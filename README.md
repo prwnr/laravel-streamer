@@ -1,6 +1,6 @@
-# RedisStream
+# Laravel Streamer
 
-RedisStream is a Lumen package for events functionality between different applications, powered by Redis Streams.
+Streamer is a Laravel package for events functionality between different applications, powered by Redis Streams.
 This package utilizes all main commands of Redis 5.0 Streams providing a simple usage of Streams as Events.
 
 Main concept of this package is to provide easy way of emitting new events from your application and to allow listening to them in your other applcations that are using same Redis server.
