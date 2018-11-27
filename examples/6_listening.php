@@ -13,7 +13,7 @@ use Prwnr\Streamer\EventDispatcher\Streamer;
 class ExampleStreamerEvent implements Event {
     public function name(): string
     {
-        return 'ExampleStreamerEvent';
+        return 'example.streamer.event';
     }
     public function type(): string
     {
@@ -31,8 +31,7 @@ $id = $streamer->emit($event);
 
 // Basic listen usage without using group or consumers. It will receive all messages from Stream
 // Listen method on a streamer instance allows listening for any new incoming events
-// It accepts two arguments, event name that is 'dot.cased' name of event class
-// (compare above event class to this argument), and a callback handler.
+// It accepts two arguments, event name and a callback handler
 // Callback is called with single argument of ReceivedMessage instance (it has message ID and content)
 $streamer->listen('example.streamer.event', function (ReceivedMessage $receivedMessage) {
     // do whatever is needed with $receivedMessage

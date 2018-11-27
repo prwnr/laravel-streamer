@@ -14,8 +14,8 @@ interface Event
     public const TYPE_COMMAND = 'command';
 
     /**
-     * Name of event
-     * String will be transformed to 'dot.case'
+     * Event name. Can be any string
+     * This name will be later used as event name for listening
      * @return string
      */
     public function name(): string;

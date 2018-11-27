@@ -12,13 +12,12 @@ use Prwnr\Streamer\EventDispatcher\Streamer;
 class ExampleStreamerEvent implements Event {
     /**
      * Require name method, must return a string.
-     * Event name can be a camel case, sentence or a dot case - that will be
-     * converted into dot.case
-     * ExampleStreamerEvent => example.streamer.event
+     * Event name can be anything, but remember that it will be used for listening
+     * @return string
      */
     public function name(): string
     {
-        return 'ExampleStreamerEvent';
+        return 'example.streamer.event';
     }
 
     /**

@@ -30,7 +30,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | Events classes that should be invoked with Streamer listen command
-    | based on streamer_event_name => [local_events] pairs
+    | based on streamer.event.name => [local_events] pairs
     |
     */
     'listen_and_fire' => [

@@ -29,13 +29,11 @@ First of all, you will need to have a valid class that implements `Prwnr\Streame
 class ExampleStreamerEvent implements Prwnr\Streamer\Contracts\Event {
     /**
      * Require name method, must return a string.
-     * Event name can be a camel case, sentence or a dot case - that will be
-     * converted into dot.case
-     * ExampleStreamerEvent => example.streamer.event
+     * Event name can be anything, but remember that it will be used for listening
      */
     public function name(): string 
     {
-        return 'ExampleStreamerEvent';
+        return 'example.streamer.event';
     }
     /**
      * Required type method, must return a string.
@@ -73,7 +71,7 @@ At config file you will find *Application events* configuration with default val
 |--------------------------------------------------------------------------
 |
 | Events classes that should be invoked with Streamer listen command
-| based on streamer_event_name => [local_events] pairs
+| based on streamer.event.name => [local_events] pairs
 |
 */
 'listen_and_fire' => [

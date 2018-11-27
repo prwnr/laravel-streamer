@@ -73,18 +73,16 @@ class Streamer implements Emitter, Listener
      */
     public function emit(Event $event): string
     {
-        $eventName = Str::snake(str_replace('.', '', $event->name()), '.');
         $meta = [
             'type' => $event->type(),
             'domain' => config('streamer.domain'),
-            'name' => $eventName,
+            'name' => $event->name(),
             'created' => time()
         ];
 
         $message = new Message($meta, $event->payload());
-        $stream = new Stream($eventName);
-        $messageId = $stream->add($message);
-        return $messageId;
+        $stream = new Stream($event->name());
+        return $stream->add($message);
     }
 
     /**
