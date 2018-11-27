@@ -22,6 +22,10 @@ class StreamerProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->bind('Streamer', function () {
+            return new Streamer();
+        });
+
         $this->offerPublishing();
         $this->configure();
         $this->registerRedisProfile();
