@@ -63,7 +63,6 @@ class ListenCommand extends Command
         }
 
         $this->streamer->listen($event, function (ReceivedMessage $message) use ($localEvents) {
-            print_r('test');
             foreach ($localEvents as $localEvent) {
                 event($localEvent, new $localEvent($message));
             }
