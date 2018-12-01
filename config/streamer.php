@@ -7,7 +7,7 @@ return [
     | Streamer listen timeout
     |--------------------------------------------------------------------------
     |
-    | Miliseconds after which Streamer listen block should timeout
+    | Milliseconds after which Streamer listen block should timeout
     | Setting 0 never timeouts.
     |
     */

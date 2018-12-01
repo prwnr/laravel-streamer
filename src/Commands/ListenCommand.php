@@ -76,7 +76,7 @@ class ListenCommand extends Command
     private function setupGroupListening(Stream $stream): void
     {
         if (!$stream->groupExists($this->option('group'))) {
-            $stream->creteGroup($this->option('group'));
+            $stream->createGroup($this->option('group'));
             $this->info("Created new group: {$this->option('group')} on a stream: {$this->argument('event')}");
         }
 

@@ -133,7 +133,7 @@ class Stream implements Waitable
      * @param string $from
      * @param bool $createStreamIfNotExists
      */
-    public function creteGroup(string $name, string $from = self::FROM_START, bool $createStreamIfNotExists = true): void
+    public function createGroup(string $name, string $from = self::FROM_START, bool $createStreamIfNotExists = true): void
     {
         if ($createStreamIfNotExists) {
             Redis::XGROUP(self::CREATE, $this->name, $name, $from, 'MKSTREAM');

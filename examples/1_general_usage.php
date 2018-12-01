@@ -36,7 +36,7 @@ $consumers = $stream->consumers('group');
 // 'createStreamIfNotExist': determines if empty stream should be created with group creation
 // this is an implementation of MKSTREAM option for XGROUP command, to avoid issues that occurs
 // when a group creation is attempted on non existing stream. This options is by default set to true
-$stream->creteGroup('group');
+$stream->createGroup('group');
 
 // len returns number of messages of current stream
 $length = $stream->len();

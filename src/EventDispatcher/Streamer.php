@@ -3,7 +3,6 @@
 namespace Prwnr\Streamer\EventDispatcher;
 
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Prwnr\Streamer\Contracts\{
     Emitter, Event, Listener, Waitable
 };
