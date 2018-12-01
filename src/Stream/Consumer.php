@@ -62,7 +62,7 @@ class Consumer implements Waitable
     /**
      * {@inheritdoc}
      */
-    public function await(string $lastId, int $timeout = 0): ?array
+    public function await(string $lastId = self::NEW_ENTRIES, int $timeout = 0): ?array
     {
         return Redis::XREADGROUP(Stream::GROUP, $this->group, $this->consumer, Stream::BLOCK, $timeout, Stream::STREAMS, $this->stream->getName(), $lastId);
     }
@@ -74,7 +74,7 @@ class Consumer implements Waitable
     public function acknowledge(string $id): void
     {
         $result = Redis::XACK($this->stream->getName(), $this->group, $id);
-        if ($result === '0') {
+        if ($result === 0) {
             throw new \Exception("Could not acknowledge message with ID $id");
         }
     }
@@ -89,7 +89,7 @@ class Consumer implements Waitable
     }
 
     /**
-     * Claim all given messages that have minimumt idle time of $idleTime miliseconds
+     * Claim all given messages that have minimum idle time of $idleTime miliseconds
      * @param array $ids
      * @param int $idleTime
      * @return array
