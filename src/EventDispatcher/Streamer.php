@@ -21,9 +21,16 @@ class Streamer implements Emitter, Listener
     protected $startFrom;
 
     /**
+     * Milliseconds
      * @var int
      */
-    protected $timeout;
+    protected $readTimeout;
+
+    /**
+     * Milliseconds
+     * @var int
+     */
+    protected $listenTimeout;
 
     /**
      * @var string
@@ -34,6 +41,16 @@ class Streamer implements Emitter, Listener
      * @var string
      */
     private $consumer;
+
+    /**
+     * @var
+     */
+    private $canceled = false;
+
+    /**
+     * @var bool
+     */
+    private $inLoop = false;
 
     /**
      * @param string $startFrom
@@ -51,7 +68,10 @@ class Streamer implements Emitter, Listener
      */
     public function __construct()
     {
-        $this->timeout = config('streamer.listen_timeout') ?: 0;
+        $this->readTimeout = config('streamer.stream_read_timeout') ?: 0;
+        $this->listenTimeout = config('streamer.listen_timeout') ?: 0;
+        $this->readTimeout *= 1000;
+        $this->listenTimeout *= 1000;
     }
 
     /**
@@ -85,14 +105,18 @@ class Streamer implements Emitter, Listener
     }
 
     /**
-     * Handler is invoked with \Prwnr\Streamer\EventDispatcher\ReceivedMessage instance as argument
+     * Handler is invoked with \Prwnr\Streamer\EventDispatcher\ReceivedMessage instance as first argument
+     * and with \Prwnr\Streamer\EventDispatcher\Streamer as second argument
      * {@inheritdoc}
      */
     public function listen(string $event, callable $handler): void
     {
+        if ($this->inLoop) {
+            return;
+        }
         $stream = new Stream($event);
         if ($this->group && $this->consumer) {
-            $this->adjustGroupListenerTimeout();
+            $this->adjustGroupReadTimeout();
             $this->listenOn(new Stream\Consumer($this->consumer, $stream, $this->group), $handler);
             return;
         }
@@ -101,35 +125,66 @@ class Streamer implements Emitter, Listener
     }
 
     /**
+     * Cancels current listener loop
+     */
+    public function cancel()
+    {
+        $this->canceled = true;
+    }
+
+    /**
      * @param Waitable $on
      * @param callable $handler
      */
     private function listenOn(Waitable $on, callable $handler): void
     {
+        $start = microtime(true) * 1000;
         $lastSeenId = $this->startFrom ?? $on->getNewEntriesKey();
-        while (true) {
-            $payload = $on->await($lastSeenId, $this->timeout);
+        while (!$this->canceled) {
+            $this->inLoop = true;
+            $payload = $on->await($lastSeenId, $this->readTimeout);
             if (!$payload) {
                 if ($on->getNewEntriesKey() === Stream\Consumer::NEW_ENTRIES) {
                     $lastSeenId = $on->getNewEntriesKey();
                 }
                 sleep(1);
+                if ($this->shouldStop($start)) {
+                    break;
+                }
                 continue;
             }
 
-            $messageId = null;
-            foreach ($payload[$on->getName()] as $messageId => $message) {
-                try {
-                    $this->forward($messageId, $message, $handler);
-                    $on->acknowledge($messageId);
-                } catch (\Throwable $ex) {
-                    Log::error("Listener error. Failed processing message with ID {$messageId} on '{$on->getName()}' stream. Error: {$ex->getMessage()}");
-                    continue;
-                }
-            }
-
-            $lastSeenId = $messageId ?: $on->getNewEntriesKey();
+            $lastSeenId = $this->processPayload($payload, $on, $handler);
+            $lastSeenId = $lastSeenId ?: $on->getNewEntriesKey();
+            $start = microtime(true) * 1000;
         }
+
+        $this->inLoop = false;
+    }
+
+    /**
+     * @param array $payload
+     * @param Waitable $on
+     * @param callable $handler
+     * @return string
+     */
+    private function processPayload(array $payload, Waitable $on, callable $handler): ?string
+    {
+        $messageId = null;
+        foreach ($payload[$on->getName()] as $messageId => $message) {
+            try {
+                $this->forward($messageId, $message, $handler);
+                $on->acknowledge($messageId);
+                if ($this->canceled) {
+                    break;
+                }
+            } catch (\Throwable $ex) {
+                Log::error("Listener error. Failed processing message with ID {$messageId} on '{$on->getName()}' stream. Error: {$ex->getMessage()}");
+                continue;
+            }
+        }
+
+        return $messageId;
     }
 
     /**
@@ -139,18 +194,35 @@ class Streamer implements Emitter, Listener
      */
     private function forward(string $messageId, array $message, callable $handler): void
     {
-        $handler(new ReceivedMessage($messageId, $message));
+        $handler(new ReceivedMessage($messageId, $message), $this);
     }
 
     /**
-     * When listening on group, timeout should not equal 0, because it is required to know
-     * when reading history of message is finished and when listening for only new messages
-     * should be started via '>' key
+     * When listening on group, timeout should not be equal to 0, because it is required to know
+     * when reading history of message is finished and when listener should start
+     * reading only new messages via '>' key
      */
-    private function adjustGroupListenerTimeout()
+    private function adjustGroupReadTimeout()
     {
-        if ($this->timeout === 0) {
-            $this->timeout = 2000;
+        if ($this->readTimeout === 0) {
+            $this->readTimeout = 2000;
         }
+    }
+
+    /**
+     * @param $start
+     * @return bool
+     */
+    private function shouldStop($start): bool
+    {
+        if ($this->listenTimeout === 0) {
+            return false;
+        }
+
+        if (microtime(true) * 1000 - $start > $this->listenTimeout) {
+            return true;
+        }
+
+        return false;
     }
 }

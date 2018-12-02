@@ -32,8 +32,10 @@ $id = $streamer->emit($event);
 // Basic listen usage without using group or consumers. It will receive all messages from Stream
 // Listen method on a streamer instance allows listening for any new incoming events
 // It accepts two arguments, event name and a callback handler
-// Callback is called with single argument of ReceivedMessage instance (it has message ID and content)
-$streamer->listen('example.streamer.event', function (ReceivedMessage $receivedMessage) {
+// Callback is called with argument of ReceivedMessage instance (it has message ID and content)
+// and a Streamer instance, that lets you cancel the listener loop whenever you want
+// or emit event mid loop
+$streamer->listen('example.streamer.event', function (ReceivedMessage $receivedMessage, Streamer $streamer) {
     // do whatever is needed with $receivedMessage
 });
 
@@ -43,7 +45,7 @@ $streamer->listen('example.streamer.event', function (ReceivedMessage $receivedM
 // When it gets first message, from now on it waits for any new messages older than last message ID
 // It is possible however to start listening from fixed ID, by calling Streamer::startFrom() method
 $streamer->startFrom('1541752483932-0');
-$streamer->listen('example.streamer.event', function (ReceivedMessage $receivedMessage) {
+$streamer->listen('example.streamer.event', function (ReceivedMessage $receivedMessage, Streamer $streamer) {
     // do whatever is needed with $receivedMessage
 });
 

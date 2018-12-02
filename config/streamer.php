@@ -4,14 +4,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Streamer listen timeout
+    | Listener timeout
     |--------------------------------------------------------------------------
     |
-    | Milliseconds after which Streamer listen block should timeout
+    | Seconds after which Streamer listen block should timeout
     | Setting 0 never timeouts.
     |
     */
     'listen_timeout' => 0,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Streamer read timeout
+    |--------------------------------------------------------------------------
+    |
+    | Seconds after which Streamer listen block should timeout
+    | Setting 0 never timeouts.
+    |
+    */
+    'stream_read_timeout' => 0,
 
     /*
     |--------------------------------------------------------------------------

@@ -133,7 +133,29 @@ class ConsumerTest extends TestCase
         $this->assertCount(2, $consumerB->pending());
     }
 
-    public function test_claim_does_notassigns_not_existing_messages_for_consumer_from_other_consumer(): void
+    public function test_claim_returns_messages_content_not_just_ids(): void
+    {
+        $stream = new Stream('foo');
+        $stream->createGroup('bar');
+        $consumerA = new Stream\Consumer('foobar', $stream, 'bar');
+        $consumerB = new Stream\Consumer('barfoo', $stream, 'bar');
+
+        $ids = [];
+        $ids[] = $stream->add($this->makeMessage());
+        $ids[] = $stream->add($this->makeMessage());
+
+        sleep(1); // sleep for a second to get idle time on messages
+        //Consume message without acknowledging it, so it stays as pending
+        $consumerA->await($consumerA->getNewEntriesKey());
+
+        $actual = $consumerB->claim($ids, 1, false);
+        $this->assertArrayHasKey($ids[0], $actual);
+        $this->assertArrayHasKey($ids[1], $actual);
+        $this->assertEquals(['foo' => 'bar'], $actual[$ids[0]]);
+        $this->assertEquals(['foo' => 'bar'], $actual[$ids[1]]);
+    }
+
+    public function test_claim_does_not_assign_not_existing_messages_for_consumer_from_other_consumer(): void
     {
         $stream = new Stream('foo');
         $stream->createGroup('bar');

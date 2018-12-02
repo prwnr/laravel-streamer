@@ -92,10 +92,15 @@ class Consumer implements Waitable
      * Claim all given messages that have minimum idle time of $idleTime miliseconds
      * @param array $ids
      * @param int $idleTime
+     * @param bool $justId
      * @return array
      */
-    public function claim(array $ids, int $idleTime): array
+    public function claim(array $ids, int $idleTime, $justId = true): array
     {
-        return Redis::XCLAIM($this->stream->getName(), $this->group, $this->consumer, $idleTime, $ids, 'JUSTID');
+        if ($justId) {
+            return Redis::XCLAIM($this->stream->getName(), $this->group, $this->consumer, $idleTime, $ids, 'JUSTID');
+        }
+
+        return Redis::XCLAIM($this->stream->getName(), $this->group, $this->consumer, $idleTime, $ids);
     }
 }

@@ -40,8 +40,6 @@ class Claim extends Command
                 $response[$value[0]] = $payload ?: $value[1];
                 continue;
             }
-
-            $response[] = $value[0];
         }
 
         return $response;
