@@ -42,14 +42,14 @@ class ListenCommand extends Command
      * Execute the console command
      * @throws \Exception
      */
-    public function handle(): void
+    public function handle(): int
     {
         $event = $this->argument('event');
         $events = config('streamer.listen_and_fire');
         $localEvents = $events[$event] ?? null;
         if (!$localEvents) {
             $this->error("There are no local events associated with $event event in configuration.");
-            return;
+            return 1;
         }
 
         $this->streamer = new Streamer();
@@ -67,6 +67,8 @@ class ListenCommand extends Command
                 event($localEvent, new $localEvent($message));
             }
         });
+
+        return 0;
     }
 
     /**

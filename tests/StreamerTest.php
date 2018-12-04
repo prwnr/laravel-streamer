@@ -4,7 +4,6 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
 use Illuminate\Support\Facades\Log;
-use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\EventDispatcher\Streamer;
 use Prwnr\Streamer\Facades\Streamer as StreamerFacade;
@@ -169,23 +168,5 @@ class StreamerTest extends TestCase
 
         $streamer->startFrom('0-0');
         $streamer->listen('foo.bar', $callback);
-    }
-
-    private function makeEvent(): Event
-    {
-        return new class implements Event {
-            public function name(): string
-            {
-                return 'foo.bar';
-            }
-            public function type(): string
-            {
-                return Event::TYPE_EVENT;
-            }
-            public function payload(): array
-            {
-                return ['foo' => 'bar'];
-            }
-        };
     }
 }

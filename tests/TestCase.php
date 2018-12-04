@@ -2,7 +2,10 @@
 
 namespace Tests;
 
+use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\StreamableMessage;
+use Tests\Stubs\MessageStub;
+use Tests\Stubs\StreamerEventStub;
 
 class TestCase extends \Orchestra\Testbench\TestCase
 {
@@ -30,11 +33,11 @@ class TestCase extends \Orchestra\Testbench\TestCase
 
     protected function makeMessage(): StreamableMessage
     {
-        return new class implements StreamableMessage {
-            public function getContent(): array
-            {
-                return ['foo' => 'bar'];
-            }
-        };
+        return new MessageStub();
+    }
+
+    protected function makeEvent(): Event
+    {
+        return new StreamerEventStub();
     }
 }
