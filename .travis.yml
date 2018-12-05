@@ -1,0 +1,20 @@
+language: php
+php:
+  - 7.1
+  - 7.2
+addons:
+  apt:
+    packages:
+      - redis-server
+services:
+  - redis-server
+before_install:
+  - sudo sed -e 's/^bind.*/bind 127.0.0.1/' /etc/redis/redis.conf > redis.conf
+  - sudo mv redis.conf /etc/redis
+  - sudo service redis-server start
+before_script:
+  - composer self-update
+  - composer install --prefer-source --no-interaction
+  - composer dump-autoload
+script:
+  - vendor/bin/phpunit

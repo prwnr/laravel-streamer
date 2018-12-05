@@ -119,9 +119,9 @@ class ConsumerTest extends TestCase
         $ids[] = $stream->add($this->makeMessage());
         $ids[] = $stream->add($this->makeMessage());
 
-        sleep(1); // sleep for a second to get idle time on messages
         //Consume message without acknowledging it, so it stays as pending
         $consumerA->await($consumerA->getNewEntriesKey());
+        sleep(1); // sleep for a second to get idle time on messages
 
         $this->assertNotEmpty($consumerA->pending());
         $this->assertEmpty($consumerB->pending());
@@ -144,9 +144,12 @@ class ConsumerTest extends TestCase
         $ids[] = $stream->add($this->makeMessage());
         $ids[] = $stream->add($this->makeMessage());
 
-        sleep(1); // sleep for a second to get idle time on messages
         //Consume message without acknowledging it, so it stays as pending
-        $consumerA->await($consumerA->getNewEntriesKey());
+        $consumerA->await($consumerA->getNewEntriesKey(), 1);
+        sleep(1); // sleep for a moment to get idle time on messages
+
+        $this->assertNotEmpty($consumerA->pending());
+        $this->assertEmpty($consumerB->pending());
 
         $actual = $consumerB->claim($ids, 1, false);
         $this->assertArrayHasKey($ids[0], $actual);
