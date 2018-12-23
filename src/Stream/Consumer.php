@@ -3,7 +3,7 @@
 
 namespace Prwnr\Streamer\Stream;
 
-use Illuminate\Support\Facades\Redis;
+use Prwnr\Streamer\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\Waitable;
 use Prwnr\Streamer\Stream;
 
@@ -13,6 +13,9 @@ use Prwnr\Streamer\Stream;
  */
 class Consumer implements Waitable
 {
+
+    use ConnectsWithRedis;
+
     public const NEW_ENTRIES = '>';
 
     /**
@@ -64,7 +67,14 @@ class Consumer implements Waitable
      */
     public function await(string $lastId = self::NEW_ENTRIES, int $timeout = 0): ?array
     {
-        return Redis::XREADGROUP(Stream::GROUP, $this->group, $this->consumer, Stream::BLOCK, $timeout, Stream::STREAMS, $this->stream->getName(), $lastId);
+        return $this->redis()->XREADGROUP(Stream::GROUP,
+            $this->group,
+            $this->consumer,
+            Stream::BLOCK,
+            $timeout,
+            Stream::STREAMS,
+            $this->stream->getName(),
+            $lastId);
     }
 
     /**
@@ -73,7 +83,7 @@ class Consumer implements Waitable
      */
     public function acknowledge(string $id): void
     {
-        $result = Redis::XACK($this->stream->getName(), $this->group, $id);
+        $result = $this->redis()->XACK($this->stream->getName(), $this->group, $id);
         if ($result === 0) {
             throw new \Exception("Could not acknowledge message with ID $id");
         }
@@ -98,9 +108,9 @@ class Consumer implements Waitable
     public function claim(array $ids, int $idleTime, $justId = true): array
     {
         if ($justId) {
-            return Redis::XCLAIM($this->stream->getName(), $this->group, $this->consumer, $idleTime, $ids, 'JUSTID');
+            return $this->redis()->XCLAIM($this->stream->getName(), $this->group, $this->consumer, $idleTime, $ids, 'JUSTID');
         }
 
-        return Redis::XCLAIM($this->stream->getName(), $this->group, $this->consumer, $idleTime, $ids);
+        return $this->redis()->XCLAIM($this->stream->getName(), $this->group, $this->consumer, $idleTime, $ids);
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Prwnr\Streamer;
 
-use Illuminate\Support\Facades\Redis;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\Contracts\Waitable;
 use Prwnr\Streamer\Stream\Range;
@@ -14,6 +13,8 @@ use Predis\Response\ServerException;
  */
 class Stream implements Waitable
 {
+    use ConnectsWithRedis;
+
     public const COUNT = 'COUNT';
     public const STREAM = 'STREAM';
     public const STREAMS = 'STREAMS';
@@ -63,7 +64,7 @@ class Stream implements Waitable
      */
     public function add(StreamableMessage $message, string $id = '*')
     {
-        return Redis::XADD($this->name, $id, $message->getContent());
+        return $this->redis()->XADD($this->name, $id, $message->getContent());
     }
 
     /**
@@ -72,7 +73,7 @@ class Stream implements Waitable
      */
     public function delete(string $id)
     {
-        return Redis::XDEL($this->name, $id);
+        return $this->redis()->XDEL($this->name, $id);
     }
 
     /**
@@ -83,10 +84,10 @@ class Stream implements Waitable
     public function read(string $from = self::FROM_START, ?int $limit = null): array
     {
         if ($limit) {
-            return Redis::XREAD(self::COUNT, $limit, self::STREAMS, $this->name, $from);
+            return $this->redis()->XREAD(self::COUNT, $limit, self::STREAMS, $this->name, $from);
         }
 
-        return Redis::XREAD(self::STREAMS, $this->name, $from);
+        return $this->redis()->XREAD(self::STREAMS, $this->name, $from);
     }
 
     /**
@@ -94,7 +95,7 @@ class Stream implements Waitable
      */
     public function await(string $lastId = self::FROM_START, int $timeout = 0): ?array
     {
-        return Redis::XREAD(self::BLOCK, $timeout, self::STREAMS, $this->name, $lastId);
+        return $this->redis()->XREAD(self::BLOCK, $timeout, self::STREAMS, $this->name, $lastId);
     }
 
     /**
@@ -122,10 +123,10 @@ class Stream implements Waitable
         }
 
         if ($limit) {
-            return Redis::$method($this->name, $start, $stop, self::COUNT, $limit);
+            return $this->redis()->$method($this->name, $start, $stop, self::COUNT, $limit);
         }
 
-        return Redis::$method($this->name, $start, $stop);
+        return $this->redis()->$method($this->name, $start, $stop);
     }
 
     /**
@@ -136,11 +137,11 @@ class Stream implements Waitable
     public function createGroup(string $name, string $from = self::FROM_START, bool $createStreamIfNotExists = true): void
     {
         if ($createStreamIfNotExists) {
-            Redis::XGROUP(self::CREATE, $this->name, $name, $from, 'MKSTREAM');
+            $this->redis()->XGROUP(self::CREATE, $this->name, $name, $from, 'MKSTREAM');
             return;
         }
 
-        Redis::XGROUP(self::CREATE, $this->name, $name, $from);
+        $this->redis()->XGROUP(self::CREATE, $this->name, $name, $from);
     }
 
     /**
@@ -152,14 +153,14 @@ class Stream implements Waitable
      */
     public function pending(string $group, ?string $consumer = null): array
     {
-        $pending = Redis::XPENDING($this->name, $group);
+        $pending = $this->redis()->XPENDING($this->name, $group);
         $pendingCount = array_shift($pending);
 
         if ($consumer) {
-            return Redis::XPENDING($this->name, $group, Range::FIRST, Range::LAST, $pendingCount, $consumer);
+            return $this->redis()->XPENDING($this->name, $group, Range::FIRST, Range::LAST, $pendingCount, $consumer);
         }
 
-        return Redis::XPENDING($this->name, $group, Range::FIRST, Range::LAST, $pendingCount);
+        return $this->redis()->XPENDING($this->name, $group, Range::FIRST, Range::LAST, $pendingCount);
     }
 
     /**
@@ -167,7 +168,7 @@ class Stream implements Waitable
      */
     public function len(): int
     {
-        return Redis::XLEN($this->name);
+        return $this->redis()->XLEN($this->name);
     }
 
     /**
@@ -178,7 +179,7 @@ class Stream implements Waitable
     public function info(): array
     {
         try {
-            return Redis::XINFO(self::STREAM, $this->name);
+            return $this->redis()->XINFO(self::STREAM, $this->name);
         } catch (ServerException $ex) {
             if (str_contains($ex->getMessage(), 'ERR no such key')) {
                 throw new StreamNotFoundException("No results for stream $this->name");
@@ -195,7 +196,7 @@ class Stream implements Waitable
     public function groups(): array
     {
         try {
-            return Redis::XINFO(self::GROUPS, $this->name);
+            return $this->redis()->XINFO(self::GROUPS, $this->name);
         } catch (ServerException $ex) {
             if (str_contains($ex->getMessage(), 'ERR no such key')) {
                 throw new StreamNotFoundException("No results for stream $this->name");
@@ -213,7 +214,7 @@ class Stream implements Waitable
     public function consumers(string $group): array
     {
         try {
-            return Redis::XINFO(self::CONSUMERS, $this->name, $group);
+            return $this->redis()->XINFO(self::CONSUMERS, $this->name, $group);
         } catch (ServerException $ex) {
             if (str_contains($ex->getMessage(), 'ERR no such key')) {
                 throw new StreamNotFoundException("No results for stream $this->name");

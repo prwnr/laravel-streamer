@@ -43,7 +43,7 @@ class Streamer implements Emitter, Listener
     private $consumer;
 
     /**
-     * @var
+     * @var bool
      */
     private $canceled = false;
 
@@ -210,10 +210,10 @@ class Streamer implements Emitter, Listener
     }
 
     /**
-     * @param $start
+     * @param float $start
      * @return bool
      */
-    private function shouldStop($start): bool
+    private function shouldStop(float $start): bool
     {
         if ($this->listenTimeout === 0) {
             return false;
