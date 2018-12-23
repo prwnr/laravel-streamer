@@ -33,7 +33,6 @@ interface Waitable
     /**
      * Acknowledge message on stream by ID
      * @param string $id
-     * @return mixed
      */
     public function acknowledge(string $id): void;
 }

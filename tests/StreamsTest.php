@@ -3,7 +3,6 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
-use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\Streams;
 
 class StreamsTest extends TestCase

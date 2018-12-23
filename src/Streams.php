@@ -2,7 +2,6 @@
 
 namespace Prwnr\Streamer;
 
-use Illuminate\Support\Facades\Redis;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 
 /**
@@ -11,6 +10,8 @@ use Prwnr\Streamer\Contracts\StreamableMessage;
  */
 class Streams
 {
+
+    use ConnectsWithRedis;
 
     /**
      * @var array
@@ -35,7 +36,7 @@ class Streams
     {
         $ids = [];
         foreach ($this->streams as $stream) {
-            $ids[] = Redis::XADD($stream, $id, $message->getContent());
+            $ids[] = $this->redis()->XADD($stream, $id, $message->getContent());
         }
 
         return $ids;
@@ -54,9 +55,9 @@ class Streams
         }
 
         if ($limit) {
-            return Redis::XREAD(Stream::COUNT, $limit, Stream::STREAMS, $this->streams, $ids);
+            return $this->redis()->XREAD(Stream::COUNT, $limit, Stream::STREAMS, $this->streams, $ids);
         }
 
-        return Redis::XREAD(Stream::STREAMS, $this->streams, $ids);
+        return $this->redis()->XREAD(Stream::STREAMS, $this->streams, $ids);
     }
 }

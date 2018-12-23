@@ -3,9 +3,9 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
+use Illuminate\Redis\Connections\Connection;
 use Illuminate\Support\Facades\Redis;
 use Predis\Response\ServerException;
-use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\Stream;
 use Prwnr\Streamer\Stream\Range;
 use Prwnr\Streamer\StreamNotFoundException;
@@ -316,10 +316,12 @@ class StreamTest extends TestCase
 
     public function test_info_throws_server_exception(): void
     {
-        $stream = new Stream('foo');
+        $mock = \Mockery::mock(Connection::class);
+        Redis::shouldReceive('connection')->with('default')->andReturn($mock);
+        $mock->shouldReceive('XINFO')->with(Stream::STREAM, 'foo')->andThrow(ServerException::class, 'server exception');
 
-        Redis::shouldReceive('XINFO')->with(Stream::STREAM, 'foo')->andThrow(ServerException::class, 'server exception');
         $this->expectException(ServerException::class);
+        $stream = new Stream('foo');
         $stream->info();
     }
 
@@ -351,10 +353,12 @@ class StreamTest extends TestCase
 
     public function test_groups_throws_server_exception(): void
     {
-        $stream = new Stream('foo');
+        $mock = \Mockery::mock(Connection::class);
+        Redis::shouldReceive('connection')->with('default')->andReturn($mock);
+        $mock->shouldReceive('XINFO')->with(Stream::GROUPS, 'foo')->andThrow(ServerException::class, 'server exception');
 
-        Redis::shouldReceive('XINFO')->with(Stream::GROUPS, 'foo')->andThrow(ServerException::class, 'server exception');
         $this->expectException(ServerException::class);
+        $stream = new Stream('foo');
         $stream->groups();
     }
 
@@ -387,10 +391,12 @@ class StreamTest extends TestCase
 
     public function test_consumers_throws_server_exception(): void
     {
-        $stream = new Stream('foo');
+        $mock = \Mockery::mock(Connection::class);
+        Redis::shouldReceive('connection')->with('default')->andReturn($mock);
+        $mock->shouldReceive('XINFO')->with(Stream::CONSUMERS, 'foo', 'bar')->andThrow(ServerException::class, 'server exception');
 
-        Redis::shouldReceive('XINFO')->with(Stream::CONSUMERS, 'foo', 'bar')->andThrow(ServerException::class, 'server exception');
         $this->expectException(ServerException::class);
+        $stream = new Stream('foo');
         $stream->consumers('bar');
     }
 

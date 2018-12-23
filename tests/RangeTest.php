@@ -7,7 +7,7 @@ use Prwnr\Streamer\Stream\Range;
 class RangeTest extends TestCase
 {
 
-    public function test_range_returns_start_and_stop()
+    public function test_range_returns_start_and_stop(): void
     {
         $defaultRange = new Range();
         $customRange = new Range('0', '100');
@@ -19,7 +19,7 @@ class RangeTest extends TestCase
         $this->assertEquals('100', $customRange->getStop());
     }
 
-    public function test_range_returns_direction()
+    public function test_range_returns_direction(): void
     {
         $forwardRange = new Range();
         $backwardRange = new Range(Range::FIRST, Range::LAST, Range::BACKWARD);
