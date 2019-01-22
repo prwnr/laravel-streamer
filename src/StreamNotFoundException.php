@@ -3,8 +3,7 @@
 namespace Prwnr\Streamer;
 
 /**
- * Class StreamNotFoundException
- * @package Prwnr\Streamer
+ * Class StreamNotFoundException.
  */
 class StreamNotFoundException extends \Exception
 {

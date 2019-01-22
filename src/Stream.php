@@ -2,14 +2,13 @@
 
 namespace Prwnr\Streamer;
 
+use Predis\Response\ServerException;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\Contracts\Waitable;
 use Prwnr\Streamer\Stream\Range;
-use Predis\Response\ServerException;
 
 /**
- * Class Stream
- * @package Prwnr\Streamer
+ * Class Stream.
  */
 class Stream implements Waitable
 {
@@ -50,6 +49,7 @@ class Stream implements Waitable
 
     /**
      * Stream constructor.
+     *
      * @param string $name
      */
     public function __construct(string $name)
@@ -59,7 +59,8 @@ class Stream implements Waitable
 
     /**
      * @param StreamableMessage $message
-     * @param string $id
+     * @param string            $id
+     *
      * @return mixed
      */
     public function add(StreamableMessage $message, string $id = '*')
@@ -69,6 +70,7 @@ class Stream implements Waitable
 
     /**
      * @param string $id
+     *
      * @return mixed
      */
     public function delete(string $id)
@@ -77,8 +79,9 @@ class Stream implements Waitable
     }
 
     /**
-     * @param string $from
+     * @param string   $from
      * @param int|null $limit
+     *
      * @return array
      */
     public function read(string $from = self::FROM_START, ?int $limit = null): array
@@ -107,8 +110,9 @@ class Stream implements Waitable
     }
 
     /**
-     * @param Range $range
+     * @param Range    $range
      * @param int|null $limit
+     *
      * @return array
      */
     public function readRange(Range $range, ?int $limit = null): array
@@ -132,12 +136,13 @@ class Stream implements Waitable
     /**
      * @param string $name
      * @param string $from
-     * @param bool $createStreamIfNotExists
+     * @param bool   $createStreamIfNotExists
      */
     public function createGroup(string $name, string $from = self::FROM_START, bool $createStreamIfNotExists = true): void
     {
         if ($createStreamIfNotExists) {
             $this->redis()->XGROUP(self::CREATE, $this->name, $name, $from, 'MKSTREAM');
+
             return;
         }
 
@@ -146,9 +151,11 @@ class Stream implements Waitable
 
     /**
      * Return all pending messages from given group.
-     * Optionally it can return pending message for single consumer
-     * @param string $group
+     * Optionally it can return pending message for single consumer.
+     *
+     * @param string      $group
      * @param null|string $consumer
+     *
      * @return array
      */
     public function pending(string $group, ?string $consumer = null): array
@@ -172,9 +179,10 @@ class Stream implements Waitable
     }
 
     /**
-     * @return array
      * @throws ServerException
      * @throws StreamNotFoundException
+     *
+     * @return array
      */
     public function info(): array
     {
@@ -184,14 +192,16 @@ class Stream implements Waitable
             if (str_contains($ex->getMessage(), 'ERR no such key')) {
                 throw new StreamNotFoundException("No results for stream $this->name");
             }
+
             throw $ex;
         }
     }
 
     /**
-     * @return array
      * @throws ServerException
      * @throws StreamNotFoundException
+     *
+     * @return array
      */
     public function groups(): array
     {
@@ -201,15 +211,18 @@ class Stream implements Waitable
             if (str_contains($ex->getMessage(), 'ERR no such key')) {
                 throw new StreamNotFoundException("No results for stream $this->name");
             }
+
             throw $ex;
         }
     }
 
     /**
      * @param string $group
-     * @return array
+     *
      * @throws ServerException
      * @throws StreamNotFoundException
+     *
+     * @return array
      */
     public function consumers(string $group): array
     {
@@ -219,14 +232,17 @@ class Stream implements Waitable
             if (str_contains($ex->getMessage(), 'ERR no such key')) {
                 throw new StreamNotFoundException("No results for stream $this->name");
             }
+
             throw $ex;
         }
     }
 
     /**
      * @param string $name
-     * @return bool
+     *
      * @throws ServerException
+     *
+     * @return bool
      */
     public function groupExists(string $name): bool
     {
@@ -244,5 +260,4 @@ class Stream implements Waitable
 
         return false;
     }
-
 }

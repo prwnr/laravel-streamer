@@ -6,19 +6,22 @@ use Prwnr\Streamer\EventDispatcher\Streamer;
 
 /**
  * Usage of Streaming class
- * Listening for events
+ * Listening for events.
  */
 
 // Streaming code that pushes new event on Stream explained in 5_streaming.php file
-class ExampleStreamerEvent implements Event {
+class ExampleStreamerEvent implements Event
+{
     public function name(): string
     {
         return 'example.streamer.event';
     }
+
     public function type(): string
     {
         return Event::TYPE_EVENT;
     }
+
     public function payload(): array
     {
         return ['message' => 'content'];

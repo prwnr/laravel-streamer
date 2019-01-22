@@ -8,7 +8,6 @@ use Predis\Command\Command;
  * @link https://redis.io/commands/xgroup
  *
  * Class Group
- * @package Prwnr\Streamer\Redis\Command
  */
 class Group extends Command
 {

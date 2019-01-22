@@ -1,22 +1,18 @@
 <?php
 
-
 namespace Prwnr\Streamer;
 
 use Illuminate\Support\ServiceProvider;
-use Prwnr\Streamer\Commands\FireCommand;
+use Predis\Profile\Factory;
 use Prwnr\Streamer\Commands\ListenCommand;
 use Prwnr\Streamer\EventDispatcher\Streamer;
 use Prwnr\Streamer\Redis\RedisVersion500;
-use Predis\Profile\Factory;
 
 /**
- * Class StreamerProvider
- * @package Prwnr\Streamer
+ * Class StreamerProvider.
  */
 class StreamerProvider extends ServiceProvider
 {
-
     /**
      * Register any application services.
      */
@@ -33,7 +29,7 @@ class StreamerProvider extends ServiceProvider
     }
 
     /**
-     * Register the Redis 5.0 profile
+     * Register the Redis 5.0 profile.
      */
     private function registerRedisProfile(): void
     {
@@ -41,19 +37,19 @@ class StreamerProvider extends ServiceProvider
     }
 
     /**
-     * Setup the configuration
+     * Setup the configuration.
      *
      * @return void
      */
     private function configure(): void
     {
         $this->mergeConfigFrom(
-            __DIR__ . '/../config/streamer.php', 'streamer'
+            __DIR__.'/../config/streamer.php', 'streamer'
         );
     }
 
     /**
-     * Setup the resource publishing groups
+     * Setup the resource publishing groups.
      *
      * @return void
      */
@@ -61,11 +57,10 @@ class StreamerProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../config/streamer.php' => app()->basePath('config/streamer.php'),
+                __DIR__.'/../config/streamer.php' => app()->basePath('config/streamer.php'),
             ], 'config');
         }
     }
-
 
     /**
      * Register the Artisan commands.
@@ -74,7 +69,7 @@ class StreamerProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-                ListenCommand::class
+                ListenCommand::class,
             ]);
         }
     }

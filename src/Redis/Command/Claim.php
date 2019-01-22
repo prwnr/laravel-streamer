@@ -2,14 +2,13 @@
 
 namespace Prwnr\Streamer\Redis\Command;
 
-use Prwnr\Streamer\Redis\Mergeable;
 use Predis\Command\Command;
+use Prwnr\Streamer\Redis\Mergeable;
 
 /**
  * @link https://redis.io/commands/xclaim
  *
  * Class Claim
- * @package Prwnr\Streamer\Redis\Command
  */
 class Claim extends Command
 {
@@ -29,7 +28,7 @@ class Claim extends Command
     public function parseResponse($data): array
     {
         $response = [];
-        foreach ((array)$data as $value) {
+        foreach ((array) $data as $value) {
             if (!\is_array($value)) {
                 $response[] = $value;
                 continue;
@@ -44,7 +43,6 @@ class Claim extends Command
 
         return $response;
     }
-
 
     /**
      * {@inheritdoc}

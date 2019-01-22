@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Prwnr\Streamer\Commands;
 
 use Illuminate\Console\Command;
@@ -9,8 +8,7 @@ use Prwnr\Streamer\EventDispatcher\Streamer;
 use Prwnr\Streamer\Stream;
 
 /**
- * Class ListenCommand
- * @package Prwnr\Streamer\Commands
+ * Class ListenCommand.
  */
 class ListenCommand extends Command
 {
@@ -39,7 +37,8 @@ class ListenCommand extends Command
     private $streamer;
 
     /**
-     * Execute the console command
+     * Execute the console command.
+     *
      * @throws \Exception
      */
     public function handle(): int
@@ -49,6 +48,7 @@ class ListenCommand extends Command
         $localEvents = $events[$event] ?? null;
         if (!$localEvents) {
             $this->error("There are no local events associated with $event event in configuration.");
+
             return 1;
         }
 
@@ -73,6 +73,7 @@ class ListenCommand extends Command
 
     /**
      * @param Stream $stream
+     *
      * @throws \Predis\Response\ServerException
      */
     private function setupGroupListening(Stream $stream): void
@@ -84,7 +85,7 @@ class ListenCommand extends Command
 
         $consumer = $this->option('consumer');
         if (!$consumer) {
-            $consumer = $this->option('group') . '-' . time();
+            $consumer = $this->option('group').'-'.time();
         }
 
         if ($this->option('reclaim')) {

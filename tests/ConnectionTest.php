@@ -27,7 +27,7 @@ class ConnectionTest extends TestCase
 
     public function test_redis_connection_trait_uses_default_connection(): void
     {
-        $foo = new class {
+        $foo = new class() {
             use ConnectsWithRedis;
 
             public function bar()
@@ -45,7 +45,7 @@ class ConnectionTest extends TestCase
     {
         $this->configureCustomRedisConnection();
 
-        $foo = new class {
+        $foo = new class() {
             use ConnectsWithRedis;
 
             public function bar()
@@ -63,7 +63,7 @@ class ConnectionTest extends TestCase
     {
         $this->configureCustomRedisConnection();
 
-        $foo = new class {
+        $foo = new class() {
             use ConnectsWithRedis;
 
             public function bar()
@@ -82,10 +82,10 @@ class ConnectionTest extends TestCase
     private function configureCustomRedisConnection(): void
     {
         $this->app['config']->set('database.redis.custom', [
-            'host' => getenv('REDIS_HOST') ?: '127.0.0.1',
-            'port' => getenv('REDIS_PORT') ?: 6379,
+            'host'     => getenv('REDIS_HOST') ?: '127.0.0.1',
+            'port'     => getenv('REDIS_PORT') ?: 6379,
             'database' => 1,
-            'timeout' => 0.5,
+            'timeout'  => 0.5,
         ]);
 
         $this->app['config']->set('streamer.redis_connection', 'custom');

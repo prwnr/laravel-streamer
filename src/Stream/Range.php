@@ -3,7 +3,7 @@
 namespace Prwnr\Streamer\Stream;
 
 /**
- * Class Range
+ * Class Range.
  */
 class Range
 {
@@ -53,9 +53,10 @@ class Range
 
     /**
      * Range constructor.
+     *
      * @param string $start
      * @param string $stop
-     * @param int $direction
+     * @param int    $direction
      */
     public function __construct(string $start = self::FIRST, string $stop = self::LAST, int $direction = self::FORWARD)
     {

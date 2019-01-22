@@ -8,7 +8,6 @@ use Predis\Command\Command;
  * @link https://redis.io/commands/xlen
  *
  * Class Len
- * @package Prwnr\Streamer\Redis\Command
  */
 class Len extends Command
 {
