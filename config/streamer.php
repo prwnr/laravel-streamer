@@ -58,6 +58,6 @@ return [
         'example.streamer.event' => [
             //List of local events that should be invoked
             //\App\Events\ExampleEvent::class
-        ]
+        ],
     ],
 ];

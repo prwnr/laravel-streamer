@@ -5,7 +5,7 @@ use Prwnr\Streamer\Streams;
 
 /**
  * Usage of Stream class
- * Explained usage of read() and readRange() methods
+ * Explained usage of read() and readRange() methods.
  */
 
 // Creating Stream instance
@@ -59,7 +59,7 @@ $rangeMessages = $stream->readRange($range, 10);
 /**
  * Usage of Streams class that is designed to manipulate multiple streams
  * Explained usage of read() method
- * reading range is not supported by multiple streams
+ * reading range is not supported by multiple streams.
  */
 
 // Creating Streams instance with array of streams names that willl be manipualted

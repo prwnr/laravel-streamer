@@ -11,7 +11,6 @@ use Prwnr\Streamer\Stream;
 
 class StreamerTest extends TestCase
 {
-
     use InteractsWithRedis;
 
     protected function setUp(): void
@@ -157,7 +156,8 @@ class StreamerTest extends TestCase
         $event = $this->makeEvent();
         $id = $streamer->emit($event);
         $callback = function ($message, $streamer) use ($id) {
-            $streamer->listen('bar.foo', function ($message, $streamer) {});
+            $streamer->listen('bar.foo', function ($message, $streamer) {
+            });
             $content = $message->getContent();
             $this->assertInstanceOf(ReceivedMessage::class, $message);
             $this->assertInstanceOf(Streamer::class, $streamer);

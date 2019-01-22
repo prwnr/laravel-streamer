@@ -8,7 +8,6 @@ use Predis\Command\Command;
  * @link https://redis.io/commands/xadd
  *
  * Class Add
- * @package Prwnr\Streamer\Redis\Command
  */
 class Add extends Command
 {

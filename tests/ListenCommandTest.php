@@ -10,12 +10,11 @@ use Tests\Stubs\LocalEventStub;
 
 class ListenCommandTest extends TestCase
 {
-
     use InteractsWithRedis;
-    
+
     private $events = [
         LocalEventStub::class,
-        AnotherLocalEventStub::class
+        AnotherLocalEventStub::class,
     ];
 
     protected function setUp(): void
@@ -68,10 +67,10 @@ class ListenCommandTest extends TestCase
         $stream->createGroup('bar');
         Streamer::emit($this->makeEvent());
         $args = [
-            'event' => 'foo.bar',
-            '--last_id' => '0-0',
-            '--group' => 'bar',
-            '--consumer' => 'foobar'
+            'event'      => 'foo.bar',
+            '--last_id'  => '0-0',
+            '--group'    => 'bar',
+            '--consumer' => 'foobar',
         ];
 
         $this->expectsEvents($this->events);
@@ -86,9 +85,9 @@ class ListenCommandTest extends TestCase
         $stream->createGroup('bar');
         Streamer::emit($this->makeEvent());
         $args = [
-            'event' => 'foo.bar',
+            'event'     => 'foo.bar',
             '--last_id' => '0-0',
-            '--group' => 'bar',
+            '--group'   => 'bar',
         ];
 
         $this->expectsEvents($this->events);
@@ -101,10 +100,10 @@ class ListenCommandTest extends TestCase
         $this->withLocalEventsConfigured();
         Streamer::emit($this->makeEvent());
         $args = [
-            'event' => 'foo.bar',
-            '--last_id' => '0-0',
-            '--group' => 'bar',
-            '--consumer' => 'foobar'
+            'event'      => 'foo.bar',
+            '--last_id'  => '0-0',
+            '--group'    => 'bar',
+            '--consumer' => 'foobar',
         ];
 
         $this->expectsEvents($this->events);
@@ -123,11 +122,11 @@ class ListenCommandTest extends TestCase
         //Consume messages without acknowledging them, so that they will stays as pending
         $consumer->await($consumer->getNewEntriesKey());
         $args = [
-            'event' => 'foo.bar',
-            '--last_id' => '0-0',
-            '--group' => 'bar',
+            'event'      => 'foo.bar',
+            '--last_id'  => '0-0',
+            '--group'    => 'bar',
             '--consumer' => 'foobarB',
-            '--reclaim' => '1'
+            '--reclaim'  => '1',
         ];
 
         $this->expectsEvents($this->events);
@@ -145,11 +144,11 @@ class ListenCommandTest extends TestCase
         //Consume messages without acknowledging them, so that they will stays as pending
         $consumer->await($consumer->getNewEntriesKey());
         $args = [
-            'event' => 'foo.bar',
-            '--last_id' => '0-0',
-            '--group' => 'bar',
+            'event'      => 'foo.bar',
+            '--last_id'  => '0-0',
+            '--group'    => 'bar',
             '--consumer' => 'foobarB',
-            '--reclaim' => '10000'
+            '--reclaim'  => '10000',
         ];
 
         $this->doesntExpectEvents($this->events);
@@ -161,11 +160,11 @@ class ListenCommandTest extends TestCase
     {
         $this->withLocalEventsConfigured();
         $args = [
-            'event' => 'foo.bar',
-            '--last_id' => '0-0',
-            '--group' => 'bar',
+            'event'      => 'foo.bar',
+            '--last_id'  => '0-0',
+            '--group'    => 'bar',
             '--consumer' => 'foobarB',
-            '--reclaim' => '10000'
+            '--reclaim'  => '10000',
         ];
 
         $this->doesntExpectEvents($this->events);
@@ -176,7 +175,7 @@ class ListenCommandTest extends TestCase
     private function withLocalEventsConfigured(): void
     {
         $this->app['config']->set('streamer.listen_and_fire', [
-            'foo.bar' => $this->events
+            'foo.bar' => $this->events,
         ]);
     }
 }

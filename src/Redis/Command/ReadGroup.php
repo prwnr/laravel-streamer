@@ -8,7 +8,6 @@ use Prwnr\Streamer\Redis\ReadCommand;
  * @link https://redis.io/commands/xreadgroup
  *
  * Class ReadGroup
- * @package Prwnr\Streamer\Redis\Command
  */
 class ReadGroup extends ReadCommand
 {

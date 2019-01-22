@@ -7,7 +7,6 @@ use Prwnr\Streamer\Stream;
 
 class ConsumerTest extends TestCase
 {
-
     use InteractsWithRedis;
 
     protected function setUp(): void

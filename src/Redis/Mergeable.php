@@ -1,24 +1,23 @@
 <?php
 
-
 namespace Prwnr\Streamer\Redis;
 
 /**
- * Trait Mergeable
- * @package Prwnr\Streamer\Redis
+ * Trait Mergeable.
  */
 trait Mergeable
 {
-
     /**
-     * Associative array dimensions to merge
+     * Associative array dimensions to merge.
+     *
      * @var int
      */
     protected $dimensions = 1;
 
     /**
      * @param array $data
-     * @param int $currentDimension
+     * @param int   $currentDimension
+     *
      * @return array
      */
     public function toAssoc(array &$data, int $currentDimension = 1): array

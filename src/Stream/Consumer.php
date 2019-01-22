@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Prwnr\Streamer\Stream;
 
 use Prwnr\Streamer\ConnectsWithRedis;
@@ -8,12 +7,10 @@ use Prwnr\Streamer\Contracts\Waitable;
 use Prwnr\Streamer\Stream;
 
 /**
- * Class Consumer
- * @package Prwnr\Streamer\Stream
+ * Class Consumer.
  */
 class Consumer implements Waitable
 {
-
     use ConnectsWithRedis;
 
     public const NEW_ENTRIES = '>';
@@ -35,6 +32,7 @@ class Consumer implements Waitable
 
     /**
      * Consumer constructor.
+     *
      * @param string $consumer
      * @param Stream $stream
      * @param string $group
@@ -79,6 +77,7 @@ class Consumer implements Waitable
 
     /**
      * {@inheritdoc}
+     *
      * @throws \Exception
      */
     public function acknowledge(string $id): void
@@ -90,7 +89,8 @@ class Consumer implements Waitable
     }
 
     /**
-     * Return pending message only for this particular consumer
+     * Return pending message only for this particular consumer.
+     *
      * @return array
      */
     public function pending(): array
@@ -99,10 +99,12 @@ class Consumer implements Waitable
     }
 
     /**
-     * Claim all given messages that have minimum idle time of $idleTime miliseconds
+     * Claim all given messages that have minimum idle time of $idleTime miliseconds.
+     *
      * @param array $ids
-     * @param int $idleTime
-     * @param bool $justId
+     * @param int   $idleTime
+     * @param bool  $justId
+     *
      * @return array
      */
     public function claim(array $ids, int $idleTime, $justId = true): array

@@ -4,7 +4,7 @@ use Prwnr\Streamer\Stream;
 
 /**
  * Usage of Stream class
- * Explained usage of await method
+ * Explained usage of await method.
  */
 
 // Creating Stream instance
@@ -34,10 +34,9 @@ Array
 // See Redis XREAD documentation for details
 $payloadNewest = $stream->await(Stream::NEW_ENTRIES, 1000);
 
-
 /**
  * Usage of Consumer class
- * Explained usage of await method on group as a consumer
+ * Explained usage of await method on group as a consumer.
  */
 
 // Creating Stream instance

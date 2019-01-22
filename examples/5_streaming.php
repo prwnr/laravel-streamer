@@ -5,14 +5,16 @@ use Prwnr\Streamer\EventDispatcher\Streamer;
 
 /**
  * Usage of Streaming class
- * Emiting new events
+ * Emiting new events.
  */
 
 // Basic implementation of Streamer event
-class ExampleStreamerEvent implements Event {
+class ExampleStreamerEvent implements Event
+{
     /**
      * Require name method, must return a string.
-     * Event name can be anything, but remember that it will be used for listening
+     * Event name can be anything, but remember that it will be used for listening.
+     *
      * @return string
      */
     public function name(): string
@@ -22,7 +24,7 @@ class ExampleStreamerEvent implements Event {
 
     /**
      * Required type method, must return a string.
-     * Type can be any string or one of predefined types from Event
+     * Type can be any string or one of predefined types from Event.
      */
     public function type(): string
     {
@@ -31,7 +33,7 @@ class ExampleStreamerEvent implements Event {
 
     /**
      * Required payload method, must return array
-     * This array will be your message data content
+     * This array will be your message data content.
      */
     public function payload(): array
     {

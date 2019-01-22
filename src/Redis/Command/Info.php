@@ -2,14 +2,13 @@
 
 namespace Prwnr\Streamer\Redis\Command;
 
-use Prwnr\Streamer\Redis\Mergeable;
 use Predis\Command\Command;
+use Prwnr\Streamer\Redis\Mergeable;
 
 /**
  * @link https://redis.io/commands/xinfo
  *
  * Class Info
- * @package Prwnr\Streamer\Redis\Command
  */
 class Info extends Command
 {
@@ -29,6 +28,7 @@ class Info extends Command
     public function parseResponse($data)
     {
         $this->dimensions = 3;
+
         return $this->toAssoc($data);
     }
 }

@@ -3,31 +3,32 @@
 namespace Prwnr\Streamer\EventDispatcher;
 
 use Illuminate\Support\Facades\Log;
-use Prwnr\Streamer\Contracts\{
-    Emitter, Event, Listener, Waitable
-};
+use Prwnr\Streamer\Contracts\Emitter;
+use Prwnr\Streamer\Contracts\Event;
+use Prwnr\Streamer\Contracts\Listener;
+use Prwnr\Streamer\Contracts\Waitable;
 use Prwnr\Streamer\Stream;
 
 /**
- * Class Streamer
- * @package Prwnr\Streamer
+ * Class Streamer.
  */
 class Streamer implements Emitter, Listener
 {
-
     /**
      * @var string
      */
     protected $startFrom;
 
     /**
-     * Milliseconds
+     * Milliseconds.
+     *
      * @var int
      */
     protected $readTimeout;
 
     /**
-     * Milliseconds
+     * Milliseconds.
+     *
      * @var int
      */
     protected $listenTimeout;
@@ -54,6 +55,7 @@ class Streamer implements Emitter, Listener
 
     /**
      * @param string $startFrom
+     *
      * @return Streamer
      */
     public function startFrom(string $startFrom): self
@@ -77,6 +79,7 @@ class Streamer implements Emitter, Listener
     /**
      * @param string $consumer
      * @param string $group
+     *
      * @return Streamer
      */
     public function asConsumer(string $consumer, string $group): self
@@ -93,14 +96,15 @@ class Streamer implements Emitter, Listener
     public function emit(Event $event): string
     {
         $meta = [
-            'type' => $event->type(),
-            'domain' => config('streamer.domain'),
-            'name' => $event->name(),
-            'created' => time()
+            'type'    => $event->type(),
+            'domain'  => config('streamer.domain'),
+            'name'    => $event->name(),
+            'created' => time(),
         ];
 
         $message = new Message($meta, $event->payload());
         $stream = new Stream($event->name());
+
         return $stream->add($message);
     }
 
@@ -118,6 +122,7 @@ class Streamer implements Emitter, Listener
         if ($this->group && $this->consumer) {
             $this->adjustGroupReadTimeout();
             $this->listenOn(new Stream\Consumer($this->consumer, $stream, $this->group), $handler);
+
             return;
         }
 
@@ -125,7 +130,7 @@ class Streamer implements Emitter, Listener
     }
 
     /**
-     * Cancels current listener loop
+     * Cancels current listener loop.
      */
     public function cancel()
     {
@@ -163,9 +168,10 @@ class Streamer implements Emitter, Listener
     }
 
     /**
-     * @param array $payload
+     * @param array    $payload
      * @param Waitable $on
      * @param callable $handler
+     *
      * @return string
      */
     private function processPayload(array $payload, Waitable $on, callable $handler): ?string
@@ -188,8 +194,8 @@ class Streamer implements Emitter, Listener
     }
 
     /**
-     * @param string $messageId
-     * @param array $message
+     * @param string   $messageId
+     * @param array    $message
      * @param callable $handler
      */
     private function forward(string $messageId, array $message, callable $handler): void
@@ -200,7 +206,7 @@ class Streamer implements Emitter, Listener
     /**
      * When listening on group, timeout should not be equal to 0, because it is required to know
      * when reading history of message is finished and when listener should start
-     * reading only new messages via '>' key
+     * reading only new messages via '>' key.
      */
     private function adjustGroupReadTimeout()
     {
@@ -211,6 +217,7 @@ class Streamer implements Emitter, Listener
 
     /**
      * @param float $start
+     *
      * @return bool
      */
     private function shouldStop(float $start): bool

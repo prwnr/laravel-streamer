@@ -376,7 +376,7 @@ class StreamTest extends TestCase
         $this->assertNotEmpty($actual);
         $this->assertCount(1, $actual);
         foreach (['name', 'pending', 'idle'] as $key) {
-            $this->assertArrayHasKey($key,  $actual[0]);
+            $this->assertArrayHasKey($key, $actual[0]);
         }
         $this->assertEquals(1, $actual[0]['pending']);
     }

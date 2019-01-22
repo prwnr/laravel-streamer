@@ -3,12 +3,10 @@
 namespace Prwnr\Streamer\Contracts;
 
 /**
- * Interface StreamableMessage
- * @package Prwnr\Streamer\Contracts
+ * Interface StreamableMessage.
  */
 interface StreamableMessage
 {
-
     /**
      * @return array
      */

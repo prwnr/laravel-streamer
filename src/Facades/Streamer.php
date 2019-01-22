@@ -5,8 +5,7 @@ namespace Prwnr\Streamer\Facades;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * Class Streamer
- * @package Prwnr\Streamer\Facades
+ * Class Streamer.
  *
  * @method static \Prwnr\Streamer\EventDispatcher\Streamer startFrom(string $startFrom)
  * @method static \Prwnr\Streamer\EventDispatcher\Streamer asConsumer(string $consumer, string $group)
@@ -17,7 +16,6 @@ use Illuminate\Support\Facades\Facade;
  */
 class Streamer extends Facade
 {
-
     /**
      * {@inheritdoc}
      */
