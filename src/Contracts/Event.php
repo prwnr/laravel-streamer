@@ -21,7 +21,7 @@ interface Event
     public function name(): string;
 
     /**
-     * Eventy type. Can be one of the predefined types from this contract
+     * Event type. Can be one of the predefined types from this contract
      * @return string
      */
     public function type(): string;

@@ -23,7 +23,7 @@ class ListenCommand extends Command
                             {event : Name of an event that should be listened to}
                             {--group= : Name of your streaming group. Only when group is provided listener will listen on group as consumer}
                             {--consumer= : Name of your group consumer. If not provided a name will be created as groupname-timestamp}
-                            {--reclaim= : Miliseconds of pending messages idle time, that should be reclaimed for current consumer in this group. Can be only used with group listening}
+                            {--reclaim= : Milliseconds of pending messages idle time, that should be reclaimed for current consumer in this group. Can be only used with group listening}
                             {--last_id= : ID from which listener should start reading messages}';
 
     /**
