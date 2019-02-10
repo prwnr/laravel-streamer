@@ -2,10 +2,10 @@
 
 namespace Prwnr\Streamer\Commands;
 
-use Illuminate\Console\Command;
-use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
-use Prwnr\Streamer\EventDispatcher\Streamer;
 use Prwnr\Streamer\Stream;
+use Illuminate\Console\Command;
+use Prwnr\Streamer\EventDispatcher\Streamer;
+use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 
 /**
  * Class ListenCommand.
@@ -46,14 +46,14 @@ class ListenCommand extends Command
         $event = $this->argument('event');
         $events = config('streamer.listen_and_fire');
         $localEvents = $events[$event] ?? null;
-        if (!$localEvents) {
+        if (! $localEvents) {
             $this->error("There are no local events associated with $event event in configuration.");
 
             return 1;
         }
 
         $this->streamer = new Streamer();
-        if (!\is_null($this->option('last_id'))) {
+        if ($this->option('last_id') !== null) {
             $this->streamer->startFrom($this->option('last_id'));
         }
 
@@ -78,13 +78,13 @@ class ListenCommand extends Command
      */
     private function setupGroupListening(Stream $stream): void
     {
-        if (!$stream->groupExists($this->option('group'))) {
+        if (! $stream->groupExists($this->option('group'))) {
             $stream->createGroup($this->option('group'));
             $this->info("Created new group: {$this->option('group')} on a stream: {$this->argument('event')}");
         }
 
         $consumer = $this->option('consumer');
-        if (!$consumer) {
+        if (! $consumer) {
             $consumer = $this->option('group').'-'.time();
         }
 
@@ -108,7 +108,7 @@ class ListenCommand extends Command
             $messages[] = $message[0];
         }
 
-        if (!$messages) {
+        if (! $messages) {
             return;
         }
 

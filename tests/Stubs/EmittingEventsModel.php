@@ -9,6 +9,6 @@ class EmittingEventsModel extends \Illuminate\Database\Eloquent\Model
     use EmitsStreamerEvents;
 
     protected $fillable = [
-        'foo'
+        'foo',
     ];
 }

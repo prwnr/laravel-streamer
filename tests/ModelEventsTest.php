@@ -2,11 +2,11 @@
 
 namespace Tests;
 
-use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
-use Prwnr\Streamer\Contracts\Event;
-use Prwnr\Streamer\Eloquent\EloquentModelEvent;
 use Prwnr\Streamer\Stream;
+use Prwnr\Streamer\Contracts\Event;
 use Tests\Stubs\EmittingEventsModel;
+use Prwnr\Streamer\Eloquent\EloquentModelEvent;
+use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
 
 class ModelEventsTest extends TestCase
 {
@@ -44,13 +44,13 @@ class ModelEventsTest extends TestCase
 
         $expected = [
             'fields' => [
-                'foo'
+                'foo',
             ],
             'before' => [
-                'foo' => null
+                'foo' => null,
             ],
             'after' => [
-                'foo' => 'bar'
+                'foo' => 'bar',
             ],
 
         ];
@@ -72,13 +72,13 @@ class ModelEventsTest extends TestCase
 
         $expected = [
             'fields' => [
-                'foo'
+                'foo',
             ],
             'before' => [
-                'foo' => 'bar'
+                'foo' => 'bar',
             ],
             'after' => [
-                'foo' => 'foobar'
+                'foo' => 'foobar',
             ],
         ];
         $stream = new Stream('emittingeventsmodel.updated');
@@ -108,7 +108,7 @@ class ModelEventsTest extends TestCase
         $model->postDelete();
 
         $expected = [
-            'deleted' => true
+            'deleted' => true,
         ];
         $stream = new Stream('emittingeventsmodel.deleted');
         $actual = $stream->read();

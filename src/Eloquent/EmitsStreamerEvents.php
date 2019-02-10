@@ -2,11 +2,11 @@
 
 namespace Prwnr\Streamer\Eloquent;
 
-use Illuminate\Database\Eloquent\Model;
 use Prwnr\Streamer\Facades\Streamer;
+use Illuminate\Database\Eloquent\Model;
 
 /**
- * Trait EmitsStreamerEvents
+ * Trait EmitsStreamerEvents.
  */
 trait EmitsStreamerEvents
 {
@@ -17,7 +17,7 @@ trait EmitsStreamerEvents
     protected $baseEventName;
 
     /**
-     * Boot event listeners
+     * Boot event listeners.
      */
     public static function boot()
     {
@@ -40,7 +40,7 @@ trait EmitsStreamerEvents
      */
     public function postSave(): void
     {
-        if (!$this->wasChanged()) {
+        if (! $this->wasChanged()) {
             return;
         }
 
@@ -55,7 +55,7 @@ trait EmitsStreamerEvents
     }
 
     /**
-     * Called after record is successfully created
+     * Called after record is successfully created.
      */
     public function postCreate(): void
     {
@@ -70,12 +70,12 @@ trait EmitsStreamerEvents
     }
 
     /**
-     * Called after record is successfully deleted
+     * Called after record is successfully deleted.
      */
     public function postDelete(): void
     {
         Streamer::emit(new EloquentModelEvent($this->getEventName('deleted'), [
-            'deleted' => true
+            'deleted' => true,
         ]));
     }
 
@@ -85,10 +85,10 @@ trait EmitsStreamerEvents
      */
     private function getEventName(string $action): string
     {
-        $suffix = '.' . $action;
-        $name = class_basename($this) . $suffix;
+        $suffix = '.'.$action;
+        $name = class_basename($this).$suffix;
         if ($this->baseEventName) {
-            $name = $this->baseEventName . $suffix;
+            $name = $this->baseEventName.$suffix;
         }
 
         return strtolower($name);

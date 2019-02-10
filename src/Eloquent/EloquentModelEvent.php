@@ -5,7 +5,7 @@ namespace Prwnr\Streamer\Eloquent;
 use Prwnr\Streamer\Contracts\Event;
 
 /**
- * Class EloquentModelEvent
+ * Class EloquentModelEvent.
  */
 class EloquentModelEvent implements Event
 {
@@ -33,7 +33,7 @@ class EloquentModelEvent implements Event
 
     /**
      * Event name. Can be any string
-     * This name will be later used as event name for listening
+     * This name will be later used as event name for listening.
      * @return string
      */
     public function name(): string
@@ -42,7 +42,7 @@ class EloquentModelEvent implements Event
     }
 
     /**
-     * Event type. Can be one of the predefined types from this contract
+     * Event type. Can be one of the predefined types from this contract.
      * @return string
      */
     public function type(): string
@@ -51,7 +51,7 @@ class EloquentModelEvent implements Event
     }
 
     /**
-     * Event payload that will be sent as message to Stream
+     * Event payload that will be sent as message to Stream.
      * @return array
      */
     public function payload(): array
