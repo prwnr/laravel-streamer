@@ -6,22 +6,21 @@ use Prwnr\Streamer\Streams;
 
 /**
  * Usage of Stream class that is designed to manipulate single stream
- * Explained usage of add() and delete() methods
+ * Explained usage of add() and delete() methods.
  */
 
 // Creating Stream instance with stream name that will be manipulated
 $stream = new Stream('stream_name');
 
 // Message implementation, used to add it to stream
-$message = new class implements StreamableMessage {
-
+$message = new class() implements StreamableMessage {
     /**
      * @return array
      */
     public function getContent(): array
     {
         return [
-            'message' => 'content'
+            'message' => 'content',
         ];
     }
 };
@@ -34,25 +33,23 @@ $incrementedId = $stream->add($message);
 // Delete message permamently from Stream by ID. Returns 1 as success.
 $stream->delete('0');
 
-
 /**
  * Usage of Streams class that is designed to manipulate multiple streams
- * Explained usage of add() method
+ * Explained usage of add() method.
  */
 
 // Creating Streams instance with array of streams names that willl be manipualted
 $streams = new Streams(['first_stream', 'second_stream']);
 
 // Message implementation, used to add it to stream
-$message = new class implements StreamableMessage {
-
+$message = new class() implements StreamableMessage {
     /**
      * @return array
      */
     public function getContent(): array
     {
         return [
-            'message' => 'content'
+            'message' => 'content',
         ];
     }
 };

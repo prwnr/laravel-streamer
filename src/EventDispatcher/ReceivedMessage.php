@@ -5,12 +5,10 @@ namespace Prwnr\Streamer\EventDispatcher;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 
 /**
- * Class ReceivedMessage
- * @package Prwnr\Streamer\EventDispatcher
+ * Class ReceivedMessage.
  */
 class ReceivedMessage implements StreamableMessage
 {
-
     /**
      * @var string
      */
@@ -39,8 +37,9 @@ class ReceivedMessage implements StreamableMessage
 
     /**
      * ReceivedStreamableMessage constructor.
+     *
      * @param string $id
-     * @param array $content
+     * @param array  $content
      */
     public function __construct(string $id, array $content)
     {

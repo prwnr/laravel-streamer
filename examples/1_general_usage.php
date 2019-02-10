@@ -4,7 +4,7 @@ use Prwnr\Streamer\Stream;
 
 /**
  * Usage of Stream and Consumer classes
- * Explained usage of methods like info, groups, consumers, pending, claim, len
+ * Explained usage of methods like info, groups, consumers, pending, claim, len.
  */
 
 // Creating Stream instance
@@ -48,7 +48,6 @@ $groupPending = $stream->pending('group');
 // when used with consumer argument it simply lists only message pending for that single consumer
 $groupConsumerPending = $stream->pending('group', 'consumer');
 
-
 // Creating Stream and Consumer instances
 $stream = new Stream('stream_name');
 $consumer = new Stream\Consumer('consumer', $stream, 'group');
@@ -61,4 +60,4 @@ $consumerPending = $consumer->pending();
 // from other consumers to current consumer. Messages stays are pending till acknowledged
 // this method accepts arrray of messages IDs to claim and idle time in miliseconds
 // idletime determines how old messages should be to reclaim them
-$consumer->claim(['0','1'], '1');
+$consumer->claim(['0', '1'], '1');

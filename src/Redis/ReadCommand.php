@@ -5,8 +5,7 @@ namespace Prwnr\Streamer\Redis;
 use Predis\Command\Command;
 
 /**
- * Class ReadCommand
- * @package Prwnr\Streamer\Redis\Command
+ * Class ReadCommand.
  */
 abstract class ReadCommand extends Command
 {
@@ -45,6 +44,7 @@ abstract class ReadCommand extends Command
                 $ids = $arguments[$key + 2];
                 unset($arguments[$key + 1], $arguments[$key + 2]);
                 $arguments = array_merge($arguments, $streams, $ids);
+
                 return $arguments;
             }
         }

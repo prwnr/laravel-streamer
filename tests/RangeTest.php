@@ -6,7 +6,6 @@ use Prwnr\Streamer\Stream\Range;
 
 class RangeTest extends TestCase
 {
-
     public function test_range_returns_start_and_stop(): void
     {
         $defaultRange = new Range();

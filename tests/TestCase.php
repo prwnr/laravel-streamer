@@ -9,25 +9,24 @@ use Tests\Stubs\StreamerEventStub;
 
 class TestCase extends \Orchestra\Testbench\TestCase
 {
-
     protected function getPackageProviders($app)
     {
         return [
-            \Prwnr\Streamer\StreamerProvider::class
+            \Prwnr\Streamer\StreamerProvider::class,
         ];
     }
 
     protected function getPackageAliases($app)
     {
         return [
-            'Streamer' => \Prwnr\Streamer\Facades\Streamer::class
+            'Streamer' => \Prwnr\Streamer\Facades\Streamer::class,
         ];
     }
 
     protected function getEnvironmentSetUp($app)
     {
         $app['config']->set('database.redis.options', [
-            'profile' => '5.0'
+            'profile' => '5.0',
         ]);
     }
 

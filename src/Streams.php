@@ -5,12 +5,10 @@ namespace Prwnr\Streamer;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 
 /**
- * Class Streams
- * @package Prwnr\Streamer
+ * Class Streams.
  */
 class Streams
 {
-
     use ConnectsWithRedis;
 
     /**
@@ -20,6 +18,7 @@ class Streams
 
     /**
      * Streams constructor.
+     *
      * @param array $streams
      */
     public function __construct(array $streams)
@@ -29,7 +28,8 @@ class Streams
 
     /**
      * @param StreamableMessage $message
-     * @param string $id
+     * @param string            $id
+     *
      * @return mixed
      */
     public function add(StreamableMessage $message, string $id = '*')
@@ -43,8 +43,9 @@ class Streams
     }
 
     /**
-     * @param array $from
+     * @param array    $from
      * @param int|null $limit
+     *
      * @return mixed
      */
     public function read(array $from = [], ?int $limit = null)

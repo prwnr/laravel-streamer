@@ -1,11 +1,9 @@
 <?php
 
-
 namespace Prwnr\Streamer\Contracts;
 
 /**
- * Interface Event
- * @package Prwnr\Streamer\Contracts
+ * Interface Event.
  */
 interface Event
 {
@@ -15,19 +13,22 @@ interface Event
 
     /**
      * Event name. Can be any string
-     * This name will be later used as event name for listening
+     * This name will be later used as event name for listening.
+     *
      * @return string
      */
     public function name(): string;
 
     /**
-     * Event type. Can be one of the predefined types from this contract
+     * Event type. Can be one of the predefined types from this contract.
+     *
      * @return string
      */
     public function type(): string;
 
     /**
-     * Event payload that will be sent as message to Stream
+     * Event payload that will be sent as message to Stream.
+     *
      * @return array
      */
     public function payload(): array;
