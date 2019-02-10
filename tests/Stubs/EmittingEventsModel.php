@@ -11,4 +11,5 @@ class EmittingEventsModel extends \Illuminate\Database\Eloquent\Model
     protected $fillable = [
         'foo',
     ];
+
 }

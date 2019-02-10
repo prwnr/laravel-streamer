@@ -57,4 +57,5 @@ class EloquentModelEvent implements Event
     {
         return $this->payload;
     }
+
 }

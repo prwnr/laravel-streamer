@@ -134,4 +134,5 @@ class ModelEventsTest extends TestCase
         $this->assertNotEmpty($actual);
         $this->assertArrayHasKey('child.model.created', $actual);
     }
+
 }

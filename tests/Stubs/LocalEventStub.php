@@ -9,4 +9,5 @@ class LocalEventStub
     public function __construct(ReceivedMessage $message)
     {
     }
+
 }

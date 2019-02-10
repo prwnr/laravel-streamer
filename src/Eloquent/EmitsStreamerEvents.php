@@ -92,4 +92,5 @@ trait EmitsStreamerEvents
 
         return strtolower($name);
     }
+
 }
