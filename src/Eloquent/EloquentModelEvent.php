@@ -9,7 +9,6 @@ use Prwnr\Streamer\Contracts\Event;
  */
 class EloquentModelEvent implements Event
 {
-
     /**
      * @var string
      */

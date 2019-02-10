@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Model;
  */
 trait EmitsStreamerEvents
 {
-
     /**
      * @var string
      */
