@@ -96,6 +96,17 @@ This command however has few options that are extending its usage, those are:
 --last_id= : ID from which listener should start reading messages
 ```
 
+### Eloquent Model Events
+
+With use of a `EmitsStreamerEvents` trait you can easily make your Eloquent Models emit basic events.
+This trait will integrate your model with Streamer and will emit events on actions like: `save`, `create` and `delete`.
+It will emit an event of your model name with suffix of the action and a payload of what happened. In case of a `create`
+and `save` actions the payload will have a list of changed fields and a before/after for each of those fields (with create action
+fields before will basically have all values set to null), in case of a `delete` action, payload will simply state that the model has been deleted.
+
+By default events will take names from their models with a suffix of the action, but the name can be changed by 
+assigning it to a `baseEventName` attribute. This name will replace the model name but will keep suffix of what action has been taken.
+
 # What's more
 Despite of giving an option to emit and listen to events, this package is also giving a nice abstraction of Redis Streaming commands. Commands that are implemented:
 * XACK
