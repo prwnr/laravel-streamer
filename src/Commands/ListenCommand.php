@@ -2,6 +2,7 @@
 
 namespace Prwnr\Streamer\Commands;
 
+use Prwnr\Streamer\ListenersStack;
 use Prwnr\Streamer\Stream;
 use Illuminate\Console\Command;
 use Prwnr\Streamer\EventDispatcher\Streamer;
@@ -44,9 +45,9 @@ class ListenCommand extends Command
     public function handle(): int
     {
         $event = $this->argument('event');
-        $events = config('streamer.listen_and_fire');
+        $events = ListenersStack::all();
         $localEvents = $events[$event] ?? null;
-        if (! $localEvents) {
+        if (!$localEvents) {
             $this->error("There are no local events associated with $event event in configuration.");
 
             return 1;
@@ -72,19 +73,19 @@ class ListenCommand extends Command
     }
 
     /**
-     * @param Stream $stream
+     * @param  Stream  $stream
      *
      * @throws \Predis\Response\ServerException
      */
     private function setupGroupListening(Stream $stream): void
     {
-        if (! $stream->groupExists($this->option('group'))) {
+        if (!$stream->groupExists($this->option('group'))) {
             $stream->createGroup($this->option('group'));
             $this->info("Created new group: {$this->option('group')} on a stream: {$this->argument('event')}");
         }
 
         $consumer = $this->option('consumer');
-        if (! $consumer) {
+        if (!$consumer) {
             $consumer = $this->option('group').'-'.time();
         }
 
@@ -96,8 +97,8 @@ class ListenCommand extends Command
     }
 
     /**
-     * @param Stream $stream
-     * @param string $consumerName
+     * @param  Stream  $stream
+     * @param  string  $consumerName
      */
     private function reclaimMessages(Stream $stream, string $consumerName): void
     {
@@ -108,11 +109,11 @@ class ListenCommand extends Command
             $messages[] = $message[0];
         }
 
-        if (! $messages) {
+        if (!$messages) {
             return;
         }
 
-        $consumerName = new Stream\Consumer($consumerName, $stream, $this->option('group'));
-        $consumerName->claim($messages, $this->option('reclaim'));
+        $consumer = new Stream\Consumer($consumerName, $stream, $this->option('group'));
+        $consumer->claim($messages, $this->option('reclaim'));
     }
 }

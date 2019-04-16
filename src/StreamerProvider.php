@@ -26,6 +26,8 @@ class StreamerProvider extends ServiceProvider
         $this->configure();
         $this->registerRedisProfile();
         $this->registerCommands();
+
+        ListenersStack::boot(config('streamer.listen_and_fire'));
     }
 
     /**
