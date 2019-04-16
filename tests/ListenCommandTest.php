@@ -4,6 +4,7 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
 use Prwnr\Streamer\Facades\Streamer;
+use Prwnr\Streamer\ListenersStack;
 use Prwnr\Streamer\Stream;
 use Tests\Stubs\AnotherLocalEventStub;
 use Tests\Stubs\LocalEventStub;
@@ -174,8 +175,8 @@ class ListenCommandTest extends TestCase
 
     private function withLocalEventsConfigured(): void
     {
-        $this->app['config']->set('streamer.listen_and_fire', [
-            'foo.bar' => $this->events,
-        ]);
+        foreach ($this->events as $event) {
+            ListenersStack::add('foo.bar', $event);
+        }
     }
 }
