@@ -64,6 +64,8 @@ This will create a message on a stream named (if such does not exists): `example
 
 In order to listen to event you will have to properly configure `config/streamer.php` and run `php artisan streamer:listen` command. 
 At config file you will find *Application events* configuration with default values for it, that should be changed if you want to start listening with streamer listen command.
+Other way to add listeners for events is to use `ListenersStack` static class. This class is being booted with listeners from configuration file and is then used by 
+command to get all of them. So, the addition of this class is that it allows adding listeners not only via configuration file, but also programmatically. 
 ```php
 /*
 |--------------------------------------------------------------------------
@@ -81,7 +83,7 @@ At config file you will find *Application events* configuration with default val
     ]
 ],
 ```
-Aboves configuration is an array of Streamer events with array of local events related to Streamer event. When listening to `example.streamer.event` all local events from its config definition will be fired with message received from Stream as construct argument. Streamer event will always in this case invoke `ExampleEvent` with `Prwnr\Streamer\EventDispatcher\ReceivedMessage` instance. Make sure that your ExampleEvent can handle it. 
+Above configuration is an array of Streamer events with array of local events related to Streamer event. When listening to `example.streamer.event` all local events from its config definition will be fired with message received from Stream as construct argument. Streamer event will always in this case invoke `ExampleEvent` with `Prwnr\Streamer\EventDispatcher\ReceivedMessage` instance. Make sure that your ExampleEvent can handle it. 
 
 To start listening for event, use this command:
 ```bash
