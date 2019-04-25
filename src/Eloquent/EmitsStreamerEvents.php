@@ -18,18 +18,17 @@ trait EmitsStreamerEvents
     /**
      * Boot event listeners.
      */
-    public static function boot()
+    public static function bootEmitsStreamerEvents(): void
     {
-        parent::boot();
-        static::saved(function (Model $model) {
+        static::saved(static function (Model $model) {
             $model->postSave();
         });
 
-        static::created(function (Model $model) {
+        static::created(static function (Model $model) {
             $model->postCreate();
         });
 
-        static::deleted(function (Model $model) {
+        static::deleted(static function (Model $model) {
             $model->postDelete();
         });
     }
