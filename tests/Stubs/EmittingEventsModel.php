@@ -2,9 +2,10 @@
 
 namespace Tests\Stubs;
 
-use Prwnr\Streamer\Eloquent\EmitsStreamerEvents;
+use Illuminate\Database\Eloquent\Model;
+use Prwnr\Streamer\Concerns\EmitsStreamerEvents;
 
-class EmittingEventsModel extends \Illuminate\Database\Eloquent\Model
+class EmittingEventsModel extends Model
 {
     use EmitsStreamerEvents;
 

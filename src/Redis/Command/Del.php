@@ -7,7 +7,7 @@ use Predis\Command\Command;
 /**
  * @link https://redis.io/commands/xdel
  *
- * Class ADelck
+ * Class Del
  */
 class Del extends Command
 {

@@ -43,6 +43,7 @@ class ModelEventsTest extends TestCase
         $model->postCreate();
 
         $expected = [
+            'id' => null,
             'fields' => [
                 'foo',
             ],
@@ -71,6 +72,7 @@ class ModelEventsTest extends TestCase
         $model->postSave();
 
         $expected = [
+            'id' => null,
             'fields' => [
                 'foo',
             ],
@@ -108,6 +110,7 @@ class ModelEventsTest extends TestCase
         $model->postDelete();
 
         $expected = [
+            'id' => null,
             'deleted' => true,
         ];
         $stream = new Stream('emittingeventsmodel.deleted');

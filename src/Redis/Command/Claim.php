@@ -3,7 +3,7 @@
 namespace Prwnr\Streamer\Redis\Command;
 
 use Predis\Command\Command;
-use Prwnr\Streamer\Redis\Mergeable;
+use Prwnr\Streamer\Concerns\Mergeable;
 
 /**
  * @link https://redis.io/commands/xclaim

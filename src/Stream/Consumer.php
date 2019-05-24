@@ -2,7 +2,7 @@
 
 namespace Prwnr\Streamer\Stream;
 
-use Prwnr\Streamer\ConnectsWithRedis;
+use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\Waitable;
 use Prwnr\Streamer\Stream;
 

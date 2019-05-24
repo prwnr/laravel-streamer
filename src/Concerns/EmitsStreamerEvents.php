@@ -1,7 +1,8 @@
 <?php
 
-namespace Prwnr\Streamer\Eloquent;
+namespace Prwnr\Streamer\Concerns;
 
+use Prwnr\Streamer\Eloquent\EloquentModelEvent;
 use Prwnr\Streamer\Facades\Streamer;
 use Illuminate\Database\Eloquent\Model;
 
@@ -42,7 +43,7 @@ trait EmitsStreamerEvents
             return;
         }
 
-        $payload = [];
+        $payload = $this->makeBasePayload();
         foreach ($this->getChanges() as $field => $change) {
             $payload['fields'][] = $field;
             $payload['before'][$field] = $this->getOriginal($field);
@@ -57,7 +58,7 @@ trait EmitsStreamerEvents
      */
     public function postCreate(): void
     {
-        $payload = [];
+        $payload = $this->makeBasePayload();
         foreach ($this->getAttributes() as $field => $change) {
             $payload['fields'][] = $field;
             $payload['before'][$field] = null;
@@ -72,9 +73,9 @@ trait EmitsStreamerEvents
      */
     public function postDelete(): void
     {
-        Streamer::emit(new EloquentModelEvent($this->getEventName('deleted'), [
-            'deleted' => true,
-        ]));
+        $payload = $this->makeBasePayload();
+        $payload['deleted'] = true;
+        Streamer::emit(new EloquentModelEvent($this->getEventName('deleted'), $payload));
     }
 
     /**
@@ -90,6 +91,16 @@ trait EmitsStreamerEvents
         }
 
         return strtolower($name);
+    }
+
+    /**
+     * @return array
+     */
+    private function makeBasePayload(): array
+    {
+        return [
+            $this->getKeyName() => $this->getKey()
+        ];
     }
 
 }

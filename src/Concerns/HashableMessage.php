@@ -1,6 +1,6 @@
 <?php
 
-namespace Prwnr\Streamer\EventDispatcher;
+namespace Prwnr\Streamer\Concerns;
 
 /**
  * Trait HashableMessage.

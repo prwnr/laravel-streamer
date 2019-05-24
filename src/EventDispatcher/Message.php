@@ -2,6 +2,7 @@
 
 namespace Prwnr\Streamer\EventDispatcher;
 
+use Prwnr\Streamer\Concerns\HashableMessage;
 use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 

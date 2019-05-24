@@ -5,7 +5,7 @@ namespace Tests;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
 use Illuminate\Redis\Connections\Connection;
 use Predis\Client;
-use Prwnr\Streamer\ConnectsWithRedis;
+use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Stream;
 
 class ConnectionTest extends TestCase

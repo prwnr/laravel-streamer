@@ -4,7 +4,7 @@ namespace Tests;
 
 use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\StreamableMessage;
-use Prwnr\Streamer\EventDispatcher\HashableMessage;
+use Prwnr\Streamer\Concerns\HashableMessage;
 use Prwnr\Streamer\EventDispatcher\Message;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 
