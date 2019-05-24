@@ -3,6 +3,7 @@
 namespace Prwnr\Streamer\Redis;
 
 use Predis\Command\Command;
+use Prwnr\Streamer\Concerns\Mergeable;
 
 /**
  * Class RangeCommand.

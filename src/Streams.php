@@ -2,6 +2,7 @@
 
 namespace Prwnr\Streamer;
 
+use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 
 /**

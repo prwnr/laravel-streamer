@@ -1,6 +1,6 @@
 <?php
 
-namespace Prwnr\Streamer;
+namespace Prwnr\Streamer\Concerns;
 
 use Illuminate\Redis\Connections\Connection;
 use Illuminate\Support\Facades\Redis;

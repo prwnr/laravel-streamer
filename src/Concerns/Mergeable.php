@@ -1,6 +1,6 @@
 <?php
 
-namespace Prwnr\Streamer\Redis;
+namespace Prwnr\Streamer\Concerns;
 
 /**
  * Trait Mergeable.

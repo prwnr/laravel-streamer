@@ -3,6 +3,7 @@
 namespace Prwnr\Streamer;
 
 use Predis\Response\ServerException;
+use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\Contracts\Waitable;
 use Prwnr\Streamer\Stream\Range;

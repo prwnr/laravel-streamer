@@ -1,7 +1,8 @@
 <?php
 
-namespace Prwnr\Streamer\Eloquent;
+namespace Prwnr\Streamer\Concerns;
 
+use Prwnr\Streamer\Eloquent\EloquentModelEvent;
 use Prwnr\Streamer\Facades\Streamer;
 use Illuminate\Database\Eloquent\Model;
 
