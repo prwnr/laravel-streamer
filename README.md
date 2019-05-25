@@ -62,34 +62,42 @@ This will create a message on a stream named (if such does not exists): `example
 
 ### Listening for new messages on events
 
-In order to listen to event you will have to properly configure `config/streamer.php` and run `php artisan streamer:listen` command. 
-At config file you will find *Application events* configuration with default values for it, that should be changed if you want to start listening with streamer listen command.
+In order to listen to event you will have to properly configure `config/streamer.php` (or use `ListenerStack::add` method) and run `php artisan streamer:listen` command. 
+At config file you will find *Application listeners* configuration with default values for it, that should be changed if you want to start listening with streamer listen command.
 Other way to add listeners for events is to use `ListenersStack` static class. This class is being booted with listeners from configuration file and is then used by 
 command to get all of them. So, the addition of this class is that it allows adding listeners not only via configuration file, but also programmatically. 
+
+Remember that local listener should implement `MessageReceiver` contract to ensure that it has `handle` method
+which accepts `ReceivedMessage` as an argument.
 ```php
 /*
 |--------------------------------------------------------------------------
-| Application events
+| Application handlers
 |--------------------------------------------------------------------------
 |
-| Events classes that should be invoked with Streamer listen command
-| based on streamer.event.name => [local_events] pairs
+| Handlers classes that should be invoked with Streamer listen command
+| based on streamer.event.name => [local_handlers] pairs
+|
+| Local handlers should implement MessageReceiver contract
 |
 */
 'listen_and_fire' => [
     'example.streamer.event' => [
-        //List of local events that should be invoked
-        \App\Events\ExampleEvent::class
-    ]
+        //List of local listeners that should be invoked
+        //\App\Listeners\ExampleListener::class
+    ],
 ],
 ```
-Above configuration is an array of Streamer events with array of local events related to Streamer event. When listening to `example.streamer.event` all local events from its config definition will be fired with message received from Stream as construct argument. Streamer event will always in this case invoke `ExampleEvent` with `Prwnr\Streamer\EventDispatcher\ReceivedMessage` instance. Make sure that your ExampleEvent can handle it. 
+Above configuration is an array of Streamer events with array of local listeners related to Streamer event. When listening to `example.streamer.event` all local listeners from its config definition 
+will be created and their `handle` method fired with message received from Stream. 
+For listener instance creation this package uses Laravel Container, therefore you can type hint anything into your 
+listener constructor to use Laravel dependency injection. 
 
 To start listening for event, use this command:
 ```bash
 php artisan streamer:listen example.streamer.event 
 ```
-That's a basic usage of listening command, where event name is required argument. In this case it simply starts listening for only new events.
+That's a basic usage of listening command, where event name is a required argument. In this case it simply starts listening for only new events.
 This command however has few options that are extending its usage, those are:
 ```text
 --group= : Name of your streaming group. Only when group is provided listener will listen on group as consumer
@@ -105,6 +113,7 @@ This trait will integrate your model with Streamer and will emit events on actio
 It will emit an event of your model name with suffix of the action and a payload of what happened. In case of a `create`
 and `save` actions the payload will have a list of changed fields and a before/after for each of those fields (with create action
 fields before will basically have all values set to null), in case of a `delete` action, payload will simply state that the model has been deleted.
+Each payload includes a `[key_name => key_value]` pair of your model ID. 
 
 By default events will take names from their models with a suffix of the action, but the name can be changed by 
 assigning it to a `baseEventName` attribute. This name will replace the model name but will keep suffix of what action has been taken.
