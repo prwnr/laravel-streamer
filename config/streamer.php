@@ -47,13 +47,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Application handlers
+    | Application listeners
     |--------------------------------------------------------------------------
     |
-    | Handlers classes that should be invoked with Streamer listen command
+    | Listeners classes that should be invoked with Streamer listen command
     | based on streamer.event.name => [local_handlers] pairs
     |
-    | Local handlers should implement MessageReceiver contract
+    | Local listeners should implement MessageReceiver contract
     |
     */
     'listen_and_fire' => [
