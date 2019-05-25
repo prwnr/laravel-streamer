@@ -38,7 +38,7 @@ $range = new Stream\Range();
 // Reading message from a range. readRange() method requires first argument to be a Stream\Range instance
 // Second argument is optional and is used to set limit to how many message should be returned
 $rangeMessages = $stream->readRange($range);
-/* $rangeMesages result format
+/* $rangeMessages result format
 Array
 (
     [1541684691193-0] => Array
@@ -62,7 +62,7 @@ $rangeMessages = $stream->readRange($range, 10);
  * reading range is not supported by multiple streams.
  */
 
-// Creating Streams instance with array of streams names that willl be manipualted
+// Creating Streams instance with array of streams names that will be manipulated
 $streams = new Streams(['first_stream', 'second_stream']);
 
 // read method for streams have two options as well.

@@ -30,7 +30,7 @@ $fixedId = $stream->add($message, '0');
 // Adding message to Stream without fixed ID. By default a special '*' ID will be used. This will create message with automatically incremented ID.
 $incrementedId = $stream->add($message);
 
-// Delete message permamently from Stream by ID. Returns 1 as success.
+// Delete message permanently from Stream by ID. Returns 1 as success.
 $stream->delete('0');
 
 /**
@@ -38,7 +38,7 @@ $stream->delete('0');
  * Explained usage of add() method.
  */
 
-// Creating Streams instance with array of streams names that willl be manipualted
+// Creating Streams instance with array of streams names that will be manipulated
 $streams = new Streams(['first_stream', 'second_stream']);
 
 // Message implementation, used to add it to stream
