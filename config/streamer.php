@@ -47,17 +47,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Application events
+    | Application listeners
     |--------------------------------------------------------------------------
     |
-    | Events classes that should be invoked with Streamer listen command
-    | based on streamer.event.name => [local_events] pairs
+    | Listeners classes that should be invoked with Streamer listen command
+    | based on streamer.event.name => [local_handlers] pairs
+    |
+    | Local listeners should implement MessageReceiver contract
     |
     */
     'listen_and_fire' => [
         'example.streamer.event' => [
-            //List of local events that should be invoked
-            //\App\Events\ExampleEvent::class
+            //List of local listeners that should be invoked
+            //\App\Listeners\ExampleListener::class
         ],
     ],
 ];

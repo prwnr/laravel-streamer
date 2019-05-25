@@ -36,10 +36,9 @@ class ReceivedMessage implements StreamableMessage
     }
 
     /**
-     * ReceivedStreamableMessage constructor.
-     *
-     * @param string $id
-     * @param array  $content
+     * ReceivedMessage constructor.
+     * @param  string  $id
+     * @param  array  $content
      */
     public function __construct(string $id, array $content)
     {

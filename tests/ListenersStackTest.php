@@ -3,8 +3,8 @@
 namespace Tests;
 
 use Prwnr\Streamer\ListenersStack;
-use Tests\Stubs\AnotherLocalEventStub;
-use Tests\Stubs\LocalEventStub;
+use Tests\Stubs\AnotherLocalListener;
+use Tests\Stubs\LocalListener;
 
 class ListenersStackTest extends TestCase
 {
@@ -19,8 +19,8 @@ class ListenersStackTest extends TestCase
     {
         $expected = [
             'foo.bar' => [
-                LocalEventStub::class,
-                AnotherLocalEventStub::class
+                LocalListener::class,
+                AnotherLocalListener::class
             ]
         ];
         ListenersStack::boot($expected);
@@ -32,17 +32,34 @@ class ListenersStackTest extends TestCase
     {
         $expected = [
             'foo.bar' => [
-                LocalEventStub::class,
-                AnotherLocalEventStub::class
+                LocalListener::class,
+                AnotherLocalListener::class
             ],
             'bar.foo' => [
-                LocalEventStub::class
+                LocalListener::class
             ]
         ];
 
-        ListenersStack::add('foo.bar', LocalEventStub::class);
-        ListenersStack::add('foo.bar', AnotherLocalEventStub::class);
-        ListenersStack::add('bar.foo', LocalEventStub::class);
+        ListenersStack::add('foo.bar', LocalListener::class);
+        ListenersStack::add('foo.bar', AnotherLocalListener::class);
+        ListenersStack::add('bar.foo', LocalListener::class);
+
+        $this->assertEquals($expected, ListenersStack::all());
+    }
+
+    public function test_listeners_stack_adds_new_event_listeners_to_stack_as_array(): void
+    {
+        $expected = [
+            'foo.bar' => [
+                LocalListener::class,
+                AnotherLocalListener::class
+            ],
+            'bar.foo' => [
+                LocalListener::class
+            ]
+        ];
+
+        ListenersStack::addMany($expected);
 
         $this->assertEquals($expected, ListenersStack::all());
     }
@@ -51,14 +68,14 @@ class ListenersStackTest extends TestCase
     {
         $expected = [
             'foo.bar' => [
-                LocalEventStub::class,
-                AnotherLocalEventStub::class
+                LocalListener::class,
+                AnotherLocalListener::class
             ],
         ];
 
-        ListenersStack::add('foo.bar', LocalEventStub::class);
-        ListenersStack::add('foo.bar', AnotherLocalEventStub::class);
-        ListenersStack::add('foo.bar', AnotherLocalEventStub::class);
+        ListenersStack::add('foo.bar', LocalListener::class);
+        ListenersStack::add('foo.bar', AnotherLocalListener::class);
+        ListenersStack::add('foo.bar', AnotherLocalListener::class);
 
         $this->assertEquals($expected, ListenersStack::all());
     }

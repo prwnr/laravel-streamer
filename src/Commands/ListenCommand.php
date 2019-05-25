@@ -2,6 +2,10 @@
 
 namespace Prwnr\Streamer\Commands;
 
+use Illuminate\Container\Container;
+use Predis\Response\ServerException;
+use Prwnr\Streamer\Contracts\MessageReceiver;
+use Prwnr\Streamer\EventDispatcher\Message;
 use Prwnr\Streamer\ListenersStack;
 use Prwnr\Streamer\Stream;
 use Illuminate\Console\Command;
@@ -45,10 +49,10 @@ class ListenCommand extends Command
     public function handle(): int
     {
         $event = $this->argument('event');
-        $events = ListenersStack::all();
-        $localEvents = $events[$event] ?? null;
-        if (!$localEvents) {
-            $this->error("There are no local events associated with $event event in configuration.");
+        $listeners = ListenersStack::all();
+        $localListeners = $listeners[$event] ?? null;
+        if (!$localListeners) {
+            $this->error("There are no local listeners associated with $event event in configuration.");
 
             return 1;
         }
@@ -63,9 +67,16 @@ class ListenCommand extends Command
             $this->setupGroupListening($stream);
         }
 
-        $this->streamer->listen($event, function (ReceivedMessage $message) use ($localEvents) {
-            foreach ($localEvents as $localEvent) {
-                event($localEvent, new $localEvent($message));
+        $container = Container::getInstance();
+        $this->streamer->listen($event, function (ReceivedMessage $message) use ($localListeners, $container) {
+            foreach ($localListeners as $listener) {
+                $receiver = $container->make($listener);
+                if (!$receiver instanceof MessageReceiver) {
+                    $this->error("Listener class ({$listener}) needs to implement MessageReceiver");
+                    continue;
+                }
+
+                $receiver->handle($message);
             }
         });
 
@@ -75,7 +86,7 @@ class ListenCommand extends Command
     /**
      * @param  Stream  $stream
      *
-     * @throws \Predis\Response\ServerException
+     * @throws ServerException
      */
     private function setupGroupListening(Stream $stream): void
     {

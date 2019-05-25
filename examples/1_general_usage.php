@@ -56,8 +56,8 @@ $consumer = new Stream\Consumer('consumer', $stream, 'group');
 $consumerPending = $consumer->pending();
 
 // claim is a method that can only be called on a Consumer instance
-// this method implementes XCLAIM command and claims messages on a given stream
+// this method implements XCLAIM command and claims messages on a given stream
 // from other consumers to current consumer. Messages stays are pending till acknowledged
-// this method accepts arrray of messages IDs to claim and idle time in miliseconds
+// this method accepts array of messages IDs to claim and idle time in milliseconds
 // idletime determines how old messages should be to reclaim them
 $consumer->claim(['0', '1'], '1');

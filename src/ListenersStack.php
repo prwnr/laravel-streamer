@@ -22,6 +22,21 @@ final class ListenersStack
     }
 
     /**
+     * Add many listeners to stack at once.
+     * Uses ListenersStack::add underneath
+     *
+     * @param  array  $listenersStack [event => [listeners]]
+     */
+    public static function addMany(array $listenersStack): void
+    {
+        foreach ($listenersStack as $event => $listeners) {
+            foreach ($listeners as $listener) {
+                self::add($event, $listener);
+            }
+        }
+    }
+
+    /**
      * Add event listener to stack
      *
      * @param  string  $event

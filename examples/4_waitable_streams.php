@@ -11,7 +11,7 @@ use Prwnr\Streamer\Stream;
 $stream = new Stream('stream_name');
 
 // await method is implementation of Redis XREAD with BLOCK option
-// It has two arguments: lastId and timeout (in miliseconds).
+// It has two arguments: lastId and timeout (in milliseconds).
 // last id determines from which ID stream should be read and a timeout is used for BLOCK command
 // By default last ID is set to 0 and timeout as well to 0 (which means to never time out)
 $payload = $stream->await('0', 1000);
@@ -41,7 +41,7 @@ $payloadNewest = $stream->await(Stream::NEW_ENTRIES, 1000);
 
 // Creating Stream instance
 $stream = new Stream('stream_name');
-// Consumer accepts a name, stream (from whch its name is retrieved) and a group name. All 3 parameters are required
+// Consumer accepts a name, stream (from which its name is retrieved) and a group name. All 3 parameters are required
 $consumer = new Stream\Consumer('consumer_name', $stream, 'group_name');
 
 // await method is implementation of Redis XREADGROUP with BLOCK option
@@ -66,9 +66,9 @@ Array
 
 /**
  * Acknowledging stream group messages
- * Stream and Consumer, both are implemeting a 'Waitable' interface, which defines explained above await method
+ * Stream and Consumer, both are implementing a 'Waitable' interface, which defines explained above await method
  * and a 'acknowledge' method.
- * Althought both classes are implementing this method, only one has it implemented.
+ * Although both classes are implementing this method, only one has it implemented.
  * Stream class has this method empty, because there is no way to acknowledge messages on a Stream without listening as consumer
  * Consumer class has this method implemented.
  */

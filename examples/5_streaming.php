@@ -5,7 +5,7 @@ use Prwnr\Streamer\EventDispatcher\Streamer;
 
 /**
  * Usage of Streaming class
- * Emiting new events.
+ * Emitting new events.
  */
 
 // Basic implementation of Streamer event
