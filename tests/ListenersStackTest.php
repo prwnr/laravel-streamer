@@ -54,13 +54,20 @@ class ListenersStackTest extends TestCase
                 LocalListener::class,
                 AnotherLocalListener::class
             ],
-            'bar.foo' => [
-                LocalListener::class
-            ]
+            'bar.foo' => LocalListener::class
         ];
 
         ListenersStack::addMany($expected);
 
+        $expected = [
+            'foo.bar' => [
+                LocalListener::class,
+                AnotherLocalListener::class
+            ],
+            'bar.foo' => [
+                LocalListener::class
+            ]
+        ];
         $this->assertEquals($expected, ListenersStack::all());
     }
 

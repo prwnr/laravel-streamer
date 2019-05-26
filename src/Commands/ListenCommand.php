@@ -2,10 +2,10 @@
 
 namespace Prwnr\Streamer\Commands;
 
+use Exception;
 use Illuminate\Container\Container;
 use Predis\Response\ServerException;
 use Prwnr\Streamer\Contracts\MessageReceiver;
-use Prwnr\Streamer\EventDispatcher\Message;
 use Prwnr\Streamer\ListenersStack;
 use Prwnr\Streamer\Stream;
 use Illuminate\Console\Command;
@@ -44,7 +44,7 @@ class ListenCommand extends Command
     /**
      * Execute the console command.
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function handle(): int
     {

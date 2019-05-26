@@ -29,12 +29,12 @@ class Claim extends Command
     {
         $response = [];
         foreach ((array) $data as $value) {
-            if (!\is_array($value)) {
+            if (!is_array($value)) {
                 $response[] = $value;
                 continue;
             }
 
-            if (\is_array($value[1])) {
+            if (is_array($value[1])) {
                 $payload = $this->toAssoc($value[1]);
                 $response[$value[0]] = $payload ?: $value[1];
                 continue;
@@ -50,7 +50,7 @@ class Claim extends Command
     protected function filterArguments(array $arguments): array
     {
         foreach ($arguments as $key => $argument) {
-            if (\is_array($argument)) {
+            if (is_array($argument)) {
                 unset($arguments[$key]);
                 foreach ($argument as $i => $value) {
                     array_splice($arguments, $i + $key, 0, $value);

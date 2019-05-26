@@ -16,7 +16,7 @@ trait HashableMessage
             return;
         }
 
-        $data = \is_array($this->content['data']) || \is_object($this->content['data']) ? json_encode($this->content['data']) : $this->content['data'];
+        $data = is_array($this->content['data']) || is_object($this->content['data']) ? json_encode($this->content['data']) : $this->content['data'];
         $key = $this->content['type'].$this->content['name'].$this->content['domain'].$data;
         $hash = hash('SHA256', $key);
         $this->content['hash'] = $hash;
