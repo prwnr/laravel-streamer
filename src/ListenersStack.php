@@ -30,6 +30,10 @@ final class ListenersStack
     public static function addMany(array $listenersStack): void
     {
         foreach ($listenersStack as $event => $listeners) {
+            if (is_string($listeners)) {
+                $listeners = [$listeners];
+            }
+
             foreach ($listeners as $listener) {
                 self::add($event, $listener);
             }

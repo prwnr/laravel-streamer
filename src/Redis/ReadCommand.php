@@ -19,7 +19,7 @@ abstract class ReadCommand extends Command
     {
         $response = [];
         foreach ((array) $data as $value) {
-            if (!\is_array($value)) {
+            if (!is_array($value)) {
                 $response[] = $value;
                 continue;
             }
@@ -40,7 +40,7 @@ abstract class ReadCommand extends Command
     protected function filterArguments(array $arguments): array
     {
         foreach ($arguments as $key => $argument) {
-            if ($argument === 'STREAMS' && \is_array($arguments[$key + 1])) {
+            if ($argument === 'STREAMS' && is_array($arguments[$key + 1])) {
                 $streams = $arguments[$key + 1];
                 $ids = $arguments[$key + 2];
                 unset($arguments[$key + 1], $arguments[$key + 2]);

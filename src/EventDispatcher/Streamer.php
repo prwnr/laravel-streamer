@@ -8,6 +8,7 @@ use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\Listener;
 use Prwnr\Streamer\Contracts\Waitable;
 use Prwnr\Streamer\Stream;
+use Throwable;
 
 /**
  * Class Streamer.
@@ -32,6 +33,13 @@ class Streamer implements Emitter, Listener
      * @var int
      */
     protected $listenTimeout;
+
+    /**
+     * Seconds.
+     *
+     * @var int
+     */
+    protected $readSleep;
 
     /**
      * @var string
@@ -70,8 +78,9 @@ class Streamer implements Emitter, Listener
      */
     public function __construct()
     {
-        $this->readTimeout = config('streamer.stream_read_timeout') ?: 0;
-        $this->listenTimeout = config('streamer.listen_timeout') ?: 0;
+        $this->readTimeout = config('streamer.stream_read_timeout', 0);
+        $this->listenTimeout = config('streamer.listen_timeout', 0);
+        $this->readSleep = config('streamer.read_sleep', 1);
         $this->readTimeout *= 1000;
         $this->listenTimeout *= 1000;
     }
@@ -152,7 +161,7 @@ class Streamer implements Emitter, Listener
                 if ($on->getNewEntriesKey() === Stream\Consumer::NEW_ENTRIES) {
                     $lastSeenId = $on->getNewEntriesKey();
                 }
-                sleep(1);
+                sleep($this->readSleep);
                 if ($this->shouldStop($start)) {
                     break;
                 }
@@ -184,7 +193,7 @@ class Streamer implements Emitter, Listener
                 if ($this->canceled) {
                     break;
                 }
-            } catch (\Throwable $ex) {
+            } catch (Throwable $ex) {
                 Log::error("Listener error. Failed processing message with ID {$messageId} on '{$on->getName()}' stream. Error: {$ex->getMessage()}");
                 continue;
             }

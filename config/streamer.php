@@ -10,6 +10,8 @@ return [
     | Seconds after which Streamer listen block should timeout
     | Setting 0 never timeouts.
     |
+    | Time in milliseconds
+    |
     */
     'listen_timeout' => 0,
 
@@ -21,8 +23,22 @@ return [
     | Seconds after which Streamer listen block should timeout
     | Setting 0 never timeouts.
     |
+    | Time in milliseconds
+    |
     */
     'stream_read_timeout' => 0,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Streamer reading sleep
+    |--------------------------------------------------------------------------
+    |
+    | Seconds of a sleep time that happens between reading messages from Stream
+    |
+    | Time in seconds
+    |
+    */
+    'read_sleep' => 1,
 
     /*
     |--------------------------------------------------------------------------
@@ -47,13 +63,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Application listeners
+    | Application handlers
     |--------------------------------------------------------------------------
     |
-    | Listeners classes that should be invoked with Streamer listen command
+    | Handlers classes that should be invoked with Streamer listen command
     | based on streamer.event.name => [local_handlers] pairs
     |
-    | Local listeners should implement MessageReceiver contract
+    | Local handlers should implement MessageReceiver contract
     |
     */
     'listen_and_fire' => [

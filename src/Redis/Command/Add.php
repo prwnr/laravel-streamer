@@ -24,7 +24,7 @@ class Add extends Command
      */
     protected function filterArguments(array $arguments): array
     {
-        if (\count($arguments) === 3 && \is_array($arguments[2])) {
+        if (count($arguments) === 3 && is_array($arguments[2])) {
             $payload = array_pop($arguments);
             foreach ($payload as $name => $value) {
                 $arguments[] = $name;

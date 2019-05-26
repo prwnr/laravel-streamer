@@ -25,7 +25,7 @@ trait Mergeable
         $response = [];
         $key = 0;
         while ($data) {
-            if ($this->dimensions > 1 && \is_array($data[$key])) {
+            if ($this->dimensions > 1 && is_array($data[$key])) {
                 $currentDimension++;
                 $response[$key] = $this->toAssoc($data[$key], $currentDimension);
                 unset($data[$key]);
@@ -33,7 +33,7 @@ trait Mergeable
                 continue;
             }
 
-            if ($this->dimensions > 1 && !\is_array($data[$key]) && \is_array($data[$key + 1])) {
+            if ($this->dimensions > 1 && !is_array($data[$key]) && is_array($data[$key + 1])) {
                 $currentDimension++;
                 $response[$data[$key]] = $this->toAssoc($data[$key + 1], $currentDimension);
                 unset($data[$key], $data[$key + 1]);

@@ -2,6 +2,7 @@
 
 namespace Prwnr\Streamer;
 
+use Illuminate\Support\Str;
 use Predis\Response\ServerException;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\StreamableMessage;
@@ -190,7 +191,7 @@ class Stream implements Waitable
         try {
             return $this->redis()->XINFO(self::STREAM, $this->name);
         } catch (ServerException $ex) {
-            if (str_contains($ex->getMessage(), 'ERR no such key')) {
+            if (Str::contains($ex->getMessage(), 'ERR no such key')) {
                 throw new StreamNotFoundException("No results for stream $this->name");
             }
 
@@ -209,7 +210,7 @@ class Stream implements Waitable
         try {
             return $this->redis()->XINFO(self::GROUPS, $this->name);
         } catch (ServerException $ex) {
-            if (str_contains($ex->getMessage(), 'ERR no such key')) {
+            if (Str::contains($ex->getMessage(), 'ERR no such key')) {
                 throw new StreamNotFoundException("No results for stream $this->name");
             }
 
@@ -230,7 +231,7 @@ class Stream implements Waitable
         try {
             return $this->redis()->XINFO(self::CONSUMERS, $this->name, $group);
         } catch (ServerException $ex) {
-            if (str_contains($ex->getMessage(), 'ERR no such key')) {
+            if (Str::contains($ex->getMessage(), 'ERR no such key')) {
                 throw new StreamNotFoundException("No results for stream $this->name");
             }
 
