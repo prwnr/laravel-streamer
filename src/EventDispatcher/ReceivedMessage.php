@@ -2,6 +2,7 @@
 
 namespace Prwnr\Streamer\EventDispatcher;
 
+use Illuminate\Support\Arr;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 
 /**
@@ -33,6 +34,34 @@ class ReceivedMessage implements StreamableMessage
     public function getContent(): array
     {
         return $this->content;
+    }
+
+    /**
+     * @param  null|string  $key  dot.notation string
+     * @param  null  $default
+     * @return mixed
+     */
+    public function get(?string $key = null, $default = null)
+    {
+        return Arr::get($this->content['data'] ?? [], $key, $default);
+    }
+
+    /**
+     * @param  array|string  $keys
+     * @return array
+     */
+    public function only($keys): array
+    {
+        return Arr::only($this->content['data'] ?? [], $keys);
+    }
+
+    /**
+     * @param  array|string  $keys
+     * @return array
+     */
+    public function except($keys): array
+    {
+        return Arr::except($this->content['data'] ?? [], $keys);
     }
 
     /**
