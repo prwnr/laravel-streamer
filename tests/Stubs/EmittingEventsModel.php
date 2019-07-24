@@ -10,7 +10,13 @@ class EmittingEventsModel extends Model
     use EmitsStreamerEvents;
 
     protected $fillable = [
-        'foo',
+        'foo', 'id'
     ];
+
+    public function __construct(array $attributes = [])
+    {
+        $this->baseEventName = 'model';
+        parent::__construct($attributes);
+    }
 
 }
