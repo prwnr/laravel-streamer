@@ -34,7 +34,10 @@ class MessageTest extends TestCase
 
     public function test_received_message_is_created_with_id_and_content(): void
     {
-        $data = ['foo' => 'bar'];
+        $data = [
+            'foo' => 'bar',
+            'bar' => 'foo bar foo'
+        ];
         $expectedId = '1-0';
         $expected = [
             '_id'  => $expectedId,
@@ -48,6 +51,10 @@ class MessageTest extends TestCase
 
         $this->assertInstanceOf(StreamableMessage::class, $message);
         $this->assertNotEmpty($message->getContent());
+        $this->assertEquals($data, $message->get());
+        $this->assertEquals('bar', $message->get('foo'));
+        $this->assertEquals(['foo' => 'bar'], $message->only('foo'));
+        $this->assertEquals(['bar' => 'foo bar foo'], $message->except('foo'));
         $this->assertEquals($expectedId, $message->getId());
         $this->assertEquals($expected, $message->getContent());
     }
