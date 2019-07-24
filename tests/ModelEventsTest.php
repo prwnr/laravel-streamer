@@ -7,6 +7,7 @@ use Prwnr\Streamer\Contracts\Event;
 use Tests\Stubs\EmittingEventsModel;
 use Prwnr\Streamer\Eloquent\EloquentModelEvent;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
+use Tests\Stubs\EmittingEventsWithAdditionalModel;
 
 class ModelEventsTest extends TestCase
 {
@@ -39,40 +40,42 @@ class ModelEventsTest extends TestCase
 
     public function test_creating_model_emits_created_event_to_stream(): void
     {
-        $model = new EmittingEventsModel(['foo' => 'bar']);
+        $model = new EmittingEventsModel(['id' => 123, 'foo' => 'bar']);
         $model->postCreate();
 
         $expected = [
-            'id' => null,
+            'id' => 123,
             'fields' => [
-                'foo',
+                'id', 'foo',
             ],
             'before' => [
+                'id' => null,
                 'foo' => null,
             ],
             'after' => [
+                'id' => 123,
                 'foo' => 'bar',
             ],
 
         ];
-        $stream = new Stream('emittingeventsmodel.created');
+        $stream = new Stream('model.created');
         $actual = $stream->read();
         $this->assertNotEmpty($actual);
-        $this->assertArrayHasKey('emittingeventsmodel.created', $actual);
-        $message = array_pop($actual['emittingeventsmodel.created']);
+        $this->assertArrayHasKey('model.created', $actual);
+        $message = array_pop($actual['model.created']);
         $this->assertEquals(json_encode($expected), $message['data']);
     }
 
     public function test_saving_model_emits_updated_event_to_stream(): void
     {
-        $model = new EmittingEventsModel(['foo' => 'bar']);
+        $model = new EmittingEventsModel(['id' => 123, 'foo' => 'bar']);
         $model->syncOriginal();
         $model->foo = 'foobar';
         $model->syncChanges();
         $model->postSave();
 
         $expected = [
-            'id' => null,
+            'id' => 123,
             'fields' => [
                 'foo',
             ],
@@ -83,41 +86,41 @@ class ModelEventsTest extends TestCase
                 'foo' => 'foobar',
             ],
         ];
-        $stream = new Stream('emittingeventsmodel.updated');
+        $stream = new Stream('model.updated');
         $actual = $stream->read();
         $this->assertNotEmpty($actual);
-        $this->assertArrayHasKey('emittingeventsmodel.updated', $actual);
-        $message = array_pop($actual['emittingeventsmodel.updated']);
+        $this->assertArrayHasKey('model.updated', $actual);
+        $message = array_pop($actual['model.updated']);
         $this->assertEquals(json_encode($expected), $message['data']);
     }
 
-    public function test_saving_model_withoun_changes_wont_emit_updated_event_to_stream(): void
+    public function test_saving_model_without_changes_wont_emit_updated_event_to_stream(): void
     {
-        $model = new EmittingEventsModel(['foo' => 'bar']);
+        $model = new EmittingEventsModel(['id' => 123, 'foo' => 'bar']);
         $model->syncOriginal();
         $model->foo = 'bar';
         $model->syncChanges();
         $model->postSave();
 
-        $stream = new Stream('emittingeventsmodel.updated');
+        $stream = new Stream('model.updated');
         $actual = $stream->read();
         $this->assertEmpty($actual);
     }
 
     public function test_deleting_model_emits_deleted_event_to_stream(): void
     {
-        $model = new EmittingEventsModel(['foo' => 'bar']);
+        $model = new EmittingEventsModel(['id' => 123, 'foo' => 'bar']);
         $model->postDelete();
 
         $expected = [
-            'id' => null,
+            'id' => 123,
             'deleted' => true,
         ];
-        $stream = new Stream('emittingeventsmodel.deleted');
+        $stream = new Stream('model.deleted');
         $actual = $stream->read();
         $this->assertNotEmpty($actual);
-        $this->assertArrayHasKey('emittingeventsmodel.deleted', $actual);
-        $message = array_pop($actual['emittingeventsmodel.deleted']);
+        $this->assertArrayHasKey('model.deleted', $actual);
+        $message = array_pop($actual['model.deleted']);
         $this->assertEquals(json_encode($expected), $message['data']);
     }
 
@@ -126,8 +129,8 @@ class ModelEventsTest extends TestCase
         $model = new class extends EmittingEventsModel {
             public function __construct(array $attributes = [])
             {
-                $this->baseEventName = 'child.model';
                 parent::__construct($attributes);
+                $this->baseEventName = 'child.model';
             }
         };
         $model->postCreate();
@@ -138,4 +141,62 @@ class ModelEventsTest extends TestCase
         $this->assertArrayHasKey('child.model.created', $actual);
     }
 
+    public function test_creating_model_with_additional_payload_data_emits_created_event_to_stream_with_that_data(): void
+    {
+        $model = new EmittingEventsWithAdditionalModel(['id' => 123, 'foo' => 'bar']);
+        $model->setAdditionalPayloadData(['foo' => 'bar']);
+        $model->postCreate();
+
+        $expected = [
+            'id' => 123,
+            'additional' => ['foo' => 'bar'],
+            'fields' => [
+                'id', 'foo',
+            ],
+            'before' => [
+                'id' => null,
+                'foo' => null,
+            ],
+            'after' => [
+                'id' => 123,
+                'foo' => 'bar',
+            ],
+        ];
+
+        $stream = new Stream('model.with.additional.created');
+        $actual = $stream->read();
+        $this->assertNotEmpty($actual);
+        $this->assertArrayHasKey('model.with.additional.created', $actual);
+        $message = array_pop($actual['model.with.additional.created']);
+        $this->assertEquals(json_encode($expected), $message['data']);
+    }
+
+    public function test_creating_model_with_empty_additional_payload_data_emits_created_event_to_stream_without_that_data(): void
+    {
+        $model = new EmittingEventsWithAdditionalModel(['id' => 123, 'foo' => 'bar']);
+        $model->setAdditionalPayloadData([]);
+        $model->postCreate();
+
+        $expected = [
+            'id' => 123,
+            'fields' => [
+                'id', 'foo',
+            ],
+            'before' => [
+                'id' => null,
+                'foo' => null,
+            ],
+            'after' => [
+                'id' => 123,
+                'foo' => 'bar',
+            ],
+        ];
+
+        $stream = new Stream('model.with.additional.created');
+        $actual = $stream->read();
+        $this->assertNotEmpty($actual);
+        $this->assertArrayHasKey('model.with.additional.created', $actual);
+        $message = array_pop($actual['model.with.additional.created']);
+        $this->assertEquals(json_encode($expected), $message['data']);
+    }
 }

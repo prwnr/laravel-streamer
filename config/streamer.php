@@ -10,7 +10,7 @@ return [
     | Seconds after which Streamer listen block should timeout
     | Setting 0 never timeouts.
     |
-    | Time in milliseconds
+    | Time in seconds
     |
     */
     'listen_timeout' => 0,
@@ -23,7 +23,7 @@ return [
     | Seconds after which Streamer listen block should timeout
     | Setting 0 never timeouts.
     |
-    | Time in milliseconds
+    | Time in seconds
     |
     */
     'stream_read_timeout' => 0,
