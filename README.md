@@ -106,6 +106,36 @@ This command however has few options that are extending its usage, those are:
 --last_id= : ID from which listener should start reading messages
 ```
 
+### Channels
+
+Channels are similar to listener, but are dedicated to a single-name events with consumer
+and group associated to them by default. They are made to be a blocking message receivers.
+
+You can achieve channel functionality by extending `Channel` class (and implementing its abstract methods).
+
+Channels are simple to use, they have two functional methods.
+1) `send` - sends message to stream (with name that is based on class name),
+2) `receive` - awaits for stream messages and calls callback function that is to be determined by the user.
+
+When receiving messages from channel, there are few things to know. Closure should always
+return either `true` or `false`. `true` will keep the listening alive, while `false` will
+break out of the listening loop (note: only after first processing all already received messages). The last thing to know is that, when streamer will time out, 
+it will inject empty `ReceivedMessage` instance into closure call. You can determine empty message
+by checking if it has ID or not (by calling `$message->getId()`).
+
+Example usage:
+```php
+$channel = new FooBarChannel(); //channel instance (extends Channel)
+$channel->send(['foo' => 'bar']); //sending message to channel
+
+//receiving message from channel
+$channel->receive(function (ReceivedMessage $message) {
+    $this->assertEquals(['foo' => 'bar'], $message->get());
+
+    return false;
+});
+``` 
+
 ### Eloquent Model Events
 
 With use of a `EmitsStreamerEvents` trait you can easily make your Eloquent Models emit basic events.
