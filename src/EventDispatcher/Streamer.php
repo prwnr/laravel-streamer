@@ -102,7 +102,7 @@ class Streamer implements Emitter, Listener
     /**
      * {@inheritdoc}
      */
-    public function emit(Event $event): string
+    public function emit(Event $event, string $id = '*'): string
     {
         $meta = [
             'type'    => $event->type(),
@@ -114,7 +114,7 @@ class Streamer implements Emitter, Listener
         $message = new Message($meta, $event->payload());
         $stream = new Stream($event->name());
 
-        return $stream->add($message);
+        return $stream->add($message, $id);
     }
 
     /**

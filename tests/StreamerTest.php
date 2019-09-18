@@ -55,6 +55,21 @@ class StreamerTest extends TestCase
         $this->assertArrayHasKey($id, $actual['foo.bar']);
     }
 
+    public function test_streamer_facade_emits_event_with_specified_id(): void
+    {
+        $event = $this->makeEvent();
+
+        $id = StreamerFacade::emit($event, '123-0');
+        $stream = new Stream('foo.bar');
+        $actual = $stream->read();
+
+        $this->assertNotNull($id);
+        $this->assertEquals('123-0', $id);
+        $this->assertNotEmpty($actual);
+        $this->assertArrayHasKey('foo.bar', $actual);
+        $this->assertArrayHasKey($id, $actual['foo.bar']);
+    }
+
     public function test_streamer_listen_listens_to_and_handles_event(): void
     {
         $this->app['config']->set('streamer.stream_read_timeout', 0.01);
