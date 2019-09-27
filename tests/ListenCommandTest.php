@@ -3,11 +3,13 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
+use Illuminate\Support\Facades\Log;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\Facades\Streamer;
 use Prwnr\Streamer\ListenersStack;
 use Prwnr\Streamer\Stream;
 use Tests\Stubs\AnotherLocalListener;
+use Tests\Stubs\ExceptionalListener;
 use Tests\Stubs\LocalListener;
 use Tests\Stubs\NotReceiverListener;
 
@@ -73,6 +75,22 @@ class ListenCommandTest extends TestCase
 
         $this->doesntExpectListenersToBeCalled($listeners);
         $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0'])
+            ->assertExitCode(0);
+    }
+
+    public function test_command_prints_out_the_error_when_it_occurs_on_listening(): void
+    {
+        $listeners = [ExceptionalListener::class];
+        $this->withLocalListenersConfigured($listeners);
+
+        $event = $this->makeEvent();
+        $id = Streamer::emit($event);
+
+        $error = "Listener error. Failed processing message with ID {$id} on '{$event->name()}' stream. Error: Listener failed.";
+        Log::shouldReceive('error')->with($error);
+
+        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0'])
+            ->expectsOutput($error)
             ->assertExitCode(0);
     }
 

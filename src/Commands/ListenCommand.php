@@ -41,6 +41,14 @@ class ListenCommand extends Command
      */
     private $streamer;
 
+    public function __construct(Streamer $streamer)
+    {
+        $this->streamer = $streamer;
+        $this->streamer->setConsole($this);
+
+        parent::__construct();
+    }
+
     /**
      * Execute the console command.
      *
@@ -57,7 +65,6 @@ class ListenCommand extends Command
             return 1;
         }
 
-        $this->streamer = new Streamer();
         if ($this->option('last_id') !== null) {
             $this->streamer->startFrom($this->option('last_id'));
         }

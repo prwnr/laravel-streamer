@@ -2,6 +2,7 @@
 
 namespace Prwnr\Streamer\EventDispatcher;
 
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Prwnr\Streamer\Contracts\Emitter;
 use Prwnr\Streamer\Contracts\Event;
@@ -62,6 +63,11 @@ class Streamer implements Emitter, Listener
     private $inLoop = false;
 
     /**
+     * @var Command
+     */
+    private $console;
+
+    /**
      * @param string $startFrom
      *
      * @return Streamer
@@ -71,6 +77,14 @@ class Streamer implements Emitter, Listener
         $this->startFrom = $startFrom;
 
         return $this;
+    }
+
+    /**
+     * @param  Command  $console
+     */
+    public function setConsole(Command $console): void
+    {
+        $this->console = $console;
     }
 
     /**
@@ -194,7 +208,7 @@ class Streamer implements Emitter, Listener
                     break;
                 }
             } catch (Throwable $ex) {
-                Log::error("Listener error. Failed processing message with ID {$messageId} on '{$on->getName()}' stream. Error: {$ex->getMessage()}");
+                $this->log($messageId, $on, $ex);
                 continue;
             }
         }
@@ -240,5 +254,19 @@ class Streamer implements Emitter, Listener
         }
 
         return false;
+    }
+
+    /**
+     * @param  string  $id
+     * @param  Waitable  $on
+     * @param  Throwable  $ex
+     */
+    private function log(string $id, Waitable $on, Throwable $ex)
+    {
+        $error = "Listener error. Failed processing message with ID {$id} on '{$on->getName()}' stream. Error: {$ex->getMessage()}";
+        Log::error($error);
+        if ($this->console) {
+            $this->console->error($error);
+        }
     }
 }
