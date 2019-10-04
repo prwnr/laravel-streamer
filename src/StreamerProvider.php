@@ -26,7 +26,7 @@ class StreamerProvider extends ServiceProvider
         $this->configure();
         $this->registerCommands();
 
-        ListenersStack::boot(config('streamer.listen_and_fire'));
+        ListenersStack::boot(config('streamer.listen_and_fire', []));
     }
     /**
      * Setup the configuration.
