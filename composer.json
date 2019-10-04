@@ -16,12 +16,12 @@
     "illuminate/console": "^6.0",
     "illuminate/support": "^6.0",
     "illuminate/redis": "^6.0",
-    "illuminate/container": "^6.0",
-    "predis/predis": "^1.1"
+    "illuminate/container": "^6.0"
   },
   "require-dev": {
     "orchestra/testbench": "^4.0",
-    "phpunit/phpunit": "^8.0"
+    "phpunit/phpunit": "^8.0",
+    "predis/predis": "^1.1"
   },
   "autoload": {
     "psr-4": {
