@@ -24,20 +24,10 @@ class StreamerProvider extends ServiceProvider
 
         $this->offerPublishing();
         $this->configure();
-        $this->registerRedisProfile();
         $this->registerCommands();
 
         ListenersStack::boot(config('streamer.listen_and_fire'));
     }
-
-    /**
-     * Register the Redis 5.0 profile.
-     */
-    private function registerRedisProfile(): void
-    {
-        Factory::define('5.0', RedisVersion500::class);
-    }
-
     /**
      * Setup the configuration.
      *

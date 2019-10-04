@@ -3,6 +3,7 @@
 namespace Prwnr\Streamer\Concerns;
 
 use Illuminate\Redis\Connections\Connection;
+use Illuminate\Redis\Connections\PhpRedisConnection;
 use Illuminate\Support\Facades\Redis;
 
 /**
@@ -13,12 +14,15 @@ trait ConnectsWithRedis
     /**
      * Returns Redis connection based on configuration.
      *
-     * @return Connection
+     * @return Connection|PhpRedisConnection
      */
     protected function redis(): Connection
     {
         $connectionName = config('streamer.redis_connection');
 
-        return Redis::connection($connectionName ?? 'default');
+        $connection = Redis::connection($connectionName ?? 'default');
+        $connection->setOption(\Redis::OPT_PREFIX, '');
+
+        return $connection;
     }
 }

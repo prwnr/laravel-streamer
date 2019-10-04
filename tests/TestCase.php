@@ -25,13 +25,6 @@ class TestCase extends \Orchestra\Testbench\TestCase
         ];
     }
 
-    protected function getEnvironmentSetUp($app): void
-    {
-        $app['config']->set('database.redis.options', [
-            'profile' => '5.0',
-        ]);
-    }
-
     protected function makeMessage(): StreamableMessage
     {
         return new MessageStub();
