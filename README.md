@@ -3,23 +3,25 @@
 Streamer is a Laravel package for events functionality between different applications, powered by Redis Streams.
 This package utilizes all main commands of Redis 5.0 Streams providing a simple usage of Streams as Events.
 
-Main concept of this package is to provide easy way of emitting new events from your application and to allow listening to them in your other applcations that are using same Redis server.
+Main concept of this package is to provide easy way of emitting new events from your application and to allow listening to them in your other applications that are using same Redis server.
 
 # Installation
 1. Install package via composer command `composer require prwnr/laravel-streamer` or by adding it to your composer.json file with version.
 2. Discover the package
 3. Publish configuration with `vendor:publish` command.
 4. Make sure that you have running Redis 5.0 instance and that Laravel is configured to use it 
-5. Change redis profile in `database.php` by adding this to redis configuration:
-    ```php
-    'options' => [
-        'profile' => '5.0'
-    ],
-    ```
-    or otherwise Laravel will use default 3.2 Redis profile and none of the Redis Stream commands will work
-
+5. Make sure that you have [PHPRedis extension](https://github.com/phpredis/phpredis) installed.
 # Usage
 There are two main ends of this package usage - emiting new event and listening to events. Whereas emiting requires a bit more work to get it used, such as creating own Event classes, then listening to events is available with artisan command and is working without much work needed.
+
+## Version Compatibility
+
+ Laravel  | Streamer   | Redis driver|
+:---------|:---------- |:----------  |
+ 5.6.x    | 1.6.x      | Predis      |
+ 5.7.x    | 1.6.x      | Predis      |
+ 5.8.x    | 1.6.x      | Predis      |
+ 6.x      | 2.x        | PhpRedis    |
 
 ### Emiting new events
 
@@ -117,20 +119,5 @@ Each payload includes a `[key_name => key_value]` pair of your model ID.
 
 By default events will take names from their models with a suffix of the action, but the name can be changed by 
 assigning it to a `baseEventName` attribute. This name will replace the model name but will keep suffix of what action has been taken.
-
-# What's more
-Despite of giving an option to emit and listen to events, this package is also giving a nice abstraction of Redis Streaming commands. Commands that are implemented:
-* XACK
-* XADD
-* XCLAIM
-* XDEL
-* XGROUP
-* XINFO
-* XLEN
-* XPENDING
-* XRANGE
-* XREAD
-* XREADGROUP
-* XREVRANGE
 
 Check examples directory in this package to see how can you exactly use each command with package Stream and Consumer instances.

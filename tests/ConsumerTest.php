@@ -18,7 +18,7 @@ class ConsumerTest extends TestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        $this->redis['predis']->connection()->flushall();
+        $this->redis['phpredis']->connection()->flushall();
         $this->tearDownRedis();
     }
 
@@ -46,7 +46,7 @@ class ConsumerTest extends TestCase
         $this->assertArrayHasKey('foo', $actual);
         $this->assertCount(1, $actual['foo']);
         $this->assertArrayHasKey($id, $actual['foo']);
-        $this->assertArraySubset(['foo' => 'bar'], $actual['foo'][$id]);
+        $this->assertEquals(['foo' => 'bar'], $actual['foo'][$id]);
     }
 
     public function test_await_returns_nothing_with_timeout_when_stream_has_no_messages_for_consumer(): void
@@ -78,7 +78,7 @@ class ConsumerTest extends TestCase
         $this->assertCount(4, $message);
         $this->assertEquals($id, $message[0]);
         $this->assertEquals('foobar', $message[1]);
-        $this->assertInternalType('integer', $message[2]);
+        $this->assertIsInt($message[2]);
         $this->assertEquals(1, $message[3]);
     }
 
@@ -126,7 +126,7 @@ class ConsumerTest extends TestCase
         $this->assertEmpty($consumerB->pending());
         $this->assertCount(2, $consumerA->pending());
 
-        $this->assertArraySubset($ids, $consumerB->claim($ids, 1));
+        $this->assertEquals($ids, $consumerB->claim($ids, 1));
         $this->assertNotEmpty($consumerB->pending());
         $this->assertEmpty($consumerA->pending());
         $this->assertCount(2, $consumerB->pending());

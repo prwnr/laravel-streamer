@@ -85,7 +85,7 @@ class StreamerTest extends TestCase
             $this->assertInstanceOf(Streamer::class, $streamer);
             $this->assertNotEmpty($content);
             $this->assertEquals(array_shift($ids), $message->getId());
-            $this->assertArraySubset(['foo' => 'bar'], $content['data']);
+            $this->assertEquals(['foo' => 'bar'], $content['data']);
 
             if (empty($ids)) {
                 $streamer->cancel(); // break out of the listener loop
@@ -110,7 +110,7 @@ class StreamerTest extends TestCase
             $this->assertInstanceOf(Streamer::class, $streamer);
             $this->assertNotEmpty($content);
             $this->assertEquals($id, $message->getId());
-            $this->assertArraySubset(['foo' => 'bar'], $content['data']);
+            $this->assertEquals(['foo' => 'bar'], $content['data']);
         };
 
         $streamer->startFrom('0-0');
@@ -132,7 +132,7 @@ class StreamerTest extends TestCase
             $this->assertInstanceOf(Streamer::class, $streamer);
             $this->assertNotEmpty($content);
             $this->assertEquals(array_shift($ids), $message->getId());
-            $this->assertArraySubset(['foo' => 'bar'], $content['data']);
+            $this->assertEquals(['foo' => 'bar'], $content['data']);
 
             if (empty($ids)) {
                 $streamer->cancel(); // break out of the listener loop
@@ -178,7 +178,7 @@ class StreamerTest extends TestCase
             $this->assertInstanceOf(Streamer::class, $streamer);
             $this->assertNotEmpty($content);
             $this->assertEquals($id, $message->getId());
-            $this->assertArraySubset(['foo' => 'bar'], $content['data']);
+            $this->assertEquals(['foo' => 'bar'], $content['data']);
         };
 
         $streamer->startFrom('0-0');

@@ -2,8 +2,6 @@
 
 namespace Prwnr\Streamer;
 
-use Illuminate\Support\Str;
-use Predis\Response\ServerException;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\Contracts\Waitable;
@@ -16,15 +14,10 @@ class Stream implements Waitable
 {
     use ConnectsWithRedis;
 
-    public const COUNT = 'COUNT';
     public const STREAM = 'STREAM';
-    public const STREAMS = 'STREAMS';
-    public const GROUP = 'GROUP';
     public const GROUPS = 'GROUPS';
     public const CREATE = 'CREATE';
     public const CONSUMERS = 'CONSUMERS';
-    public const BLOCK = 'BLOCK';
-    public const MAXLEN = 'MAXLEN';
     public const NEW_ENTRIES = '$';
     public const FROM_START = '0';
 
@@ -67,7 +60,7 @@ class Stream implements Waitable
      */
     public function add(StreamableMessage $message, string $id = '*')
     {
-        return $this->redis()->XADD($this->name, $id, $message->getContent());
+        return $this->redis()->xAdd($this->name, $id, $message->getContent());
     }
 
     /**
@@ -77,7 +70,7 @@ class Stream implements Waitable
      */
     public function delete(string $id)
     {
-        return $this->redis()->XDEL($this->name, $id);
+        return $this->redis()->xDel($this->name, [$id]);
     }
 
     /**
@@ -89,10 +82,10 @@ class Stream implements Waitable
     public function read(string $from = self::FROM_START, ?int $limit = null): array
     {
         if ($limit) {
-            return $this->redis()->XREAD(self::COUNT, $limit, self::STREAMS, $this->name, $from);
+            return $this->redis()->xRead([$this->name => $from], $limit);
         }
 
-        return $this->redis()->XREAD(self::STREAMS, $this->name, $from);
+        return $this->redis()->xRead([$this->name => $from]);
     }
 
     /**
@@ -100,7 +93,7 @@ class Stream implements Waitable
      */
     public function await(string $lastId = self::FROM_START, int $timeout = 0): ?array
     {
-        return $this->redis()->XREAD(self::BLOCK, $timeout, self::STREAMS, $this->name, $lastId);
+        return $this->redis()->xRead([$this->name => $lastId], null, $timeout);
     }
 
     /**
@@ -119,36 +112,35 @@ class Stream implements Waitable
      */
     public function readRange(Range $range, ?int $limit = null): array
     {
-        $method = 'XRANGE';
+        $method = 'xRANGE';
         $start = $range->getStart();
         $stop = $range->getStop();
         if ($range->getDirection() === Range::BACKWARD) {
-            $method = 'XREVRANGE';
+            $method = 'xREVRANGE';
             $start = $range->getStop();
             $stop = $range->getStart();
         }
 
         if ($limit) {
-            return $this->redis()->$method($this->name, $start, $stop, self::COUNT, $limit);
+            return $this->redis()->$method($this->name, $start, $stop, $limit);
         }
 
         return $this->redis()->$method($this->name, $start, $stop);
     }
 
     /**
-     * @param string $name
-     * @param string $from
-     * @param bool   $createStreamIfNotExists
+     * @param  string  $name
+     * @param  string  $from
+     * @param  bool  $createStreamIfNotExists
+     * @return bool
      */
-    public function createGroup(string $name, string $from = self::FROM_START, bool $createStreamIfNotExists = true): void
+    public function createGroup(string $name, string $from = self::FROM_START, bool $createStreamIfNotExists = true): bool
     {
         if ($createStreamIfNotExists) {
-            $this->redis()->XGROUP(self::CREATE, $this->name, $name, $from, 'MKSTREAM');
-
-            return;
+            return $this->redis()->xGroup(self::CREATE, $this->name, $name, $from, 'MKSTREAM');
         }
 
-        $this->redis()->XGROUP(self::CREATE, $this->name, $name, $from);
+        return $this->redis()->xGroup(self::CREATE, $this->name, $name, $from);
     }
 
     /**
@@ -162,14 +154,14 @@ class Stream implements Waitable
      */
     public function pending(string $group, ?string $consumer = null): array
     {
-        $pending = $this->redis()->XPENDING($this->name, $group);
+        $pending = $this->redis()->xPending($this->name, $group);
         $pendingCount = array_shift($pending);
 
         if ($consumer) {
-            return $this->redis()->XPENDING($this->name, $group, Range::FIRST, Range::LAST, $pendingCount, $consumer);
+            return $this->redis()->xPending($this->name, $group, Range::FIRST, Range::LAST, $pendingCount, $consumer);
         }
 
-        return $this->redis()->XPENDING($this->name, $group, Range::FIRST, Range::LAST, $pendingCount);
+        return $this->redis()->xPending($this->name, $group, Range::FIRST, Range::LAST, $pendingCount);
     }
 
     /**
@@ -177,72 +169,58 @@ class Stream implements Waitable
      */
     public function len(): int
     {
-        return $this->redis()->XLEN($this->name);
+        return $this->redis()->xLen($this->name);
     }
 
     /**
-     * @throws ServerException
      * @throws StreamNotFoundException
      *
      * @return array
      */
     public function info(): array
     {
-        try {
-            return $this->redis()->XINFO(self::STREAM, $this->name);
-        } catch (ServerException $ex) {
-            if (Str::contains($ex->getMessage(), 'ERR no such key')) {
-                throw new StreamNotFoundException("No results for stream $this->name");
-            }
-
-            throw $ex;
+        $result = $this->redis()->xInfo(self::STREAM, $this->name);
+        if (!$result) {
+            throw new StreamNotFoundException("No results for stream $this->name");
         }
+
+        return $result;
     }
 
     /**
-     * @throws ServerException
      * @throws StreamNotFoundException
      *
      * @return array
      */
     public function groups(): array
     {
-        try {
-            return $this->redis()->XINFO(self::GROUPS, $this->name);
-        } catch (ServerException $ex) {
-            if (Str::contains($ex->getMessage(), 'ERR no such key')) {
-                throw new StreamNotFoundException("No results for stream $this->name");
-            }
-
-            throw $ex;
+        $result = $this->redis()->xInfo(self::GROUPS, $this->name);
+        if (!$result) {
+            throw new StreamNotFoundException("No results for stream $this->name");
         }
+
+        return $result;
     }
 
     /**
      * @param string $group
      *
-     * @throws ServerException
      * @throws StreamNotFoundException
      *
      * @return array
      */
     public function consumers(string $group): array
     {
-        try {
-            return $this->redis()->XINFO(self::CONSUMERS, $this->name, $group);
-        } catch (ServerException $ex) {
-            if (Str::contains($ex->getMessage(), 'ERR no such key')) {
-                throw new StreamNotFoundException("No results for stream $this->name");
-            }
-
-            throw $ex;
+        $result = $this->redis()->xInfo(self::CONSUMERS, $this->name, $group);
+        if (!$result) {
+            throw new StreamNotFoundException("No results for stream $this->name");
         }
+
+        return $result;
     }
 
     /**
      * @param string $name
-     *
-     * @throws ServerException
      *
      * @return bool
      */

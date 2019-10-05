@@ -66,14 +66,9 @@ class Consumer implements Waitable
      */
     public function await(string $lastId = self::NEW_ENTRIES, int $timeout = 0): ?array
     {
-        return $this->redis()->XREADGROUP(Stream::GROUP,
-            $this->group,
-            $this->consumer,
-            Stream::BLOCK,
-            $timeout,
-            Stream::STREAMS,
-            $this->stream->getName(),
-            $lastId);
+        return $this->redis()->xReadGroup(
+            $this->group, $this->consumer, [$this->stream->getName() => $lastId], null, $timeout
+        );
     }
 
     /**
@@ -83,7 +78,7 @@ class Consumer implements Waitable
      */
     public function acknowledge(string $id): void
     {
-        $result = $this->redis()->XACK($this->stream->getName(), $this->group, $id);
+        $result = $this->redis()->xAck($this->stream->getName(), $this->group, [$id]);
         if ($result === 0) {
             throw new Exception("Could not acknowledge message with ID $id");
         }
@@ -111,9 +106,9 @@ class Consumer implements Waitable
     public function claim(array $ids, int $idleTime, $justId = true): array
     {
         if ($justId) {
-            return $this->redis()->XCLAIM($this->stream->getName(), $this->group, $this->consumer, $idleTime, $ids, 'JUSTID');
+            return $this->redis()->xClaim($this->stream->getName(), $this->group, $this->consumer, $idleTime, $ids, ['JUSTID']);
         }
 
-        return $this->redis()->XCLAIM($this->stream->getName(), $this->group, $this->consumer, $idleTime, $ids);
+        return $this->redis()->xClaim($this->stream->getName(), $this->group, $this->consumer, $idleTime, $ids);
     }
 }

@@ -3,9 +3,6 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
-use Illuminate\Redis\Connections\Connection;
-use Illuminate\Support\Facades\Redis;
-use Predis\Response\ServerException;
 use Prwnr\Streamer\Stream;
 use Prwnr\Streamer\Stream\Range;
 use Prwnr\Streamer\StreamNotFoundException;
@@ -46,7 +43,7 @@ class StreamTest extends TestCase
         $actual = $stream->add($this->makeMessage());
 
         $this->assertNotNull($actual);
-        $this->assertInternalType('string', $actual);
+        $this->assertIsString($actual);
     }
 
     public function test_add_message_to_stream_with_fixed_id(): void
@@ -57,7 +54,7 @@ class StreamTest extends TestCase
         $actual = $stream->add($this->makeMessage(), $expected);
 
         $this->assertNotNull($actual);
-        $this->assertInternalType('string', $actual);
+        $this->assertIsString($actual);
         $this->assertEquals($expected, $actual);
     }
 
@@ -71,7 +68,7 @@ class StreamTest extends TestCase
         $this->assertNotEmpty($actual);
         $this->assertCount(1, $actual);
         $this->assertArrayHasKey($stream->getName(), $actual);
-        $this->assertArraySubset([$id => ['foo' => 'bar']], $actual[$stream->getName()]);
+        $this->assertEquals([$id => ['foo' => 'bar']], $actual[$stream->getName()]);
     }
 
     public function test_read_messages_starting_with_specified_id_from_stream(): void
@@ -129,7 +126,7 @@ class StreamTest extends TestCase
         $this->assertCount(1, $actual);
         $this->assertArrayHasKey($stream->getName(), $actual);
         $this->assertCount(1, $actual[$stream->getName()]);
-        $this->assertArraySubset([$id => ['foo' => 'bar']], $actual[$stream->getName()]);
+        $this->assertEquals([$id => ['foo' => 'bar']], $actual[$stream->getName()]);
     }
 
     public function test_await_returns_nothing_with_timeout_when_stream_has_no_messages(): void
@@ -215,8 +212,9 @@ class StreamTest extends TestCase
         $stream = new Stream('foo');
         $stream->add($this->makeMessage());
 
-        $stream->createGroup('bar', Stream::FROM_START, false);
+        $result = $stream->createGroup('bar', Stream::FROM_START, false);
 
+        $this->assertTrue($result);
         $this->assertTrue($stream->groupExists('bar'));
     }
 
@@ -224,8 +222,8 @@ class StreamTest extends TestCase
     {
         $stream = new Stream('foo');
 
-        $this->expectException(ServerException::class);
-        $stream->createGroup('bar', Stream::FROM_START, false);
+        $result = $stream->createGroup('bar', Stream::FROM_START, false);
+        $this->assertFalse($result);
     }
 
     public function test_pending_messages_returned_from_stream_for_group(): void
@@ -246,7 +244,7 @@ class StreamTest extends TestCase
         $this->assertCount(4, $message);
         $this->assertEquals($id, $message[0]);
         $this->assertEquals('foobar', $message[1]);
-        $this->assertInternalType('integer', $message[2]);
+        $this->assertIsInt($message[2]);
         $this->assertEquals(1, $message[3]);
     }
 
@@ -267,7 +265,7 @@ class StreamTest extends TestCase
         $this->assertCount(4, $message);
         $this->assertEquals($id, $message[0]);
         $this->assertEquals('foobar', $message[1]);
-        $this->assertInternalType('integer', $message[2]);
+        $this->assertIsInt($message[2]);
         $this->assertEquals(1, $message[3]);
     }
 
@@ -314,17 +312,6 @@ class StreamTest extends TestCase
         $stream->info();
     }
 
-    public function test_info_throws_server_exception(): void
-    {
-        $mock = \Mockery::mock(Connection::class);
-        Redis::shouldReceive('connection')->with('default')->andReturn($mock);
-        $mock->shouldReceive('XINFO')->with(Stream::STREAM, 'foo')->andThrow(ServerException::class, 'server exception');
-
-        $this->expectException(ServerException::class);
-        $stream = new Stream('foo');
-        $stream->info();
-    }
-
     public function test_groups_returned_for_stream(): void
     {
         $stream = new Stream('foo');
@@ -339,8 +326,8 @@ class StreamTest extends TestCase
         foreach (['name', 'consumers', 'pending', 'last-delivered-id'] as $key) {
             $this->assertArrayHasKey($key, $actual[0]);
         }
-        $this->assertArraySubset(['name' => $expected[0]], $actual[0]);
-        $this->assertArraySubset(['name' => $expected[1]], $actual[1]);
+        $this->assertEquals($expected[0], $actual[0]['name']);
+        $this->assertEquals($expected[1], $actual[1]['name']);
     }
 
     public function test_groups_throws_stream_not_found_exception_when_stream_does_not_exists(): void
@@ -348,17 +335,6 @@ class StreamTest extends TestCase
         $stream = new Stream('foo');
 
         $this->expectException(StreamNotFoundException::class);
-        $stream->groups();
-    }
-
-    public function test_groups_throws_server_exception(): void
-    {
-        $mock = \Mockery::mock(Connection::class);
-        Redis::shouldReceive('connection')->with('default')->andReturn($mock);
-        $mock->shouldReceive('XINFO')->with(Stream::GROUPS, 'foo')->andThrow(ServerException::class, 'server exception');
-
-        $this->expectException(ServerException::class);
-        $stream = new Stream('foo');
         $stream->groups();
     }
 
@@ -386,17 +362,6 @@ class StreamTest extends TestCase
         $stream = new Stream('foo');
 
         $this->expectException(StreamNotFoundException::class);
-        $stream->consumers('bar');
-    }
-
-    public function test_consumers_throws_server_exception(): void
-    {
-        $mock = \Mockery::mock(Connection::class);
-        Redis::shouldReceive('connection')->with('default')->andReturn($mock);
-        $mock->shouldReceive('XINFO')->with(Stream::CONSUMERS, 'foo', 'bar')->andThrow(ServerException::class, 'server exception');
-
-        $this->expectException(ServerException::class);
-        $stream = new Stream('foo');
         $stream->consumers('bar');
     }
 

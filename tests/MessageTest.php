@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Illuminate\Support\Arr;
 use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\Concerns\HashableMessage;
@@ -26,7 +27,7 @@ class MessageTest extends TestCase
         $this->assertInstanceOf(StreamableMessage::class, $message);
         $this->assertNotEmpty($actual);
         $this->assertEquals('1.3', $actual['version']);
-        $this->assertArraySubset($meta, $actual);
+        $this->assertEquals($meta, Arr::except($actual, ['_id', 'version', 'data', 'hash']));
         $this->assertArrayHasKey('hash', $actual);
         $this->assertJson($actual['data']);
         $this->assertEquals(json_encode($data), $actual['data']);

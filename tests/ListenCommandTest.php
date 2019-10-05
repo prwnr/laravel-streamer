@@ -27,7 +27,7 @@ class ListenCommandTest extends TestCase
 
     protected function tearDown(): void
     {
-        $this->redis['predis']->connection()->flushall();
+        $this->redis['phpredis']->connection()->flushall();
         $this->tearDownRedis();
         parent::tearDown();
     }

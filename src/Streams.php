@@ -51,15 +51,15 @@ class Streams
      */
     public function read(array $from = [], ?int $limit = null)
     {
-        $ids = [];
+        $read = [];
         foreach ($this->streams as $key => $stream) {
-            $ids[] = $from[$key] ?? Stream::FROM_START;
+            $read[$stream] = $from[$key] ?? Stream::FROM_START;
         }
 
         if ($limit) {
-            return $this->redis()->XREAD(Stream::COUNT, $limit, Stream::STREAMS, $this->streams, $ids);
+            return $this->redis()->xRead($read, $limit);
         }
 
-        return $this->redis()->XREAD(Stream::STREAMS, $this->streams, $ids);
+        return $this->redis()->xRead($read);
     }
 }
