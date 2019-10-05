@@ -2,8 +2,6 @@
 
 namespace Prwnr\Streamer;
 
-use Illuminate\Support\Str;
-use Predis\Response\ServerException;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\Contracts\Waitable;
@@ -16,15 +14,10 @@ class Stream implements Waitable
 {
     use ConnectsWithRedis;
 
-    public const COUNT = 'COUNT';
     public const STREAM = 'STREAM';
-    public const STREAMS = 'STREAMS';
-    public const GROUP = 'GROUP';
     public const GROUPS = 'GROUPS';
     public const CREATE = 'CREATE';
     public const CONSUMERS = 'CONSUMERS';
-    public const BLOCK = 'BLOCK';
-    public const MAXLEN = 'MAXLEN';
     public const NEW_ENTRIES = '$';
     public const FROM_START = '0';
 
@@ -119,11 +112,11 @@ class Stream implements Waitable
      */
     public function readRange(Range $range, ?int $limit = null): array
     {
-        $method = 'XRANGE';
+        $method = 'xRANGE';
         $start = $range->getStart();
         $stop = $range->getStop();
         if ($range->getDirection() === Range::BACKWARD) {
-            $method = 'XREVRANGE';
+            $method = 'xREVRANGE';
             $start = $range->getStop();
             $stop = $range->getStart();
         }
@@ -161,14 +154,14 @@ class Stream implements Waitable
      */
     public function pending(string $group, ?string $consumer = null): array
     {
-        $pending = $this->redis()->XPENDING($this->name, $group);
+        $pending = $this->redis()->xPending($this->name, $group);
         $pendingCount = array_shift($pending);
 
         if ($consumer) {
-            return $this->redis()->XPENDING($this->name, $group, Range::FIRST, Range::LAST, $pendingCount, $consumer);
+            return $this->redis()->xPending($this->name, $group, Range::FIRST, Range::LAST, $pendingCount, $consumer);
         }
 
-        return $this->redis()->XPENDING($this->name, $group, Range::FIRST, Range::LAST, $pendingCount);
+        return $this->redis()->xPending($this->name, $group, Range::FIRST, Range::LAST, $pendingCount);
     }
 
     /**
@@ -176,7 +169,7 @@ class Stream implements Waitable
      */
     public function len(): int
     {
-        return $this->redis()->XLEN($this->name);
+        return $this->redis()->xLen($this->name);
     }
 
     /**

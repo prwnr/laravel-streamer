@@ -3,9 +3,6 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
-use Illuminate\Redis\Connections\Connection;
-use Illuminate\Support\Facades\Redis;
-use Predis\Response\ServerException;
 use Prwnr\Streamer\Stream;
 use Prwnr\Streamer\Stream\Range;
 use Prwnr\Streamer\StreamNotFoundException;

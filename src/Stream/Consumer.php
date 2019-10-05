@@ -78,7 +78,7 @@ class Consumer implements Waitable
      */
     public function acknowledge(string $id): void
     {
-        $result = $this->redis()->XACK($this->stream->getName(), $this->group, [$id]);
+        $result = $this->redis()->xAck($this->stream->getName(), $this->group, [$id]);
         if ($result === 0) {
             throw new Exception("Could not acknowledge message with ID $id");
         }

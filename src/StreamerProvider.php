@@ -3,10 +3,8 @@
 namespace Prwnr\Streamer;
 
 use Illuminate\Support\ServiceProvider;
-use Predis\Profile\Factory;
 use Prwnr\Streamer\Commands\ListenCommand;
 use Prwnr\Streamer\EventDispatcher\Streamer;
-use Prwnr\Streamer\Redis\RedisVersion500;
 
 /**
  * Class StreamerProvider.
