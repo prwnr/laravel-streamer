@@ -61,7 +61,7 @@ class ListenCommandTest extends TestCase
         Streamer::emit($this->makeEvent());
 
         $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0'])
-            ->expectsOutput(sprintf('Listener class (%s) needs to implement MessageReceiver', NotReceiverListener::class))
+            ->expectsOutput(sprintf('Listener class [%s] needs to implement MessageReceiver', NotReceiverListener::class))
             ->assertExitCode(0);
     }
 
@@ -101,10 +101,12 @@ class ListenCommandTest extends TestCase
             AnotherLocalListener::class,
         ];
         $this->withLocalListenersConfigured($listeners);
-        Streamer::emit($this->makeEvent());
+        $id = Streamer::emit($this->makeEvent());
 
         $this->expectsListenersToBeCalled($listeners);
         $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0'])
+            ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.", LocalListener::class))
+            ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.", AnotherLocalListener::class))
             ->assertExitCode(0);
     }
 
