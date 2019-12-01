@@ -79,11 +79,12 @@ class ListenCommand extends Command
             foreach ($localListeners as $listener) {
                 $receiver = $container->make($listener);
                 if (!$receiver instanceof MessageReceiver) {
-                    $this->error("Listener class ({$listener}) needs to implement MessageReceiver");
+                    $this->error("Listener class [{$listener}] needs to implement MessageReceiver");
                     continue;
                 }
 
                 $receiver->handle($message);
+                $this->printInfo($message, $listener);
             }
         });
 
@@ -92,8 +93,6 @@ class ListenCommand extends Command
 
     /**
      * @param  Stream  $stream
-     *
-     * @throws ServerException
      */
     private function setupGroupListening(Stream $stream): void
     {
@@ -133,5 +132,17 @@ class ListenCommand extends Command
 
         $consumer = new Stream\Consumer($consumerName, $stream, $this->option('group'));
         $consumer->claim($messages, $this->option('reclaim'));
+    }
+
+    /**
+     * @param  ReceivedMessage  $message
+     * @param  string  $listener
+     */
+    private function printInfo(ReceivedMessage $message, string $listener): void
+    {
+        $content = $message->getContent();
+        $stream = $content['name'];
+
+        $this->info("Processed message [{$message->getId()}] on '$stream' stream by [$listener] listener.");
     }
 }
