@@ -19,7 +19,7 @@ class ConnectionTest extends TestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        $this->redis['predis']->connection()->flushall();
+        $this->redis['phpredis']->connection()->flushall();
         $this->tearDownRedis();
     }
 
