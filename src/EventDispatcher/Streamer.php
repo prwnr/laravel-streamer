@@ -7,7 +7,10 @@ use Illuminate\Support\Facades\Log;
 use Prwnr\Streamer\Contracts\Emitter;
 use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\Listener;
+use Prwnr\Streamer\Contracts\Replayable;
+use Prwnr\Streamer\Contracts\Replayer;
 use Prwnr\Streamer\Contracts\Waitable;
+use Prwnr\Streamer\History\Snapshot;
 use Prwnr\Streamer\Stream;
 use Throwable;
 
@@ -68,6 +71,11 @@ class Streamer implements Emitter, Listener
     private $console;
 
     /**
+     * @var Replayer
+     */
+    private $replayer;
+
+    /**
      * @param string $startFrom
      *
      * @return Streamer
@@ -89,14 +97,18 @@ class Streamer implements Emitter, Listener
 
     /**
      * Listener constructor.
+     *
+     * @param  Replayer  $replayer
      */
-    public function __construct()
+    public function __construct(Replayer $replayer)
     {
         $this->readTimeout = config('streamer.stream_read_timeout', 0);
         $this->listenTimeout = config('streamer.listen_timeout', 0);
         $this->readSleep = config('streamer.read_sleep', 1);
         $this->readTimeout *= 1000;
         $this->listenTimeout *= 1000;
+
+        $this->replayer = $replayer;
     }
 
     /**
@@ -128,7 +140,13 @@ class Streamer implements Emitter, Listener
         $message = new Message($meta, $event->payload());
         $stream = new Stream($event->name());
 
-        return $stream->add($message, $id);
+        $id = $stream->add($message, $id);
+
+        if ($event instanceof Replayable) {
+            $this->replayer->record(new Snapshot($id, $event));
+        }
+
+        return $id;
     }
 
     /**

@@ -3,11 +3,13 @@
 namespace Tests;
 
 use Prwnr\Streamer\Contracts\Event;
+use Prwnr\Streamer\Contracts\Replayable;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\Facades\Streamer;
 use Prwnr\Streamer\StreamerProvider;
 use Tests\Stubs\MessageStub;
 use Tests\Stubs\StreamerEventStub;
+use Tests\Stubs\StreamerReplayableEventStub;
 
 class TestCase extends \Orchestra\Testbench\TestCase
 {
