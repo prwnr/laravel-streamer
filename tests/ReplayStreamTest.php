@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
 use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\Replayable;
@@ -54,6 +55,38 @@ class ReplayStreamTest extends TestCase
         ], $payload);
     }
 
+    public function testReplaysUntilSpecifiedDate(): void
+    {
+        $recorder = new Recorder();
+        $streamer = new Streamer($recorder);
+
+        $streamer->emit(new ReplayableFooBarEvent('123', [
+            'foo' => 'foo initial',
+            'bar' => 'bar initial',
+        ]));
+
+        $streamer->emit(new ReplayableFooBarEvent('123', [
+            'foo' => 'changed',
+            'new bar' => true,
+        ]));
+
+        $until = Carbon::now();
+        sleep(2);
+
+        $streamer->emit(new ReplayableFooBarEvent('123', [
+            'foo' => 'changed again',
+            'bar' => 'different value',
+        ]));
+
+        $payload = $recorder->replay('foo.bar', '123', $until);
+
+        $this->assertEquals([
+            'foo' => 'changed',
+            'bar' => 'bar initial',
+            'new bar' => true
+        ], $payload);
+    }
+
     public function testReplayingSingleEventWithMultipleDifferentEventsEmitted(): void
     {
         $recorder = new Recorder();
@@ -71,11 +104,11 @@ class ReplayStreamTest extends TestCase
 
         for ($i = 0; $i < 10; $i++) {
             $streamer->emit(new ReplayableFooBarEvent('123', [
-                'foo' => 'foo'.$i,
+                'foo' => 'foo' . $i,
             ]));
 
             $streamer->emit(new ReplayableOtherFooBarEvent('123', [
-                'other_bar' => 'bar'.$i,
+                'other_bar' => 'bar' . $i,
             ]));
         }
 
@@ -104,13 +137,13 @@ class ReplayStreamTest extends TestCase
         $modChange = 0;
         for ($i = 1; $i <= 1000; $i++) {
             $streamer->emit(new ReplayableFooBarEvent('123', [
-                'foo' => 'foo-'.$i,
+                'foo' => 'foo-' . $i,
             ]));
 
             if (($i % 100) === 0) {
                 $modChange++;
                 $streamer->emit(new ReplayableFooBarEvent('123', [
-                    'foobar' => 'foobar-'.$modChange,
+                    'foobar' => 'foobar-' . $modChange,
                 ]));
             }
         }

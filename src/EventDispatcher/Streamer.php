@@ -173,7 +173,7 @@ class Streamer implements Emitter, Listener
     /**
      * Cancels current listener loop.
      */
-    public function cancel()
+    public function cancel(): void
     {
         $this->canceled = true;
     }

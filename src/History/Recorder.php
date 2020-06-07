@@ -2,6 +2,7 @@
 
 namespace Prwnr\Streamer\History;
 
+use Carbon\Carbon;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\Replayer;
 use Prwnr\Streamer\Stream;
@@ -24,7 +25,7 @@ class Recorder implements Replayer
     /**
      * @inheritDoc
      */
-    public function replay(string $event, string $identifier): array
+    public function replay(string $event, string $identifier, Carbon $until = null): array
     {
         $key = $event.'-'.$identifier;
         $snapshots = $this->redis()->lRange($key, 0, $this->redis()->lLen($key));
@@ -38,6 +39,10 @@ class Recorder implements Replayer
         $result = [];
         for ($i = $snapshotsCount; $i >= 0; $i--) {
             $snapshot = json_decode($snapshots[$i], true);
+            if ($until && $until <= Carbon::createFromFormat('Y-m-d H:i:s', $snapshot['date'])) {
+                return $result;
+            }
+
             $record = json_decode($range[$snapshot['id']]['data'], true);
 
             foreach ($record as $field => $value) {
