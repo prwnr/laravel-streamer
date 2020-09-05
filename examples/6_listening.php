@@ -3,6 +3,7 @@
 use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\EventDispatcher\Streamer;
+use Prwnr\Streamer\History\EventHistory;
 
 /**
  * Usage of Streaming class
@@ -29,7 +30,7 @@ class ExampleStreamerEvent implements Event
 }
 
 $event = new ExampleStreamerEvent();
-$streamer = new Streamer();
+$streamer = new Streamer(new EventHistory());
 $id = $streamer->emit($event);
 
 // Basic listen usage without using group or consumers. It will receive all messages from Stream

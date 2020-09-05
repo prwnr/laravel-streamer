@@ -4,13 +4,13 @@ namespace Prwnr\Streamer\History;
 
 use Carbon\Carbon;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
-use Prwnr\Streamer\Contracts\Replayer;
+use Prwnr\Streamer\Contracts\History;
 use Prwnr\Streamer\Stream;
 
 /**
- * Class Recorder
+ * Class EventHistory
  */
-class Recorder implements Replayer
+class EventHistory implements History
 {
     use ConnectsWithRedis;
 

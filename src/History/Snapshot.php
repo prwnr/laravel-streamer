@@ -12,14 +12,25 @@ use Prwnr\Streamer\Contracts\Replayable;
 class Snapshot implements Arrayable
 {
     /**
+     * Stream message ID.
+     *
      * @var string
      */
     private $id;
 
     /**
-     * @var Replayable
+     * Event name.
+     *
+     * @var string
      */
-    private $event;
+    private $name;
+
+    /**
+     * Unique event resource identifier.
+     *
+     * @var string
+     */
+    private $identifier;
 
     /**
      * @var Carbon
@@ -35,7 +46,8 @@ class Snapshot implements Arrayable
     public function __construct(string $id, Replayable $event)
     {
         $this->id = $id;
-        $this->event = $event;
+        $this->name = $event->name();
+        $this->identifier = $event->getIdentifier();
         $this->date = Carbon::now();
     }
 
@@ -45,14 +57,6 @@ class Snapshot implements Arrayable
     public function getId(): string
     {
         return $this->id;
-    }
-
-    /**
-     * @return Replayable
-     */
-    public function getEvent(): Replayable
-    {
-        return $this->event;
     }
 
     /**
@@ -70,7 +74,7 @@ class Snapshot implements Arrayable
      */
     public function getKey(): string
     {
-        return $this->event->name().'-'.$this->event->getIdentifier();
+        return $this->name.'-'.$this->identifier;
     }
 
     /**
@@ -80,8 +84,8 @@ class Snapshot implements Arrayable
     {
         return [
             'id' => $this->id,
-            'name' => $this->event->name(),
-            'identifier' => $this->event->getIdentifier(),
+            'name' => $this->name,
+            'identifier' => $this->identifier,
             'date' => $this->date->format('Y-m-d H:i:s')
         ];
     }

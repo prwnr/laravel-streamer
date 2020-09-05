@@ -8,7 +8,7 @@ use Prwnr\Streamer\Contracts\Emitter;
 use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\Listener;
 use Prwnr\Streamer\Contracts\Replayable;
-use Prwnr\Streamer\Contracts\Replayer;
+use Prwnr\Streamer\Contracts\History;
 use Prwnr\Streamer\Contracts\Waitable;
 use Prwnr\Streamer\History\Snapshot;
 use Prwnr\Streamer\Stream;
@@ -71,9 +71,9 @@ class Streamer implements Emitter, Listener
     private $console;
 
     /**
-     * @var Replayer
+     * @var History
      */
-    private $replayer;
+    private $history;
 
     /**
      * @param string $startFrom
@@ -98,9 +98,9 @@ class Streamer implements Emitter, Listener
     /**
      * Listener constructor.
      *
-     * @param  Replayer  $replayer
+     * @param  History  $history
      */
-    public function __construct(Replayer $replayer)
+    public function __construct(History $history)
     {
         $this->readTimeout = config('streamer.stream_read_timeout', 0);
         $this->listenTimeout = config('streamer.listen_timeout', 0);
@@ -108,7 +108,7 @@ class Streamer implements Emitter, Listener
         $this->readTimeout *= 1000;
         $this->listenTimeout *= 1000;
 
-        $this->replayer = $replayer;
+        $this->history = $history;
     }
 
     /**
@@ -143,7 +143,7 @@ class Streamer implements Emitter, Listener
         $id = $stream->add($message, $id);
 
         if ($event instanceof Replayable) {
-            $this->replayer->record(new Snapshot($id, $event));
+            $this->history->record(new Snapshot($id, $event));
         }
 
         return $id;

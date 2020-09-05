@@ -6,9 +6,9 @@ use Carbon\Carbon;
 use Prwnr\Streamer\History\Snapshot;
 
 /**
- * Interface Replayer
+ * Interface History
  */
-interface Replayer
+interface History
 {
     /**
      * Records snapshot information in Redis.

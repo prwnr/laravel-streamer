@@ -4,9 +4,9 @@ namespace Prwnr\Streamer;
 
 use Illuminate\Support\ServiceProvider;
 use Prwnr\Streamer\Commands\ListenCommand;
-use Prwnr\Streamer\Contracts\Replayer;
+use Prwnr\Streamer\Contracts\History;
 use Prwnr\Streamer\EventDispatcher\Streamer;
-use Prwnr\Streamer\History\Recorder;
+use Prwnr\Streamer\History\EventHistory;
 
 /**
  * Class StreamerProvider.
@@ -18,7 +18,7 @@ class StreamerProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(Replayer::class, Recorder::class);
+        $this->app->bind(History::class, EventHistory::class);
 
         $this->app->bind('Streamer', function () {
             return $this->app->make(Streamer::class);

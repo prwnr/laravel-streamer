@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
 use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\Replayable;
 use Prwnr\Streamer\EventDispatcher\Streamer;
-use Prwnr\Streamer\History\Recorder;
+use Prwnr\Streamer\History\EventHistory;
 
 class ReplayStreamTest extends TestCase
 {
@@ -28,7 +28,7 @@ class ReplayStreamTest extends TestCase
 
     public function testReplaySingleEvent(): void
     {
-        $recorder = new Recorder();
+        $recorder = new EventHistory();
         $streamer = new Streamer($recorder);
 
         $streamer->emit(new ReplayableFooBarEvent('123', [
@@ -57,7 +57,7 @@ class ReplayStreamTest extends TestCase
 
     public function testReplaysUntilSpecifiedDate(): void
     {
-        $recorder = new Recorder();
+        $recorder = new EventHistory();
         $streamer = new Streamer($recorder);
 
         $streamer->emit(new ReplayableFooBarEvent('123', [
@@ -89,7 +89,7 @@ class ReplayStreamTest extends TestCase
 
     public function testReplayingSingleEventWithMultipleDifferentEventsEmitted(): void
     {
-        $recorder = new Recorder();
+        $recorder = new EventHistory();
         $streamer = new Streamer($recorder);
 
         $streamer->emit(new ReplayableFooBarEvent('123', [
@@ -125,7 +125,7 @@ class ReplayStreamTest extends TestCase
 
     public function testReplayingSingleEventWithBigHistory(): void
     {
-        $recorder = new Recorder();
+        $recorder = new EventHistory();
         $streamer = new Streamer($recorder);
 
         $streamer->emit(new ReplayableFooBarEvent('123', [
