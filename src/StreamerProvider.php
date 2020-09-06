@@ -3,6 +3,7 @@
 namespace Prwnr\Streamer;
 
 use Illuminate\Support\ServiceProvider;
+use Prwnr\Streamer\Commands\ListCommand;
 use Prwnr\Streamer\Commands\ListenCommand;
 use Prwnr\Streamer\Contracts\History;
 use Prwnr\Streamer\EventDispatcher\Streamer;
@@ -64,6 +65,7 @@ class StreamerProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 ListenCommand::class,
+                ListCommand::class,
             ]);
         }
     }
