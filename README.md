@@ -122,3 +122,13 @@ By default events will take names from their models with a suffix of the action,
 assigning it to a `baseEventName` attribute. This name will replace the model name but will keep suffix of what action has been taken.
 
 Check examples directory in this package to see how can you exactly use each command with package Stream and Consumer instances.
+
+### Helpful Commands
+
+#### List
+
+`streamer:list` command will list all registered events, and their associated listeners. 
+The option `--compact` will yield only a list of the events, skipping listeners column. 
+
+This command may be useful to see what events are being actually handled by a listener, what can help to find out
+what's missing. This list can be also used to start listening to available events by 3rd part app.
