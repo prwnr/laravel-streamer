@@ -109,6 +109,42 @@ This command however has few options that are extending its usage, those are:
 --last_id= : ID from which listener should start reading messages
 ```
 
+### Replaying Events
+
+Since 2.2 version, Stream events can be "replayed". This means, that the specific message (with a unique identifier) 
+can be "reconstructed" until "now" (or until a selected date). 
+
+What "replaying" messages really means? It means, that all the messages that are in the stream, will be read from the
+very beginning, and payload of each single entry will be "combined" into a final version of the message - 
+each filed will be replaced with its "newer" value, if such exists in the history. 
+
+This is going to be useful with events that don't hold all the information about the resource they may represent, 
+but have only data about fields that changed. 
+
+So, for example having a resource with fields `name` and `surname`, 
+we will emit 3 different events:
+- first for its creation populating both fields with values (`name: foo; surname: bar`)
+- second event that will change only `name` into `foo bar`
+- third event that changes name again to `bar foo`. 
+
+While replaying this set of messages (remember that each one has the same unique identifier) 
+our final replayed resource will be: `name: bar foo; surname: bar`. 
+If we would replay the event until the time before third change, we would have `name: foo bar; surname: bar`
+ 
+#### Usage
+
+To make Event replayable, it needs to implement the `Prwnr\Streamer\Contracts\Replayable` contract. 
+This will enforce adding a `getIdentifier` method, that should return unique identifier for the resource
+(like UUID of the resource that this event represents). With this contract being fulfilled, all events that will go
+through `Streamer` emit method, will be also "marked" as available to be replayed.
+
+To actually replay messages, `Hsitory` interface implementation needs to be used. 
+
+Method that should be used is: `replay(string $event, string $identifier, Carbon $until = null): array`.
+This method will return the "current state" of the event, rebuilding it from its history. As seen in method definition,
+it asks for event string name and resource identifier (that was applied by `Replayable` contract). Third parameter is
+optional and if used, it will stop replaying messages when first message with matching date will be encountered.
+
 ### Eloquent Model Events
 
 With use of a `EmitsStreamerEvents` trait you can easily make your Eloquent Models emit basic events.

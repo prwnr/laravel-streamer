@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\EventDispatcher\Streamer;
 use Prwnr\Streamer\Facades\Streamer as StreamerFacade;
+use Prwnr\Streamer\History\EventHistory;
 use Prwnr\Streamer\Stream;
 
 class StreamerTest extends TestCase
@@ -28,7 +29,7 @@ class StreamerTest extends TestCase
 
     public function test_streamer_emits_event(): void
     {
-        $streamer = new Streamer();
+        $streamer = new Streamer(new EventHistory());
         $event = $this->makeEvent();
 
         $id = $streamer->emit($event);
@@ -73,7 +74,7 @@ class StreamerTest extends TestCase
     public function test_streamer_listen_listens_to_and_handles_event(): void
     {
         $this->app['config']->set('streamer.stream_read_timeout', 0.01);
-        $streamer = new Streamer();
+        $streamer = new Streamer(new EventHistory());
         $event = $this->makeEvent();
 
         $ids = [];
@@ -100,7 +101,7 @@ class StreamerTest extends TestCase
     {
         $this->app['config']->set('streamer.listen_timeout', 2);
         $this->app['config']->set('streamer.stream_read_timeout', 0.01);
-        $streamer = new Streamer();
+        $streamer = new Streamer(new EventHistory());
         $event = $this->makeEvent();
 
         $id = $streamer->emit($event);
@@ -120,7 +121,7 @@ class StreamerTest extends TestCase
     public function test_streamer_listen_listens_to_and_handles_events_as_consumer(): void
     {
         (new Stream('foo.bar'))->createGroup('bar');
-        $streamer = new Streamer();
+        $streamer = new Streamer(new EventHistory());
         $event = $this->makeEvent();
 
         $ids = [];
@@ -148,7 +149,7 @@ class StreamerTest extends TestCase
     {
         $this->app['config']->set('streamer.listen_timeout', 1);
         $this->app['config']->set('streamer.stream_read_timeout', 0.01);
-        $streamer = new Streamer();
+        $streamer = new Streamer(new EventHistory());
         $event = $this->makeEvent();
 
         $id = $streamer->emit($event);
@@ -167,7 +168,7 @@ class StreamerTest extends TestCase
     {
         $this->app['config']->set('streamer.listen_timeout', 1);
         $this->app['config']->set('streamer.stream_read_timeout', 0.01);
-        $streamer = new Streamer();
+        $streamer = new Streamer(new EventHistory());
         $event = $this->makeEvent();
         $id = $streamer->emit($event);
         $callback = function ($message, $streamer) use ($id) {

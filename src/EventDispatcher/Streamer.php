@@ -7,7 +7,10 @@ use Illuminate\Support\Facades\Log;
 use Prwnr\Streamer\Contracts\Emitter;
 use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\Listener;
+use Prwnr\Streamer\Contracts\Replayable;
+use Prwnr\Streamer\Contracts\History;
 use Prwnr\Streamer\Contracts\Waitable;
+use Prwnr\Streamer\History\Snapshot;
 use Prwnr\Streamer\Stream;
 use Throwable;
 
@@ -68,6 +71,11 @@ class Streamer implements Emitter, Listener
     private $console;
 
     /**
+     * @var History
+     */
+    private $history;
+
+    /**
      * @param string $startFrom
      *
      * @return Streamer
@@ -89,14 +97,18 @@ class Streamer implements Emitter, Listener
 
     /**
      * Listener constructor.
+     *
+     * @param  History  $history
      */
-    public function __construct()
+    public function __construct(History $history)
     {
         $this->readTimeout = config('streamer.stream_read_timeout', 0);
         $this->listenTimeout = config('streamer.listen_timeout', 0);
         $this->readSleep = config('streamer.read_sleep', 1);
         $this->readTimeout *= 1000;
         $this->listenTimeout *= 1000;
+
+        $this->history = $history;
     }
 
     /**
@@ -128,7 +140,13 @@ class Streamer implements Emitter, Listener
         $message = new Message($meta, $event->payload());
         $stream = new Stream($event->name());
 
-        return $stream->add($message, $id);
+        $id = $stream->add($message, $id);
+
+        if ($event instanceof Replayable) {
+            $this->history->record(new Snapshot($id, $event));
+        }
+
+        return $id;
     }
 
     /**
@@ -155,7 +173,7 @@ class Streamer implements Emitter, Listener
     /**
      * Cancels current listener loop.
      */
-    public function cancel()
+    public function cancel(): void
     {
         $this->canceled = true;
     }
@@ -231,7 +249,7 @@ class Streamer implements Emitter, Listener
      * when reading history of message is finished and when listener should start
      * reading only new messages via '>' key.
      */
-    private function adjustGroupReadTimeout()
+    private function adjustGroupReadTimeout(): void
     {
         if ($this->readTimeout === 0) {
             $this->readTimeout = 2000;
@@ -261,7 +279,7 @@ class Streamer implements Emitter, Listener
      * @param  Waitable  $on
      * @param  Throwable  $ex
      */
-    private function log(string $id, Waitable $on, Throwable $ex)
+    private function log(string $id, Waitable $on, Throwable $ex): void
     {
         $error = "Listener error. Failed processing message with ID {$id} on '{$on->getName()}' stream. Error: {$ex->getMessage()}";
         Log::error($error);
