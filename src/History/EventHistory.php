@@ -27,7 +27,7 @@ class EventHistory implements History
      */
     public function replay(string $event, string $identifier, Carbon $until = null): array
     {
-        $key = $event.'-'.$identifier;
+        $key = $event.Snapshot::KEY_SEPARATOR.$identifier;
         $snapshots = $this->redis()->lRange($key, 0, $this->redis()->lLen($key));
         $snapshotsCount = count($snapshots) - 1;
         $last = json_decode($snapshots[0], true)['id'];

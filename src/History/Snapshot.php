@@ -11,6 +11,8 @@ use Prwnr\Streamer\Contracts\Replayable;
  */
 class Snapshot implements Arrayable
 {
+    public const KEY_SEPARATOR = '-';
+
     /**
      * Stream message ID.
      *
@@ -74,7 +76,7 @@ class Snapshot implements Arrayable
      */
     public function getKey(): string
     {
-        return $this->name.'-'.$this->identifier;
+        return $this->name.self::KEY_SEPARATOR.$this->identifier;
     }
 
     /**

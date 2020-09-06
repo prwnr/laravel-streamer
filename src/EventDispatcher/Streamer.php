@@ -249,7 +249,7 @@ class Streamer implements Emitter, Listener
      * when reading history of message is finished and when listener should start
      * reading only new messages via '>' key.
      */
-    private function adjustGroupReadTimeout()
+    private function adjustGroupReadTimeout(): void
     {
         if ($this->readTimeout === 0) {
             $this->readTimeout = 2000;
@@ -279,7 +279,7 @@ class Streamer implements Emitter, Listener
      * @param  Waitable  $on
      * @param  Throwable  $ex
      */
-    private function log(string $id, Waitable $on, Throwable $ex)
+    private function log(string $id, Waitable $on, Throwable $ex): void
     {
         $error = "Listener error. Failed processing message with ID {$id} on '{$on->getName()}' stream. Error: {$ex->getMessage()}";
         Log::error($error);
