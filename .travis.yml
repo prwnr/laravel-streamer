@@ -15,8 +15,32 @@ before_install:
   - sudo service redis-server start
   - printf "\n" | pecl install -f redis
 before_script:
-  - composer self-update
+  - composer require "orchestra/testbench=${testbench}" --dev --prefer-dist --no-interaction --no-suggest
+  - composer require "illuminate/console=${laravel}" --dev --prefer-dist --no-interaction --no-suggest
+  - composer require "illuminate/support=${laravel}" --dev --prefer-dist --no-interaction --no-suggest
+  - composer require "illuminate/redis=${laravel}" --dev --prefer-dist --no-interaction --no-suggest
+  - composer require "illuminate/container=${laravel}" --dev --prefer-dist --no-interaction --no-suggest
   - composer install --prefer-source --no-interaction
-  - composer dump-autoload
+  - composer du
+
 script:
   - vendor/bin/phpunit
+
+matrix:
+  include:
+    - php: 7.2
+      env: laravel=^6.0 testbench=^4.0
+    - php: 7.2
+      env: laravel=^7.0 testbench=^5.0
+    - php: 7.3
+      env: laravel=^6.0 testbench=^4.0
+    - php: 7.3
+      env: laravel=^7.0 testbench=^5.0
+    - php: 7.3
+      env: laravel=^8.0 testbench=^6.0
+    - php: 7.4
+      env: laravel=^7.0 testbench=^5.0
+    - php: 7.4
+      env: laravel=^8.0 testbench=^6.0
+
+  fast_finish: true
