@@ -18,8 +18,4 @@
             <directory suffix=".php">./src</directory>
         </whitelist>
     </filter>
-    <php>
-        <env name="REDIS_HOST" value="redis"/>
-        <ini name="memory_limit" value="2048M"/>
-    </php>
 </phpunit>
