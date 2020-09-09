@@ -13,10 +13,7 @@ before_install:
   - printf "\n" | pecl install -f redis
 before_script:
   - composer require "orchestra/testbench=${testbench}" --dev --prefer-dist --no-interaction --no-suggest
-  - composer require "illuminate/console=${laravel}" --dev --prefer-dist --no-interaction --no-suggest
-  - composer require "illuminate/support=${laravel}" --dev --prefer-dist --no-interaction --no-suggest
-  - composer require "illuminate/redis=${laravel}" --dev --prefer-dist --no-interaction --no-suggest
-  - composer require "illuminate/container=${laravel}" --dev --prefer-dist --no-interaction --no-suggest
+  - composer require "laravel/framework=${laravel}" --dev --prefer-dist --no-interaction --no-suggest
   - composer install --prefer-source --no-interaction
   - composer du
 
