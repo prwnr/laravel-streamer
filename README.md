@@ -16,13 +16,14 @@ There are two main ends of this package usage - emiting new event and listening 
 
 ## Version Compatibility
 
- Laravel  | Streamer    | Redis driver|
-:---------|:------------|:------------|
- 5.6.x    | 1.6.x       | Predis      |
- 5.7.x    | 1.6.x       | Predis      |
- 5.8.x    | 1.6.x       | Predis      |
- 6.x      | 2.x         | PhpRedis    |
- 7.x      | ^2.1        | PhpRedis    |
+ Laravel               | Streamer    | Redis driver|
+:----------------------|:------------|:------------|
+ 5.6.x                 | 1.6.x       | Predis      |
+ 5.7.x                 | 1.6.x       | Predis      |
+ 5.8.x                 | 1.6.x       | Predis      |
+ 6.x                   | 2.x         | PhpRedis    |
+ 6.x&#124;7.x          | ^2.1        | PhpRedis    |
+ 6.x&#124;7.x&#124;8.x | ^2.3        | PhpRedis    |
 
 ### Emiting new events
 

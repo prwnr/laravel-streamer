@@ -1,0 +1,13 @@
+version: '3'
+services:
+
+  app:
+    build: .
+    volumes:
+      - ./:/var/www/html
+
+  redis:
+    image: redis:6.0.7-alpine
+    ports:
+      - 6379:6379
+    command: redis-server --appendonly yes
