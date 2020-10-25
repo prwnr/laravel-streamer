@@ -66,11 +66,6 @@ class Streamer implements Emitter, Listener
     private $inLoop = false;
 
     /**
-     * @var Command
-     */
-    private $console;
-
-    /**
      * @var History
      */
     private $history;
@@ -85,14 +80,6 @@ class Streamer implements Emitter, Listener
         $this->startFrom = $startFrom;
 
         return $this;
-    }
-
-    /**
-     * @param  Command  $console
-     */
-    public function setConsole(Command $console): void
-    {
-        $this->console = $console;
     }
 
     /**
@@ -226,7 +213,7 @@ class Streamer implements Emitter, Listener
                     break;
                 }
             } catch (Throwable $ex) {
-                $this->log($messageId, $on, $ex);
+                $this->report($messageId, $on, $ex);
                 continue;
             }
         }
@@ -279,12 +266,9 @@ class Streamer implements Emitter, Listener
      * @param  Waitable  $on
      * @param  Throwable  $ex
      */
-    private function log(string $id, Waitable $on, Throwable $ex): void
+    private function report(string $id, Waitable $on, Throwable $ex): void
     {
         $error = "Listener error. Failed processing message with ID {$id} on '{$on->getName()}' stream. Error: {$ex->getMessage()}";
         Log::error($error);
-        if ($this->console) {
-            $this->console->error($error);
-        }
     }
 }

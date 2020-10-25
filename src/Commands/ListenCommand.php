@@ -44,7 +44,6 @@ class ListenCommand extends Command
     public function __construct(Streamer $streamer)
     {
         $this->streamer = $streamer;
-        $this->streamer->setConsole($this);
 
         parent::__construct();
     }
@@ -83,7 +82,13 @@ class ListenCommand extends Command
                     continue;
                 }
 
-                $receiver->handle($message);
+                try {
+                    $receiver->handle($message);
+                } catch (Exception $e) {
+                    $this->printError($message, $listener, $e);
+                    continue;
+                }
+
                 $this->printInfo($message, $listener);
             }
         });
@@ -144,5 +149,20 @@ class ListenCommand extends Command
         $stream = $content['name'];
 
         $this->info("Processed message [{$message->getId()}] on '$stream' stream by [$listener] listener.");
+    }
+
+    /**
+     * @param ReceivedMessage $message
+     * @param string $listener
+     * @param Exception $e
+     */
+    private function printError(ReceivedMessage $message, string $listener, Exception $e): void
+    {
+        $content = $message->getContent();
+        $stream = $content['name'];
+
+        $error = "Listener error. Failed processing message with ID {$message->getId()} on '$stream' stream by $listener. Error: {$e->getMessage()}";
+
+        $this->error($error);
     }
 }
