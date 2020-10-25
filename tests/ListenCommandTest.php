@@ -3,7 +3,6 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
-use Illuminate\Support\Facades\Log;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\Facades\Streamer;
 use Prwnr\Streamer\ListenersStack;
@@ -85,12 +84,10 @@ class ListenCommandTest extends TestCase
 
         $event = $this->makeEvent();
         $id = Streamer::emit($event);
-
-        $error = "Listener error. Failed processing message with ID {$id} on '{$event->name()}' stream. Error: Listener failed.";
-        Log::shouldReceive('error')->with($error);
+        $printError = sprintf("Listener error. Failed processing message with ID %s on '%s' stream by %s. Error: Listener failed.", $id, $event->name(), ExceptionalListener::class);
 
         $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0'])
-            ->expectsOutput($error)
+            ->expectsOutput($printError)
             ->assertExitCode(0);
     }
 
@@ -110,7 +107,26 @@ class ListenCommandTest extends TestCase
             ->assertExitCode(0);
     }
 
-    public function test_command_called_as_group_and_consumer_fires_local_event_and_ackowledges_message(): void
+    public function test_command_called_with_events_while_one_of_them_throws_exception(): void
+    {
+        $listeners = [
+            ExceptionalListener::class,
+            LocalListener::class,
+        ];
+        $this->withLocalListenersConfigured($listeners);
+
+        $event = $this->makeEvent();
+        $id = Streamer::emit($event);
+
+        $printError = sprintf("Listener error. Failed processing message with ID %s on '%s' stream by %s. Error: Listener failed.", $id, $event->name(), ExceptionalListener::class);
+
+        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0'])
+            ->expectsOutput($printError)
+            ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.", LocalListener::class))
+            ->assertExitCode(0);
+    }
+
+    public function test_command_called_as_group_and_consumer_fires_local_event_and_acknowledges_message(): void
     {
         $listeners = [
             LocalListener::class,
