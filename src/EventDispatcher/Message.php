@@ -29,8 +29,9 @@ class Message implements StreamableMessage
     /**
      * Message constructor.
      *
-     * @param array $meta
-     * @param array $data
+     * @param  array  $meta
+     * @param  array  $data
+     * @throws \JsonException
      */
     public function __construct(array $meta, array $data)
     {
@@ -41,7 +42,7 @@ class Message implements StreamableMessage
             'name'    => $meta['name'],
             'domain'  => $meta['domain'],
             'created' => time(),
-            'data'    => json_encode($data),
+            'data'    => json_encode($data, JSON_THROW_ON_ERROR),
         ];
 
         $this->content = $payload;
