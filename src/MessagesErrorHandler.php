@@ -3,7 +3,6 @@
 namespace Prwnr\Streamer;
 
 use Exception;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\ErrorHandler;
 use Prwnr\Streamer\Contracts\MessageReceiver;
@@ -13,6 +12,8 @@ use Prwnr\Streamer\Stream\Range;
 class MessagesErrorHandler implements ErrorHandler
 {
     use ConnectsWithRedis;
+    
+    public const ERRORS_LIST = 'failed_streams';
 
     /**
      * @inheritDoc
@@ -26,23 +27,34 @@ class MessagesErrorHandler implements ErrorHandler
             'error' => $e->getMessage(),
         ];
 
-        $this->redis()->lPush('failed_streams', json_encode($data));
+        $this->redis()->sAdd(self::ERRORS_LIST, json_encode($data));
     }
 
     /**
      * @inheritDoc
      */
+    public function list(): array
+    {
+        $count = $this->redis()->sCard(self::ERRORS_LIST);
+        if (!$count) {
+            return [];
+        }
+
+        return $this->redis()->spop(self::ERRORS_LIST, $count);
+    }
+
+    /**
+     * @inheritDoc
+     * @throws Exception
+     */
     public function retryAll(): void
     {
-        do {
-            $failed = $this->redis()->rPop('failed_streams');
-            if ($failed) {
-                $data = json_decode($failed, true, 512);
+        foreach ($this->list() as $failedMessage) {
+            $data = json_decode($failedMessage, true);
+            $stream = new Stream($data['stream']);
 
-                $stream = new Stream($data['stream']);
-                $this->retry($stream, $data['id'], $data['receiver']);
-            }
-        } while ($failed);
+            $this->retry($stream, $data['id'], $data['receiver']);
+        }
     }
 
     /**
@@ -50,11 +62,16 @@ class MessagesErrorHandler implements ErrorHandler
      * @param  Stream  $stream
      * @param  string  $id
      * @param  string  $receiver
-     * @throws BindingResolutionException
+     * @throws Exception
      */
     public function retry(Stream $stream, string $id, string $receiver): void
     {
         if (!class_exists($receiver)) {
+            return;
+        }
+
+        $listener = app($receiver);
+        if (!$listener instanceof MessageReceiver) {
             return;
         }
 
@@ -63,10 +80,19 @@ class MessagesErrorHandler implements ErrorHandler
             return;
         }
 
-        /** @var MessageReceiver $listener */
-        $listener = app()->make($receiver);
         foreach ($messages as $message) {
-            $listener->handle(new ReceivedMessage($message['_id'], $message));
+            $receivedMessage = null;
+
+            try {
+                $receivedMessage = new ReceivedMessage($message['_id'], $message);
+                $listener->handle($receivedMessage);
+            } catch (Exception $e) {
+                if (!$receivedMessage) {
+                    throw $e;
+                }
+
+                $this->handle($receivedMessage, $listener, $e);
+            }
         }
     }
 }

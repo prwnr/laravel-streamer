@@ -19,6 +19,13 @@ interface ErrorHandler
     public function handle(ReceivedMessage $message, MessageReceiver $receiver, Exception $e): void;
 
     /**
+     * Returns a list of all failed messages info.
+     *
+     * @return array
+     */
+    public function list(): array;
+
+    /**
      * Iterates over all failed messages and passes them through their associated listeners.
      */
     public function retryAll(): void;
