@@ -4,7 +4,6 @@ namespace Prwnr\Streamer;
 
 use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use JsonException;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\ErrorHandler;
 use Prwnr\Streamer\Contracts\MessageReceiver;
@@ -17,7 +16,6 @@ class MessagesErrorHandler implements ErrorHandler
 
     /**
      * @inheritDoc
-     * @throws JsonException
      */
     public function handle(ReceivedMessage $message, MessageReceiver $receiver, Exception $e): void
     {
@@ -28,19 +26,18 @@ class MessagesErrorHandler implements ErrorHandler
             'error' => $e->getMessage(),
         ];
 
-        $this->redis()->lPush('failed_streams', json_encode($data, JSON_THROW_ON_ERROR));
+        $this->redis()->lPush('failed_streams', json_encode($data));
     }
 
     /**
      * @inheritDoc
-     * @throws JsonException
      */
     public function retryAll(): void
     {
         do {
             $failed = $this->redis()->rPop('failed_streams');
             if ($failed) {
-                $data = json_decode($failed, true, 512, JSON_THROW_ON_ERROR);
+                $data = json_decode($failed, true, 512);
 
                 $stream = new Stream($data['stream']);
                 $this->retry($stream, $data['id'], $data['receiver']);
@@ -54,7 +51,6 @@ class MessagesErrorHandler implements ErrorHandler
      * @param  string  $id
      * @param  string  $receiver
      * @throws BindingResolutionException
-     * @throws JsonException
      */
     public function retry(Stream $stream, string $id, string $receiver): void
     {
