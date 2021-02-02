@@ -53,6 +53,31 @@ class MessagesErrorHandlerTest extends TestCase
         ], $actual);
     }
 
+    public function test_lists_all_failed_messages_info(): void
+    {
+        $messages[] = $this->failFakeMessage('foo.bar', '123', ['payload' => 123]);
+        $messages[] = $this->failFakeMessage('other.bar', '123', ['payload' => 123]);
+
+        $handler = new MessagesErrorHandler();
+        $actual = $handler->list();
+
+        $this->assertCount(2, $actual);
+        $this->assertEquals([
+            [
+                'id' => $messages[0]->getId(),
+                'stream' => 'foo.bar',
+                'receiver' => LocalListener::class,
+                'error' => 'error',
+            ],
+            [
+                'id' => $messages[0]->getId(),
+                'stream' => 'other.bar',
+                'receiver' => LocalListener::class,
+                'error' => 'error',
+            ]
+        ], $actual);
+    }
+
     public function test_retries_failed_message(): void
     {
         $message = $this->failFakeMessage('foo.bar', '123', ['payload' => 123]);

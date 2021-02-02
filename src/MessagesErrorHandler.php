@@ -40,7 +40,9 @@ class MessagesErrorHandler implements ErrorHandler
             return [];
         }
 
-        return $this->redis()->spop(self::ERRORS_LIST, $count);
+        return array_map(static function ($item) {
+            return json_decode($item, true);
+        }, $this->redis()->spop(self::ERRORS_LIST, $count));
     }
 
     /**
@@ -50,10 +52,8 @@ class MessagesErrorHandler implements ErrorHandler
     public function retryAll(): void
     {
         foreach ($this->list() as $failedMessage) {
-            $data = json_decode($failedMessage, true);
-            $stream = new Stream($data['stream']);
-
-            $this->retry($stream, $data['id'], $data['receiver']);
+            $stream = new Stream($failedMessage['stream']);
+            $this->retry($stream, $failedMessage['id'], $failedMessage['receiver']);
         }
     }
 
