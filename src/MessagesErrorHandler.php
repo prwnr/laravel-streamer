@@ -40,9 +40,14 @@ class MessagesErrorHandler implements ErrorHandler
             return [];
         }
 
+        $elements = $this->redis()->spop(self::ERRORS_LIST, $count);
+        if (!$elements) {
+            return [];
+        }
+
         return array_map(static function ($item) {
             return json_decode($item, true);
-        }, $this->redis()->spop(self::ERRORS_LIST, $count));
+        }, array_reverse($elements));
     }
 
     /**

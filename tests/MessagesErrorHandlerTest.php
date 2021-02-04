@@ -42,7 +42,7 @@ class MessagesErrorHandlerTest extends TestCase
         $handler->handle($message, $listener, $e);
         $failed = $this->redis()->spop(MessagesErrorHandler::ERRORS_LIST)[0];
 
-        $this->assertNotFalse($failed);
+        $this->assertNotEmpty($failed);
 
         $actual = json_decode($failed, true);
         $this->assertEquals([
@@ -56,7 +56,7 @@ class MessagesErrorHandlerTest extends TestCase
     public function test_lists_all_failed_messages_info(): void
     {
         $messages[] = $this->failFakeMessage('foo.bar', '123', ['payload' => 123]);
-        $messages[] = $this->failFakeMessage('other.bar', '123', ['payload' => 123]);
+        $messages[] = $this->failFakeMessage('other.bar', '321', ['payload' => 321]);
 
         $handler = new MessagesErrorHandler();
         $actual = $handler->list();
@@ -70,7 +70,7 @@ class MessagesErrorHandlerTest extends TestCase
                 'error' => 'error',
             ],
             [
-                'id' => $messages[0]->getId(),
+                'id' => $messages[1]->getId(),
                 'stream' => 'other.bar',
                 'receiver' => LocalListener::class,
                 'error' => 'error',
