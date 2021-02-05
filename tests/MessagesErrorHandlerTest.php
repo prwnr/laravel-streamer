@@ -4,6 +4,7 @@ namespace Tests;
 
 use Exception;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
+use Illuminate\Support\Arr;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\EventDispatcher\Message;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
@@ -64,26 +65,30 @@ class MessagesErrorHandlerTest extends TestCase
         $actual = $handler->list();
 
         $this->assertCount(3, $actual);
-        $this->assertSame([
-            [
-                'id' => '123',
-                'stream' => 'foo.bar',
-                'receiver' => LocalListener::class,
-                'error' => 'error',
-            ],
-            [
-                'id' => '321',
-                'stream' => 'other.bar',
-                'receiver' => LocalListener::class,
-                'error' => 'error',
-            ],
-            [
-                'id' => '456',
-                'stream' => 'some.bar',
-                'receiver' => LocalListener::class,
-                'error' => 'error',
-            ]
-        ], $actual);
+        $this->assertEquals([
+            'id' => '123',
+            'stream' => 'foo.bar',
+            'receiver' => LocalListener::class,
+            'error' => 'error',
+        ], Arr::first($actual, static function ($item) {
+            return $item['id'] === '123';
+        }));
+        $this->assertEquals([
+            'id' => '321',
+            'stream' => 'other.bar',
+            'receiver' => LocalListener::class,
+            'error' => 'error',
+        ], Arr::first($actual, static function ($item) {
+            return $item['id'] === '321';
+        }));
+        $this->assertEquals([
+            'id' => '456',
+            'stream' => 'some.bar',
+            'receiver' => LocalListener::class,
+            'error' => 'error',
+        ], Arr::first($actual, static function ($item) {
+            return $item['id'] === '456';
+        }));
     }
 
     public function test_retries_failed_message(): void
