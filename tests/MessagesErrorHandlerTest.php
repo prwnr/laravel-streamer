@@ -40,11 +40,12 @@ class MessagesErrorHandlerTest extends TestCase
         $listener = new LocalListener();
         $e = new Exception('error');
         $handler->handle($message, $listener, $e);
-        $failed = $this->redis()->spop(MessagesErrorHandler::ERRORS_LIST)[0];
+        $failed = $this->redis()->sMembers(MessagesErrorHandler::ERRORS_LIST);
 
         $this->assertNotEmpty($failed);
+        $this->assertCount(1, $failed);
 
-        $actual = json_decode($failed, true);
+        $actual = json_decode($failed[0], true);
         $this->assertEquals([
             'id' => $message->getId(),
             'stream' => 'foo.bar',
