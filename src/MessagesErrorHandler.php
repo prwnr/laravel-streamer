@@ -40,7 +40,7 @@ class MessagesErrorHandler implements ErrorHandler
             return [];
         }
 
-        $elements = $this->redis()->spop(self::ERRORS_LIST, $count);
+        $elements = $this->redis()->sMembers(self::ERRORS_LIST);
         if (!$elements) {
             return [];
         }
@@ -57,6 +57,9 @@ class MessagesErrorHandler implements ErrorHandler
     public function retryAll(): void
     {
         foreach ($this->list() as $failedMessage) {
+            //TODO move to retry to have better control over removal of processed job
+            $this->redis()->sRem(self::ERRORS_LIST, json_encode($failedMessage));
+
             $stream = new Stream($failedMessage['stream']);
             $this->retry($stream, $failedMessage['id'], $failedMessage['receiver']);
         }
