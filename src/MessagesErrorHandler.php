@@ -35,11 +35,6 @@ class MessagesErrorHandler implements ErrorHandler
      */
     public function list(): array
     {
-        $count = $this->redis()->sCard(self::ERRORS_LIST);
-        if (!$count) {
-            return [];
-        }
-
         $elements = $this->redis()->sMembers(self::ERRORS_LIST);
         if (!$elements) {
             return [];

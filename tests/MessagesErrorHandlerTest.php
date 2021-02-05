@@ -56,23 +56,30 @@ class MessagesErrorHandlerTest extends TestCase
 
     public function test_lists_all_failed_messages_info(): void
     {
-        $messages[] = $this->failFakeMessage('foo.bar', '123', ['payload' => 123]);
-        $messages[] = $this->failFakeMessage('other.bar', '321', ['payload' => 321]);
+        $this->failFakeMessage('foo.bar', '123', ['payload' => 123]);
+        $this->failFakeMessage('other.bar', '321', ['payload' => 321]);
+        $this->failFakeMessage('some.bar', '456', ['payload' => 456]);
 
         $handler = new MessagesErrorHandler();
         $actual = $handler->list();
 
-        $this->assertCount(2, $actual);
-        $this->assertEquals([
+        $this->assertCount(3, $actual);
+        $this->assertSame([
             [
-                'id' => $messages[0]->getId(),
+                'id' => '123',
                 'stream' => 'foo.bar',
                 'receiver' => LocalListener::class,
                 'error' => 'error',
             ],
             [
-                'id' => $messages[1]->getId(),
+                'id' => '321',
                 'stream' => 'other.bar',
+                'receiver' => LocalListener::class,
+                'error' => 'error',
+            ],
+            [
+                'id' => '456',
+                'stream' => 'some.bar',
                 'receiver' => LocalListener::class,
                 'error' => 'error',
             ]
