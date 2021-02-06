@@ -8,6 +8,7 @@ use Illuminate\Support\Arr;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\EventDispatcher\Message;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
+use Prwnr\Streamer\FailedMessage;
 use Prwnr\Streamer\MessagesErrorHandler;
 use Prwnr\Streamer\Stream;
 use Tests\Stubs\LocalListener;
@@ -41,7 +42,7 @@ class MessagesErrorHandlerTest extends TestCase
         $listener = new LocalListener();
         $e = new Exception('error');
         $handler->handle($message, $listener, $e);
-        $failed = $this->redis()->sMembers(MessagesErrorHandler::ERRORS_LIST);
+        $failed = $this->redis()->sMembers(MessagesErrorHandler::ERRORS_SET);
 
         $this->assertNotEmpty($failed);
         $this->assertCount(1, $failed);
@@ -70,25 +71,25 @@ class MessagesErrorHandlerTest extends TestCase
             'stream' => 'foo.bar',
             'receiver' => LocalListener::class,
             'error' => 'error',
-        ], Arr::first($actual, static function ($item) {
-            return $item['id'] === '123';
-        }));
+        ], $actual->first(static function (FailedMessage $item) {
+            return $item->getId() === '123';
+        })->jsonSerialize());
         $this->assertEquals([
             'id' => '321',
             'stream' => 'other.bar',
             'receiver' => LocalListener::class,
             'error' => 'error',
-        ], Arr::first($actual, static function ($item) {
-            return $item['id'] === '321';
-        }));
+        ], $actual->first(static function (FailedMessage $item) {
+            return $item->getId() === '321';
+        })->jsonSerialize());
         $this->assertEquals([
             'id' => '456',
             'stream' => 'some.bar',
             'receiver' => LocalListener::class,
             'error' => 'error',
-        ], Arr::first($actual, static function ($item) {
-            return $item['id'] === '456';
-        }));
+        ], $actual->first(static function (FailedMessage $item) {
+            return $item->getId() === '456';
+        })->jsonSerialize());
     }
 
     public function test_retries_failed_message(): void
@@ -106,7 +107,7 @@ class MessagesErrorHandlerTest extends TestCase
             ->andReturn();
 
         $handler = new MessagesErrorHandler();
-        $handler->retry(new Stream('foo.bar'), '123', LocalListener::class);
+        $handler->retry(new FailedMessage('123', 'foo.bar', LocalListener::class, 'error'));
     }
 
     public function test_retries_multiple_failed_messages(): void
@@ -114,7 +115,7 @@ class MessagesErrorHandlerTest extends TestCase
         $firstMessage = $this->failFakeMessage('foo.bar', '123', ['payload' => 123]);
         $secondMessage = $this->failFakeMessage('foo.bar', '345', ['payload' => 'foobar']);
 
-        $this->assertEquals(2, $this->redis()->sCard(MessagesErrorHandler::ERRORS_LIST));
+        $this->assertEquals(2, $this->redis()->sCard(MessagesErrorHandler::ERRORS_SET));
 
         $listener = $this->mock(LocalListener::class);
         $listener->shouldReceive('handle')
@@ -138,7 +139,7 @@ class MessagesErrorHandlerTest extends TestCase
         $handler = new MessagesErrorHandler();
         $handler->retryAll();
 
-        $this->assertEquals(0, $this->redis()->sCard(MessagesErrorHandler::ERRORS_LIST));
+        $this->assertEquals(0, $this->redis()->sCard(MessagesErrorHandler::ERRORS_SET));
     }
 
     public function test_wont_retry_message_when_receiver_doest_not_exists(): void
@@ -147,7 +148,7 @@ class MessagesErrorHandlerTest extends TestCase
         $listener->shouldNotHaveBeenCalled();
 
         $handler = new MessagesErrorHandler();
-        $handler->retry(new Stream('foo.bar'), '123', 'not a class');
+        $handler->retry(new FailedMessage('123', 'foo.bar', 'not a class', 'error'));
     }
 
     public function test_wont_retry_message_when_it_doest_not_exists(): void
@@ -156,7 +157,7 @@ class MessagesErrorHandlerTest extends TestCase
         $listener->shouldNotHaveBeenCalled();
 
         $handler = new MessagesErrorHandler();
-        $handler->retry(new Stream('foo.bar'), '123', LocalListener::class);
+        $handler->retry(new FailedMessage('123', 'foo.bar', LocalListener::class, 'error'));
     }
 
     public function test_handles_failed_message_and_puts_it_back_when_it_fails_again(): void
@@ -176,7 +177,7 @@ class MessagesErrorHandlerTest extends TestCase
         $handler = new MessagesErrorHandler();
         $handler->retryAll();
 
-        $this->assertEquals(1, $this->redis()->sCard(MessagesErrorHandler::ERRORS_LIST));
+        $this->assertEquals(1, $this->redis()->sCard(MessagesErrorHandler::ERRORS_SET));
     }
 
     protected function failFakeMessage(string $stream, string $id, array $data): ReceivedMessage

@@ -3,6 +3,7 @@
 namespace Prwnr\Streamer;
 
 use Exception;
+use Illuminate\Support\Collection;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\ErrorHandler;
 use Prwnr\Streamer\Contracts\MessageReceiver;
@@ -13,36 +14,34 @@ class MessagesErrorHandler implements ErrorHandler
 {
     use ConnectsWithRedis;
     
-    public const ERRORS_LIST = 'failed_streams';
+    public const ERRORS_SET = 'failed_streams';
 
     /**
      * @inheritDoc
      */
     public function handle(ReceivedMessage $message, MessageReceiver $receiver, Exception $e): void
     {
-        $data = [
-            'id' => $message->getId(),
-            'stream' => $message->getContent()['name'] ?? null,
-            'receiver' => get_class($receiver),
-            'error' => $e->getMessage(),
-        ];
-
-        $this->redis()->sAdd(self::ERRORS_LIST, json_encode($data));
+        $this->redis()->sAdd(self::ERRORS_SET, json_encode(new FailedMessage(...[
+            $message->getId(),
+            $message->getContent()['name'] ?? '',
+            get_class($receiver),
+            $e->getMessage(),
+        ])));
     }
 
     /**
      * @inheritDoc
      */
-    public function list(): array
+    public function list(): Collection
     {
-        $elements = $this->redis()->sMembers(self::ERRORS_LIST);
+        $elements = $this->redis()->sMembers(self::ERRORS_SET);
         if (!$elements) {
-            return [];
+            return collect();
         }
 
-        return array_map(static function ($item) {
-            return json_decode($item, true);
-        }, array_reverse($elements));
+        return collect($elements)->map(static function ($item) {
+            return new FailedMessage(...array_values(json_decode($item, true)));
+        });
     }
 
     /**
@@ -52,11 +51,7 @@ class MessagesErrorHandler implements ErrorHandler
     public function retryAll(): void
     {
         foreach ($this->list() as $failedMessage) {
-            //TODO move to retry to have better control over removal of processed job
-            $this->redis()->sRem(self::ERRORS_LIST, json_encode($failedMessage));
-
-            $stream = new Stream($failedMessage['stream']);
-            $this->retry($stream, $failedMessage['id'], $failedMessage['receiver']);
+            $this->retry($failedMessage);
         }
     }
 
@@ -67,27 +62,30 @@ class MessagesErrorHandler implements ErrorHandler
      * @param  string  $receiver
      * @throws Exception
      */
-    public function retry(Stream $stream, string $id, string $receiver): void
+    public function retry(FailedMessage $message): void
     {
-        if (!class_exists($receiver)) {
+        if (!class_exists($message->getReceiver())) {
             return;
         }
 
-        $listener = app($receiver);
+        $listener = app($message->getReceiver());
         if (!$listener instanceof MessageReceiver) {
             return;
         }
 
-        $messages = $stream->readRange(new Range($id, $id), 1);
+        $this->redis()->sRem(self::ERRORS_SET, json_encode($message));
+
+        $range = new Range($message->getId(), $message->getId());
+        $messages = $message->getStream()->readRange($range, 1);
         if (!$messages) {
             return;
         }
 
-        foreach ($messages as $message) {
+        foreach ($messages as $streamMessage) {
             $receivedMessage = null;
 
             try {
-                $receivedMessage = new ReceivedMessage($message['_id'], $message);
+                $receivedMessage = new ReceivedMessage($streamMessage['_id'], $streamMessage);
                 $listener->handle($receivedMessage);
             } catch (Exception $e) {
                 if (!$receivedMessage) {

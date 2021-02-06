@@ -3,7 +3,9 @@
 namespace Prwnr\Streamer\Contracts;
 
 use Exception;
+use Illuminate\Support\Collection;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
+use Prwnr\Streamer\FailedMessage;
 use Prwnr\Streamer\Stream;
 
 interface ErrorHandler
@@ -21,9 +23,9 @@ interface ErrorHandler
     /**
      * Returns a list of all failed messages info.
      *
-     * @return array
+     * @return Collection&FailedMessage[]
      */
-    public function list(): array;
+    public function list(): Collection;
 
     /**
      * Iterates over all failed messages and passes them through their associated listeners.
@@ -33,9 +35,7 @@ interface ErrorHandler
     /**
      * Looks up message on a stream and attempts to retry it with given receiver.
      *
-     * @param  Stream  $stream
-     * @param  string  $id
-     * @param  string  $receiver
+     * @param  FailedMessage  $message
      */
-    public function retry(Stream $stream, string $id, string $receiver): void;
+    public function retry(FailedMessage $message): void;
 }
