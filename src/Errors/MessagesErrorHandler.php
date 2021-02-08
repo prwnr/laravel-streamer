@@ -1,47 +1,40 @@
 <?php
 
-namespace Prwnr\Streamer;
+namespace Prwnr\Streamer\Errors;
 
 use Exception;
-use Illuminate\Support\Collection;
-use Prwnr\Streamer\Concerns\ConnectsWithRedis;
-use Prwnr\Streamer\Contracts\ErrorHandler;
+use Prwnr\Streamer\Contracts\Errors\ErrorHandler;
+use Prwnr\Streamer\Contracts\Errors\Repository;
 use Prwnr\Streamer\Contracts\MessageReceiver;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
+use Prwnr\Streamer\Stream;
 use Prwnr\Streamer\Stream\Range;
 
 class MessagesErrorHandler implements ErrorHandler
 {
-    use ConnectsWithRedis;
-    
-    public const ERRORS_SET = 'failed_streams';
+    private $repository;
+
+    /**
+     * MessagesErrorHandler constructor.
+     *
+     * @param  Repository  $repository
+     */
+    public function __construct(Repository $repository)
+    {
+        $this->repository = $repository;
+    }
 
     /**
      * @inheritDoc
      */
     public function handle(ReceivedMessage $message, MessageReceiver $receiver, Exception $e): void
     {
-        $this->redis()->sAdd(self::ERRORS_SET, json_encode(new FailedMessage(...[
+        $this->repository->add(new FailedMessage(...[
             $message->getId(),
             $message->getContent()['name'] ?? '',
             get_class($receiver),
             $e->getMessage(),
-        ])));
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function list(): Collection
-    {
-        $elements = $this->redis()->sMembers(self::ERRORS_SET);
-        if (!$elements) {
-            return collect();
-        }
-
-        return collect($elements)->map(static function ($item) {
-            return new FailedMessage(...array_values(json_decode($item, true)));
-        });
+        ]));
     }
 
     /**
@@ -50,7 +43,7 @@ class MessagesErrorHandler implements ErrorHandler
      */
     public function retryAll(): void
     {
-        foreach ($this->list() as $failedMessage) {
+        foreach ($this->repository->all() as $failedMessage) {
             $this->retry($failedMessage);
         }
     }
@@ -73,7 +66,7 @@ class MessagesErrorHandler implements ErrorHandler
             return;
         }
 
-        $this->redis()->sRem(self::ERRORS_SET, json_encode($message));
+        $this->repository->remove($message);
 
         $range = new Range($message->getId(), $message->getId());
         $messages = $message->getStream()->readRange($range, 1);

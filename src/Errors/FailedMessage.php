@@ -1,9 +1,10 @@
 <?php
 
-namespace Prwnr\Streamer;
+namespace Prwnr\Streamer\Errors;
 
 use Carbon\Carbon;
 use JsonSerializable;
+use Prwnr\Streamer\Stream;
 
 /**
  * Class FailedMessage
@@ -46,7 +47,7 @@ class FailedMessage implements JsonSerializable
         $this->stream = $stream;
         $this->receiver = $receiver;
         $this->error = $error;
-        $this->date = $date ?? Carbon::now()->toDateTimeString();
+        $this->date = $date ?? Carbon::now()->toDateTimeString(); //todo make use of the date
     }
 
     /**

@@ -1,12 +1,11 @@
 <?php
 
-namespace Prwnr\Streamer\Contracts;
+namespace Prwnr\Streamer\Contracts\Errors;
 
 use Exception;
-use Illuminate\Support\Collection;
+use Prwnr\Streamer\Contracts\MessageReceiver;
+use Prwnr\Streamer\Errors\FailedMessage;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
-use Prwnr\Streamer\FailedMessage;
-use Prwnr\Streamer\Stream;
 
 interface ErrorHandler
 {
@@ -19,13 +18,6 @@ interface ErrorHandler
      * @return mixed
      */
     public function handle(ReceivedMessage $message, MessageReceiver $receiver, Exception $e): void;
-
-    /**
-     * Returns a list of all failed messages info.
-     *
-     * @return Collection&FailedMessage[]
-     */
-    public function list(): Collection;
 
     /**
      * Iterates over all failed messages and passes them through their associated listeners.
