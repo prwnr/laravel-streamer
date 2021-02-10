@@ -47,7 +47,7 @@ class FailedMessage implements JsonSerializable
         $this->stream = $stream;
         $this->receiver = $receiver;
         $this->error = $error;
-        $this->date = $date ?? Carbon::now()->toDateTimeString(); //todo make use of the date
+        $this->date = $date ?? Carbon::now()->toDateTimeString();
     }
 
     /**
@@ -100,6 +100,7 @@ class FailedMessage implements JsonSerializable
             'stream' => $this->stream,
             'receiver' => $this->receiver,
             'error' => $this->error,
+            'date' => $this->date,
         ];
     }
 }

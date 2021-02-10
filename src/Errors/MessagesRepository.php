@@ -24,6 +24,8 @@ class MessagesRepository implements Repository
 
         return collect($elements)->map(static function ($item) {
             return new FailedMessage(...array_values(json_decode($item, true)));
+        })->sortBy(static function (FailedMessage $message) {
+            return $message->getDate();
         });
     }
 
@@ -49,5 +51,13 @@ class MessagesRepository implements Repository
     public function remove(FailedMessage $message): void
     {
         $this->redis()->sRem(self::ERRORS_SET, json_encode($message));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function flush(): void
+    {
+        $this->redis()->spop(self::ERRORS_SET, $this->count());
     }
 }

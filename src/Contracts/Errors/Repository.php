@@ -34,4 +34,9 @@ interface Repository
      * @param  FailedMessage  $message
      */
     public function remove(FailedMessage $message): void;
+
+    /**
+     * Removes all failed messages.
+     */
+    public function flush(): void;
 }

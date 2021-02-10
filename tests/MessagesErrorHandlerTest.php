@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+    use Carbon\Carbon;
 use Exception;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
@@ -32,6 +33,7 @@ class MessagesErrorHandlerTest extends TestCase
 
     public function test_stores_failed_message_information(): void
     {
+        Carbon::setTestNow('2021-12-12 12:12:12');
         /** @var MessagesErrorHandler $handler */
         $handler = $this->app->make(MessagesErrorHandler::class);
         $message = new ReceivedMessage('123', [
@@ -52,7 +54,10 @@ class MessagesErrorHandlerTest extends TestCase
             'stream' => 'foo.bar',
             'receiver' => LocalListener::class,
             'error' => 'error',
+            'date' => '2021-12-12 12:12:12'
         ], $actual);
+
+        Carbon::setTestNow();
     }
 
     public function test_retries_failed_message(): void
