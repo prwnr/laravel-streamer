@@ -3,6 +3,7 @@
 namespace Prwnr\Streamer;
 
 use Illuminate\Support\ServiceProvider;
+use Prwnr\Streamer\Commands\FailedList;
 use Prwnr\Streamer\Commands\ListCommand;
 use Prwnr\Streamer\Commands\ListenCommand;
 use Prwnr\Streamer\Contracts\Errors\ErrorHandler;
@@ -72,6 +73,7 @@ class StreamerProvider extends ServiceProvider
             $this->commands([
                 ListenCommand::class,
                 ListCommand::class,
+                FailedList::class,
             ]);
         }
     }
