@@ -3,6 +3,7 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
+use Prwnr\Streamer\Errors\MessagesRepository;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\Facades\Streamer;
 use Prwnr\Streamer\ListenersStack;
@@ -77,18 +78,22 @@ class ListenCommandTest extends TestCase
             ->assertExitCode(0);
     }
 
-    public function test_command_prints_out_the_error_when_it_occurs_on_listening(): void
+    public function test_command_prints_out_the_error_when_it_occurs_on_listening_and_stores_failed_message_info(): void
     {
         $listeners = [ExceptionalListener::class];
         $this->withLocalListenersConfigured($listeners);
 
         $event = $this->makeEvent();
         $id = Streamer::emit($event);
-        $printError = sprintf("Listener error. Failed processing message with ID %s on '%s' stream by %s. Error: Listener failed.", $id, $event->name(), ExceptionalListener::class);
+        $printError = sprintf("Listener error. Failed processing message with ID %s on '%s' stream by %s. Error: Listener failed.",
+            $id, $event->name(), ExceptionalListener::class);
 
         $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0'])
             ->expectsOutput($printError)
             ->assertExitCode(0);
+
+        $repository = new MessagesRepository();
+        $this->assertEquals(1, $repository->count());
     }
 
     public function test_command_called_with_events_on_stream_fires_local_event(): void
@@ -102,12 +107,15 @@ class ListenCommandTest extends TestCase
 
         $this->expectsListenersToBeCalled($listeners);
         $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0'])
-            ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.", LocalListener::class))
-            ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.", AnotherLocalListener::class))
+            ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                LocalListener::class))
+            ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                AnotherLocalListener::class))
             ->assertExitCode(0);
     }
 
-    public function test_command_called_with_events_while_one_of_them_throws_exception(): void
+    public function test_command_called_with_events_while_one_of_them_throws_exception_and_stores_failed_messages_info(
+    ): void
     {
         $listeners = [
             ExceptionalListener::class,
@@ -118,12 +126,17 @@ class ListenCommandTest extends TestCase
         $event = $this->makeEvent();
         $id = Streamer::emit($event);
 
-        $printError = sprintf("Listener error. Failed processing message with ID %s on '%s' stream by %s. Error: Listener failed.", $id, $event->name(), ExceptionalListener::class);
+        $printError = sprintf("Listener error. Failed processing message with ID %s on '%s' stream by %s. Error: Listener failed.",
+            $id, $event->name(), ExceptionalListener::class);
 
         $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0'])
             ->expectsOutput($printError)
-            ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.", LocalListener::class))
+            ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                LocalListener::class))
             ->assertExitCode(0);
+
+        $repository = new MessagesRepository();
+        $this->assertEquals(1, $repository->count());
     }
 
     public function test_command_called_as_group_and_consumer_fires_local_event_and_acknowledges_message(): void
