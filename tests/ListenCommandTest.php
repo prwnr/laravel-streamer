@@ -4,9 +4,7 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
 use Prwnr\Streamer\Errors\MessagesRepository;
-use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\Facades\Streamer;
-use Prwnr\Streamer\ListenersStack;
 use Prwnr\Streamer\Stream;
 use Tests\Stubs\AnotherLocalListener;
 use Tests\Stubs\ExceptionalListener;
@@ -273,30 +271,5 @@ class ListenCommandTest extends TestCase
         $this->doesntExpectListenersToBeCalled($listeners);
         $this->artisan('streamer:listen', $args)
             ->assertExitCode(0);
-    }
-
-    private function withLocalListenersConfigured(array $listeners): void
-    {
-        foreach ($listeners as $listener) {
-            ListenersStack::add('foo.bar', $listener);
-        }
-    }
-
-    private function expectsListenersToBeCalled(array $listeners): void
-    {
-        foreach ($listeners as $listener) {
-            $mock = \Mockery::mock($listener);
-            $mock->shouldReceive('handle')->with(ReceivedMessage::class);
-            $this->app->instance($listener, $mock);
-        }
-    }
-
-    private function doesntExpectListenersToBeCalled(array $listeners): void
-    {
-        foreach ($listeners as $listener) {
-            $mock = \Mockery::mock($listener);
-            $mock->shouldNotReceive('handle');
-            $this->app->instance($listener, $mock);
-        }
     }
 }

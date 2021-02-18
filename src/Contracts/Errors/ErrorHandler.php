@@ -20,11 +20,6 @@ interface ErrorHandler
     public function handle(ReceivedMessage $message, MessageReceiver $receiver, Exception $e): void;
 
     /**
-     * Iterates over all failed messages and passes them through their associated listeners.
-     */
-    public function retryAll(): void;
-
-    /**
      * Looks up message on a stream and attempts to retry it with given receiver.
      *
      * @param  FailedMessage  $message

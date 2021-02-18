@@ -12,6 +12,9 @@ use Prwnr\Streamer\Stream\Range;
 
 class MessagesErrorHandler implements ErrorHandler
 {
+    /**
+     * @var Repository
+     */
     private $repository;
 
     /**
@@ -35,17 +38,6 @@ class MessagesErrorHandler implements ErrorHandler
             get_class($receiver),
             $e->getMessage(),
         ]));
-    }
-
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
-    public function retryAll(): void
-    {
-        foreach ($this->repository->all() as $failedMessage) {
-            $this->retry($failedMessage);
-        }
     }
 
     /**

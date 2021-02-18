@@ -4,17 +4,18 @@ namespace Tests;
 
 use Exception;
 use Prwnr\Streamer\Contracts\Event;
+use Prwnr\Streamer\Contracts\MessageReceiver;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\Errors\MessagesErrorHandler;
 use Prwnr\Streamer\EventDispatcher\Message;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\Facades\Streamer;
+use Prwnr\Streamer\ListenersStack;
 use Prwnr\Streamer\Stream;
 use Prwnr\Streamer\StreamerProvider;
 use Tests\Stubs\LocalListener;
 use Tests\Stubs\MessageStub;
 use Tests\Stubs\StreamerEventStub;
-use Tests\Stubs\StreamerReplayableEventStub;
 
 class TestCase extends \Orchestra\Testbench\TestCase
 {
@@ -42,15 +43,44 @@ class TestCase extends \Orchestra\Testbench\TestCase
         return new StreamerEventStub();
     }
 
-    protected function failFakeMessage(string $stream, string $id, array $data): ReceivedMessage
+    protected function withLocalListenersConfigured(array $listeners): void
     {
+        foreach ($listeners as $listener) {
+            ListenersStack::add('foo.bar', $listener);
+        }
+    }
+
+    protected function expectsListenersToBeCalled(array $listeners): void
+    {
+        foreach ($listeners as $listener) {
+            $mock = \Mockery::mock($listener);
+            $mock->shouldReceive('handle')->with(ReceivedMessage::class);
+            $this->app->instance($listener, $mock);
+        }
+    }
+
+    protected function doesntExpectListenersToBeCalled(array $listeners): void
+    {
+        foreach ($listeners as $listener) {
+            $mock = \Mockery::mock($listener);
+            $mock->shouldNotReceive('handle');
+            $this->app->instance($listener, $mock);
+        }
+    }
+
+    protected function failFakeMessage(
+        string $stream,
+        string $id,
+        array $data,
+        ?MessageReceiver $listener = null
+    ): ReceivedMessage {
         /** @var MessagesErrorHandler $handler */
         $handler = $this->app->make(MessagesErrorHandler::class);
         $message = new ReceivedMessage($id, [
             'name' => $stream,
             'data' => json_encode($data)
         ]);
-        $listener = new LocalListener();
+        $listener = $listener ?? new LocalListener();
         $e = new Exception('error');
         $handler->handle($message, $listener, $e);
 

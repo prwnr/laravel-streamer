@@ -2,10 +2,11 @@
 
 namespace Tests;
 
-    use Carbon\Carbon;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
+use Prwnr\Streamer\Contracts\Errors\Repository;
 use Prwnr\Streamer\Errors\FailedMessage;
 use Prwnr\Streamer\Errors\MessagesErrorHandler;
 use Prwnr\Streamer\Errors\MessagesRepository;
@@ -107,7 +108,11 @@ class MessagesErrorHandlerTest extends TestCase
 
         /** @var MessagesErrorHandler $handler */
         $handler = $this->app->make(MessagesErrorHandler::class);
-        $handler->retryAll();
+        /** @var Repository $repository */
+        $repository = $this->app->make(Repository::class);
+        foreach ($repository->all() as $message) {
+            $handler->retry($message);
+        }
 
         $this->assertEquals(0, $this->redis()->sCard(MessagesRepository::ERRORS_SET));
     }
@@ -148,7 +153,11 @@ class MessagesErrorHandlerTest extends TestCase
 
         /** @var MessagesErrorHandler $handler */
         $handler = $this->app->make(MessagesErrorHandler::class);
-        $handler->retryAll();
+        /** @var Repository $repository */
+        $repository = $this->app->make(Repository::class);
+        foreach ($repository->all() as $message) {
+            $handler->retry($message);
+        }
 
         $this->assertEquals(1, $this->redis()->sCard(MessagesRepository::ERRORS_SET));
     }
