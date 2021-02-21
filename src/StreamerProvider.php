@@ -7,10 +7,10 @@ use Prwnr\Streamer\Commands\FailedListCommand;
 use Prwnr\Streamer\Commands\ListCommand;
 use Prwnr\Streamer\Commands\ListenCommand;
 use Prwnr\Streamer\Commands\RetryFailedCommand;
-use Prwnr\Streamer\Contracts\Errors\ErrorHandler;
+use Prwnr\Streamer\Contracts\Errors\MessagesFailer;
 use Prwnr\Streamer\Contracts\Errors\Repository;
 use Prwnr\Streamer\Contracts\History;
-use Prwnr\Streamer\Errors\MessagesErrorHandler;
+use Prwnr\Streamer\Errors\FailedMessagesHandler;
 use Prwnr\Streamer\Errors\MessagesRepository;
 use Prwnr\Streamer\EventDispatcher\Streamer;
 use Prwnr\Streamer\History\EventHistory;
@@ -26,7 +26,7 @@ class StreamerProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(History::class, EventHistory::class);
-        $this->app->bind(ErrorHandler::class, MessagesErrorHandler::class);
+        $this->app->bind(MessagesFailer::class, FailedMessagesHandler::class);
         $this->app->bind(Repository::class, MessagesRepository::class);
 
         $this->app->bind('Streamer', function () {

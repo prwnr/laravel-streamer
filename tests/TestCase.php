@@ -6,7 +6,7 @@ use Exception;
 use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\MessageReceiver;
 use Prwnr\Streamer\Contracts\StreamableMessage;
-use Prwnr\Streamer\Errors\MessagesErrorHandler;
+use Prwnr\Streamer\Errors\FailedMessagesHandler;
 use Prwnr\Streamer\EventDispatcher\Message;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\Facades\Streamer;
@@ -73,16 +73,17 @@ class TestCase extends \Orchestra\Testbench\TestCase
         string $id,
         array $data,
         ?MessageReceiver $listener = null
-    ): ReceivedMessage {
-        /** @var MessagesErrorHandler $handler */
-        $handler = $this->app->make(MessagesErrorHandler::class);
+    ): ReceivedMessage
+    {
+        /** @var FailedMessagesHandler $handler */
+        $handler = $this->app->make(FailedMessagesHandler::class);
         $message = new ReceivedMessage($id, [
             'name' => $stream,
             'data' => json_encode($data)
         ]);
         $listener = $listener ?? new LocalListener();
         $e = new Exception('error');
-        $handler->handle($message, $listener, $e);
+        $handler->store($message, $listener, $e);
 
         $meta = [
             '_id' => $id,

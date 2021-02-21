@@ -8,12 +8,12 @@ use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\Errors\Repository;
 use Prwnr\Streamer\Errors\FailedMessage;
-use Prwnr\Streamer\Errors\MessagesErrorHandler;
+use Prwnr\Streamer\Errors\FailedMessagesHandler;
 use Prwnr\Streamer\Errors\MessagesRepository;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Tests\Stubs\LocalListener;
 
-class MessagesErrorHandlerTest extends TestCase
+class FailedMessagesHandlerTest extends TestCase
 {
     use InteractsWithRedis;
     use ConnectsWithRedis;
@@ -35,15 +35,15 @@ class MessagesErrorHandlerTest extends TestCase
     public function test_stores_failed_message_information(): void
     {
         Carbon::setTestNow('2021-12-12 12:12:12');
-        /** @var MessagesErrorHandler $handler */
-        $handler = $this->app->make(MessagesErrorHandler::class);
+        /** @var FailedMessagesHandler $handler */
+        $handler = $this->app->make(FailedMessagesHandler::class);
         $message = new ReceivedMessage('123', [
             'name' => 'foo.bar',
             'data' => json_encode('payload')
         ]);
         $listener = new LocalListener();
         $e = new Exception('error');
-        $handler->handle($message, $listener, $e);
+        $handler->store($message, $listener, $e);
         $failed = $this->redis()->sMembers(MessagesRepository::ERRORS_SET);
 
         $this->assertNotEmpty($failed);
@@ -75,8 +75,8 @@ class MessagesErrorHandlerTest extends TestCase
             ->once()
             ->andReturn();
 
-        /** @var MessagesErrorHandler $handler */
-        $handler = $this->app->make(MessagesErrorHandler::class);
+        /** @var FailedMessagesHandler $handler */
+        $handler = $this->app->make(FailedMessagesHandler::class);
         $handler->retry(new FailedMessage('123', 'foo.bar', LocalListener::class, 'error'));
     }
 
@@ -106,8 +106,8 @@ class MessagesErrorHandlerTest extends TestCase
             ->once()
             ->andReturn();
 
-        /** @var MessagesErrorHandler $handler */
-        $handler = $this->app->make(MessagesErrorHandler::class);
+        /** @var FailedMessagesHandler $handler */
+        $handler = $this->app->make(FailedMessagesHandler::class);
         /** @var Repository $repository */
         $repository = $this->app->make(Repository::class);
         foreach ($repository->all() as $message) {
@@ -122,8 +122,8 @@ class MessagesErrorHandlerTest extends TestCase
         $listener = $this->mock(LocalListener::class);
         $listener->shouldNotHaveBeenCalled();
 
-        /** @var MessagesErrorHandler $handler */
-        $handler = $this->app->make(MessagesErrorHandler::class);
+        /** @var FailedMessagesHandler $handler */
+        $handler = $this->app->make(FailedMessagesHandler::class);
         $handler->retry(new FailedMessage('123', 'foo.bar', 'not a class', 'error'));
     }
 
@@ -132,8 +132,8 @@ class MessagesErrorHandlerTest extends TestCase
         $listener = $this->mock(LocalListener::class);
         $listener->shouldNotHaveBeenCalled();
 
-        /** @var MessagesErrorHandler $handler */
-        $handler = $this->app->make(MessagesErrorHandler::class);
+        /** @var FailedMessagesHandler $handler */
+        $handler = $this->app->make(FailedMessagesHandler::class);
         $handler->retry(new FailedMessage('123', 'foo.bar', LocalListener::class, 'error'));
     }
 
@@ -151,8 +151,8 @@ class MessagesErrorHandlerTest extends TestCase
             ->once()
             ->andThrow(Exception::class);
 
-        /** @var MessagesErrorHandler $handler */
-        $handler = $this->app->make(MessagesErrorHandler::class);
+        /** @var FailedMessagesHandler $handler */
+        $handler = $this->app->make(FailedMessagesHandler::class);
         /** @var Repository $repository */
         $repository = $this->app->make(Repository::class);
         foreach ($repository->all() as $message) {

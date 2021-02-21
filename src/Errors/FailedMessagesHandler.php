@@ -3,14 +3,14 @@
 namespace Prwnr\Streamer\Errors;
 
 use Exception;
-use Prwnr\Streamer\Contracts\Errors\ErrorHandler;
+use Prwnr\Streamer\Contracts\Errors\MessagesFailer;
 use Prwnr\Streamer\Contracts\Errors\Repository;
 use Prwnr\Streamer\Contracts\MessageReceiver;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\Stream;
 use Prwnr\Streamer\Stream\Range;
 
-class MessagesErrorHandler implements ErrorHandler
+class FailedMessagesHandler implements MessagesFailer
 {
     /**
      * @var Repository
@@ -30,7 +30,7 @@ class MessagesErrorHandler implements ErrorHandler
     /**
      * @inheritDoc
      */
-    public function handle(ReceivedMessage $message, MessageReceiver $receiver, Exception $e): void
+    public function store(ReceivedMessage $message, MessageReceiver $receiver, Exception $e): void
     {
         $this->repository->add(new FailedMessage(...[
             $message->getId(),
@@ -77,7 +77,7 @@ class MessagesErrorHandler implements ErrorHandler
                     throw $e;
                 }
 
-                $this->handle($receivedMessage, $listener, $e);
+                $this->store($receivedMessage, $listener, $e);
             }
         }
     }

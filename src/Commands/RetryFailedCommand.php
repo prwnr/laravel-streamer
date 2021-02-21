@@ -4,7 +4,7 @@ namespace Prwnr\Streamer\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
-use Prwnr\Streamer\Contracts\Errors\ErrorHandler;
+use Prwnr\Streamer\Contracts\Errors\MessagesFailer;
 use Prwnr\Streamer\Contracts\Errors\Repository;
 use Prwnr\Streamer\Contracts\Errors\Specification;
 use Prwnr\Streamer\Errors\FailedMessage;
@@ -27,9 +27,9 @@ class RetryFailedCommand extends Command
     protected $description = 'Retries failed messages by passing them to their original Listeners.';
 
     /**
-     * @var ErrorHandler
+     * @var MessagesFailer
      */
-    private $errorHandler;
+    private $failer;
 
     /**
      * @var Repository
@@ -49,13 +49,13 @@ class RetryFailedCommand extends Command
      * RetryFailedCommand constructor.
      *
      * @param  Repository  $repository
-     * @param  ErrorHandler  $errorHandler
+     * @param  MessagesFailer  $failer
      */
-    public function __construct(Repository $repository, ErrorHandler $errorHandler)
+    public function __construct(Repository $repository, MessagesFailer $failer)
     {
         parent::__construct();
 
-        $this->errorHandler = $errorHandler;
+        $this->failer = $failer;
         $this->repository = $repository;
     }
 
@@ -68,7 +68,7 @@ class RetryFailedCommand extends Command
 
         if ($this->option('all')) {
             foreach ($this->repository->all() as $message) {
-                $this->errorHandler->retry($message);
+                $this->failer->retry($message);
             }
 
             return 0;
@@ -102,7 +102,7 @@ class RetryFailedCommand extends Command
         }
 
         foreach ($messages as $message) {
-            $this->errorHandler->retry($message);
+            $this->failer->retry($message);
         }
 
         return 0;

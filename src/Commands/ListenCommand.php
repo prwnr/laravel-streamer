@@ -5,7 +5,7 @@ namespace Prwnr\Streamer\Commands;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Container\Container;
-use Prwnr\Streamer\Contracts\Errors\ErrorHandler;
+use Prwnr\Streamer\Contracts\Errors\MessagesFailer;
 use Prwnr\Streamer\Contracts\MessageReceiver;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\EventDispatcher\Streamer;
@@ -42,14 +42,20 @@ class ListenCommand extends Command
     private $streamer;
 
     /**
-     * @var ErrorHandler
+     * @var MessagesFailer
      */
-    private $errorHandler;
+    private $failer;
 
-    public function __construct(Streamer $streamer, ErrorHandler $errorHandler)
+    /**
+     * ListenCommand constructor.
+     *
+     * @param  Streamer  $streamer
+     * @param  MessagesFailer  $failer
+     */
+    public function __construct(Streamer $streamer, MessagesFailer $failer)
     {
         $this->streamer = $streamer;
-        $this->errorHandler = $errorHandler;
+        $this->failer = $failer;
 
         parent::__construct();
     }
@@ -92,7 +98,7 @@ class ListenCommand extends Command
                     $receiver->handle($message);
                 } catch (Exception $e) {
                     $this->printError($message, $listener, $e);
-                    $this->errorHandler->handle($message, $receiver, $e);
+                    $this->failer->store($message, $receiver, $e);
 
                     continue;
                 }

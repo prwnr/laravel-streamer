@@ -7,7 +7,7 @@ use Prwnr\Streamer\Contracts\MessageReceiver;
 use Prwnr\Streamer\Errors\FailedMessage;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 
-interface ErrorHandler
+interface MessagesFailer
 {
     /**
      * Stores failed message information in a list for later retry attempt.
@@ -17,7 +17,7 @@ interface ErrorHandler
      * @param  Exception  $e
      * @return mixed
      */
-    public function handle(ReceivedMessage $message, MessageReceiver $receiver, Exception $e): void;
+    public function store(ReceivedMessage $message, MessageReceiver $receiver, Exception $e): void;
 
     /**
      * Looks up message on a stream and attempts to retry it with given receiver.
