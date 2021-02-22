@@ -7,7 +7,7 @@ use Prwnr\Streamer\Contracts\Errors\MessagesFailer;
 use Prwnr\Streamer\Contracts\Errors\Repository;
 use Prwnr\Streamer\Contracts\MessageReceiver;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
-use Prwnr\Streamer\Stream;
+use Prwnr\Streamer\Exceptions\MessageRetryFailedException;
 use Prwnr\Streamer\Stream\Range;
 
 class FailedMessagesHandler implements MessagesFailer
@@ -42,43 +42,54 @@ class FailedMessagesHandler implements MessagesFailer
 
     /**
      * @inheritDoc
-     * @param  Stream  $stream
-     * @param  string  $id
-     * @param  string  $receiver
+     * @throws MessageRetryFailedException
      * @throws Exception
      */
     public function retry(FailedMessage $message): void
     {
-        if (!class_exists($message->getReceiver())) {
-            return;
-        }
-
-        $listener = app($message->getReceiver());
-        if (!$listener instanceof MessageReceiver) {
-            return;
-        }
+        $listener = $this->makeReceiver($message);
 
         $this->repository->remove($message);
 
         $range = new Range($message->getId(), $message->getId());
         $messages = $message->getStream()->readRange($range, 1);
-        if (!$messages) {
-            return;
+        if (!$messages || count($messages) !== 1) {
+            throw new MessageRetryFailedException($message, 'No matching messages found on a Stream to retry');
         }
 
-        foreach ($messages as $streamMessage) {
-            $receivedMessage = null;
-
-            try {
-                $receivedMessage = new ReceivedMessage($streamMessage['_id'], $streamMessage);
-                $listener->handle($receivedMessage);
-            } catch (Exception $e) {
-                if (!$receivedMessage) {
-                    throw $e;
-                }
-
-                $this->store($receivedMessage, $listener, $e);
+        $streamMessage = array_pop($messages);
+        $receivedMessage = null;
+        try {
+            $receivedMessage = new ReceivedMessage($streamMessage['_id'], $streamMessage);
+            $listener->handle($receivedMessage);
+        } catch (Exception $e) {
+            if (!$receivedMessage) {
+                throw $e;
             }
+
+            $this->store($receivedMessage, $listener, $e);
+
+            throw new MessageRetryFailedException($message, $e->getMessage());
         }
+    }
+
+    /**
+     * @param  FailedMessage  $message
+     * @return MessageReceiver
+     * @throws MessageRetryFailedException
+     */
+    private function makeReceiver(FailedMessage $message): MessageReceiver
+    {
+        if (!class_exists($message->getReceiver())) {
+            throw new MessageRetryFailedException($message, 'Receiver class does not exists');
+        }
+
+        $listener = app($message->getReceiver());
+        if (!$listener instanceof MessageReceiver) {
+            throw new MessageRetryFailedException($message,
+                'Receiver class is not an instance of MessageReceiver contract');
+        }
+
+        return $listener;
     }
 }

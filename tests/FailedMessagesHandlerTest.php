@@ -11,6 +11,7 @@ use Prwnr\Streamer\Errors\FailedMessage;
 use Prwnr\Streamer\Errors\FailedMessagesHandler;
 use Prwnr\Streamer\Errors\MessagesRepository;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
+use Prwnr\Streamer\Exceptions\MessageRetryFailedException;
 use Tests\Stubs\LocalListener;
 
 class FailedMessagesHandlerTest extends TestCase
@@ -124,6 +125,10 @@ class FailedMessagesHandlerTest extends TestCase
 
         /** @var FailedMessagesHandler $handler */
         $handler = $this->app->make(FailedMessagesHandler::class);
+
+        $this->expectException(MessageRetryFailedException::class);
+        $this->expectExceptionMessage('Receiver class does not exists');
+
         $handler->retry(new FailedMessage('123', 'foo.bar', 'not a class', 'error'));
     }
 
@@ -134,6 +139,10 @@ class FailedMessagesHandlerTest extends TestCase
 
         /** @var FailedMessagesHandler $handler */
         $handler = $this->app->make(FailedMessagesHandler::class);
+
+        $this->expectException(MessageRetryFailedException::class);
+        $this->expectExceptionMessage('No matching messages found on a Stream to retry');
+
         $handler->retry(new FailedMessage('123', 'foo.bar', LocalListener::class, 'error'));
     }
 
@@ -149,14 +158,19 @@ class FailedMessagesHandlerTest extends TestCase
                     && $arg->getContent() && $message->getContent();
             })
             ->once()
-            ->andThrow(Exception::class);
+            ->andThrow(Exception::class, 'errored again');
 
         /** @var FailedMessagesHandler $handler */
         $handler = $this->app->make(FailedMessagesHandler::class);
         /** @var Repository $repository */
         $repository = $this->app->make(Repository::class);
         foreach ($repository->all() as $message) {
-            $handler->retry($message);
+            try {
+                $handler->retry($message);
+            } catch (MessageRetryFailedException $e) {
+                $message = 'Failed to retry [123] on foo.bar stream by [Tests\Stubs\LocalListener] listener. Error: errored again';
+                $this->assertEquals($message, $e->getMessage());
+            }
         }
 
         $this->assertEquals(1, $this->redis()->sCard(MessagesRepository::ERRORS_SET));

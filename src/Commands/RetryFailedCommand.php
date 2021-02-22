@@ -4,6 +4,7 @@ namespace Prwnr\Streamer\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Prwnr\Streamer\Contracts\Errors\MessagesFailer;
 use Prwnr\Streamer\Contracts\Errors\Repository;
 use Prwnr\Streamer\Contracts\Errors\Specification;
@@ -12,6 +13,7 @@ use Prwnr\Streamer\Errors\Specifications\IdentifierSpecification;
 use Prwnr\Streamer\Errors\Specifications\MatchAllSpecification;
 use Prwnr\Streamer\Errors\Specifications\ReceiverSpecification;
 use Prwnr\Streamer\Errors\Specifications\StreamSpecification;
+use Prwnr\Streamer\Exceptions\MessageRetryFailedException;
 use Symfony\Component\Console\Input\InputOption;
 
 class RetryFailedCommand extends Command
@@ -67,9 +69,7 @@ class RetryFailedCommand extends Command
         }
 
         if ($this->option('all')) {
-            foreach ($this->repository->all() as $message) {
-                $this->failer->retry($message);
-            }
+            $this->retry($this->repository->all());
 
             return 0;
         }
@@ -101,11 +101,26 @@ class RetryFailedCommand extends Command
             return 0;
         }
 
-        foreach ($messages as $message) {
-            $this->failer->retry($message);
-        }
+        $this->retry($messages);
 
         return 0;
+    }
+
+    /**
+     * Retries set of messages
+     *
+     * @param  Collection  $messages
+     */
+    private function retry(Collection $messages): void
+    {
+        foreach ($messages as $message) {
+            try {
+                $this->failer->retry($message);
+                $this->printSuccess($message);
+            } catch (MessageRetryFailedException $e) {
+                $this->error($e->getMessage());
+            }
+        }
     }
 
     /**
@@ -124,6 +139,19 @@ class RetryFailedCommand extends Command
         }
 
         return new MatchAllSpecification(...$specifications);
+    }
+
+    /**
+     * @param  FailedMessage  $message
+     */
+    private function printSuccess(FailedMessage $message): void
+    {
+        $this->info(sprintf(
+            'Successfully retired [%s] on %s stream by [%s] listener',
+            $message->getId(),
+            $message->getStream()->getName(),
+            $message->getReceiver()
+        ));
     }
 
     /**

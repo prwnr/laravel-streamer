@@ -10,7 +10,7 @@ interface Repository
     /**
      * Returns all failed stream messages
      *
-     * @return Collection&FailedMessage
+     * @return Collection&FailedMessage[]
      */
     public function all(): Collection;
 
