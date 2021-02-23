@@ -7,7 +7,7 @@ use Prwnr\Streamer\Contracts\Errors\Repository;
 use Prwnr\Streamer\Errors\FailedMessage;
 use Symfony\Component\Console\Input\InputOption;
 
-class FailedListCommand extends Command
+class ListFailedCommand extends Command
 {
     /**
      * @var string
