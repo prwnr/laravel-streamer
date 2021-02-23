@@ -49,8 +49,6 @@ class FailedMessagesHandler implements MessagesFailer
     {
         $listener = $this->makeReceiver($message);
 
-        $this->repository->remove($message);
-
         $range = new Range($message->getId(), $message->getId());
         $messages = $message->getStream()->readRange($range, 1);
         if (!$messages || count($messages) !== 1) {
@@ -60,7 +58,7 @@ class FailedMessagesHandler implements MessagesFailer
         $streamMessage = array_pop($messages);
         $receivedMessage = null;
         try {
-            $receivedMessage = new ReceivedMessage($streamMessage['_id'], $streamMessage);
+            $receivedMessage = new ReceivedMessage($message->getId(), $streamMessage);
             $listener->handle($receivedMessage);
         } catch (Exception $e) {
             if (!$receivedMessage) {
@@ -70,6 +68,8 @@ class FailedMessagesHandler implements MessagesFailer
             $this->store($receivedMessage, $listener, $e);
 
             throw new MessageRetryFailedException($message, $e->getMessage());
+        } finally {
+            $this->repository->remove($message);
         }
     }
 

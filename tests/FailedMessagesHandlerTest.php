@@ -168,11 +168,12 @@ class FailedMessagesHandlerTest extends TestCase
             try {
                 $handler->retry($message);
             } catch (MessageRetryFailedException $e) {
-                $message = 'Failed to retry [123] on foo.bar stream by [Tests\Stubs\LocalListener] listener. Error: errored again';
-                $this->assertEquals($message, $e->getMessage());
+                $error = 'Failed to retry [123] on foo.bar stream by [Tests\Stubs\LocalListener] listener. Error: errored again';
+                $this->assertEquals($error, $e->getMessage());
             }
         }
 
-        $this->assertEquals(1, $this->redis()->sCard(MessagesRepository::ERRORS_SET));
+        $this->assertEquals(1, $repository->count());
+        $this->assertEquals($message->getId(), $repository->all()->first()->getId());
     }
 }

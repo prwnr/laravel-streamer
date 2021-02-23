@@ -66,11 +66,11 @@ class RetryFailedCommandTest extends TestCase
         ]);
 
         $this->artisan('streamer:failed:retry', ['--all' => true])
-            ->expectsOutput(sprintf('Successfully retired [123] on foo.bar stream by [%s] listener',
+            ->expectsOutput(sprintf('Successfully retried [123] on foo.bar stream by [%s] listener',
                 LocalListener::class))
-            ->expectsOutput(sprintf('Successfully retired [345] on foo.bar stream by [%s] listener',
+            ->expectsOutput(sprintf('Successfully retried [345] on foo.bar stream by [%s] listener',
                 LocalListener::class))
-            ->expectsOutput(sprintf('Successfully retired [678] on foo.bar stream by [%s] listener',
+            ->expectsOutput(sprintf('Successfully retried [678] on foo.bar stream by [%s] listener',
                 LocalListener::class))
             ->assertExitCode(0);
 
@@ -88,7 +88,7 @@ class RetryFailedCommandTest extends TestCase
         ]);
 
         $this->artisan('streamer:failed:retry', ['--id' => '123'])
-            ->expectsOutput(sprintf('Successfully retired [123] on foo.bar stream by [%s] listener',
+            ->expectsOutput(sprintf('Successfully retried [123] on foo.bar stream by [%s] listener',
                 LocalListener::class))
             ->assertExitCode(0);
 
@@ -126,9 +126,9 @@ class RetryFailedCommandTest extends TestCase
         ]);
 
         $this->artisan('streamer:failed:retry', ['--receiver' => AnotherLocalListener::class])
-            ->expectsOutput(sprintf('Successfully retired [123] on foo.bar stream by [%s] listener',
+            ->expectsOutput(sprintf('Successfully retried [123] on foo.bar stream by [%s] listener',
                 AnotherLocalListener::class))
-            ->expectsOutput(sprintf('Successfully retired [345] on foo.bar stream by [%s] listener',
+            ->expectsOutput(sprintf('Successfully retried [345] on foo.bar stream by [%s] listener',
                 AnotherLocalListener::class))
             ->assertExitCode(0);
 
@@ -148,7 +148,7 @@ class RetryFailedCommandTest extends TestCase
         $this->artisan('streamer:failed:retry', [
             '--id' => '123',
             '--stream' => 'foo.bar',
-        ])->expectsOutput(sprintf('Successfully retired [123] on foo.bar stream by [%s] listener',
+        ])->expectsOutput(sprintf('Successfully retried [123] on foo.bar stream by [%s] listener',
             AnotherLocalListener::class))
             ->assertExitCode(0);
 
@@ -167,7 +167,7 @@ class RetryFailedCommandTest extends TestCase
             '--id' => '123',
             '--stream' => 'foo.bar',
             '--receiver' => AnotherLocalListener::class
-        ])->expectsOutput(sprintf('Successfully retired [123] on foo.bar stream by [%s] listener',
+        ])->expectsOutput(sprintf('Successfully retried [123] on foo.bar stream by [%s] listener',
             AnotherLocalListener::class))
             ->assertExitCode(0);
 

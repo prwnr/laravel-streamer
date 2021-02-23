@@ -147,7 +147,7 @@ class RetryFailedCommand extends Command
     private function printSuccess(FailedMessage $message): void
     {
         $this->info(sprintf(
-            'Successfully retired [%s] on %s stream by [%s] listener',
+            'Successfully retried [%s] on %s stream by [%s] listener',
             $message->getId(),
             $message->getStream()->getName(),
             $message->getReceiver()
