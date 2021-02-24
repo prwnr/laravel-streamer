@@ -84,5 +84,4 @@ class ListCommand extends Command
             ]
         ];
     }
-
 }

@@ -29,8 +29,8 @@ class Message implements StreamableMessage
     /**
      * Message constructor.
      *
-     * @param array $meta
-     * @param array $data
+     * @param  array  $meta
+     * @param  array  $data
      */
     public function __construct(array $meta, array $data)
     {

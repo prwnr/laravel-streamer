@@ -3,9 +3,16 @@
 namespace Prwnr\Streamer;
 
 use Illuminate\Support\ServiceProvider;
+use Prwnr\Streamer\Commands\FlushFailedCommand;
 use Prwnr\Streamer\Commands\ListCommand;
 use Prwnr\Streamer\Commands\ListenCommand;
+use Prwnr\Streamer\Commands\ListFailedCommand;
+use Prwnr\Streamer\Commands\RetryFailedCommand;
+use Prwnr\Streamer\Contracts\Errors\MessagesFailer;
+use Prwnr\Streamer\Contracts\Errors\Repository;
 use Prwnr\Streamer\Contracts\History;
+use Prwnr\Streamer\Errors\FailedMessagesHandler;
+use Prwnr\Streamer\Errors\MessagesRepository;
 use Prwnr\Streamer\EventDispatcher\Streamer;
 use Prwnr\Streamer\History\EventHistory;
 
@@ -20,6 +27,8 @@ class StreamerProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(History::class, EventHistory::class);
+        $this->app->bind(MessagesFailer::class, FailedMessagesHandler::class);
+        $this->app->bind(Repository::class, MessagesRepository::class);
 
         $this->app->bind('Streamer', function () {
             return $this->app->make(Streamer::class);
@@ -66,6 +75,9 @@ class StreamerProvider extends ServiceProvider
             $this->commands([
                 ListenCommand::class,
                 ListCommand::class,
+                ListFailedCommand::class,
+                RetryFailedCommand::class,
+                FlushFailedCommand::class,
             ]);
         }
     }

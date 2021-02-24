@@ -14,7 +14,8 @@ jobs:
     strategy:
       matrix:
         php-version: ['7.2', '7.3', '7.4', '8.0']
-    name: PHP 7.4 Test
+        redis-version: [5, 6]
+    name: PHP ${{ matrix.php-version }}, Redis ${{ matrix.redis-version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -28,6 +29,8 @@ jobs:
 
       - name: Redis Server
         uses: supercharge/redis-github-action@1.2.0
+        with:
+          redis-version: ${{ matrix.redis-version }}
 
       - name: Validate composer.json
         run: composer validate
