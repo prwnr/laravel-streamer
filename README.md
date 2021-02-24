@@ -140,12 +140,12 @@ when that happened.
 Table example:
 
 ```text
-+-----+-----------+-----------------------------+-------+----------------------+
-| ID  | Stream    | Receiver                    | Error | Date                 |
-+-----+-----------+-----------------------------+-------+----------------------+
++-----+-----------+---------------------------+-------+--------------------+
+| ID  | Stream    | Receiver                  | Error | Date               |
++-----+-----------+---------------------------+-------+--------------------+
 | 123 | foo.bar   | Tests\Stubs\LocalListener | error | 2021-12-12 12:12:12  |
 | 321 | other.bar | Tests\Stubs\LocalListener | error | 2021-12-12 12:15:12  |
-+-----+-----------+-----------------------------+-------+----------------------+
++-----+-----------+---------------------------+-------+--------------------+
 ```
 
 There's one addition option for this command, called `--compact` which will limit the table output to only ID, Stream
@@ -211,9 +211,9 @@ Table example:
 | Event                  | Listeners                          |
 +------------------------+------------------------------------+
 | example.streamer.event | none                               |
-| foo.bar                | Tests\Stubs\LocalListener        |
-| other.foo.bar          | Tests\Stubs\LocalListener        |
-|                        | Tests\Stubs\AnotherLocalListener |
+| foo.bar                | Tests\Stubs\LocalListener          |
+| other.foo.bar          | Tests\Stubs\LocalListener          |
+|                        | Tests\Stubs\AnotherLocalListener   |
 +------------------------+------------------------------------+
 ```
 
