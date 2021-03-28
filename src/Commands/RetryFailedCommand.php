@@ -31,17 +31,17 @@ class RetryFailedCommand extends Command
     /**
      * @var MessagesFailer
      */
-    private $failer;
+    private MessagesFailer $failer;
 
     /**
      * @var Repository
      */
-    private $repository;
+    private Repository $repository;
 
     /**
      * @var string[]
      */
-    private $specifications = [
+    private array $specifications = [
         'id' => IdentifierSpecification::class,
         'receiver' => ReceiverSpecification::class,
         'stream' => StreamSpecification::class,
@@ -92,9 +92,8 @@ class RetryFailedCommand extends Command
     protected function retryBy(array $filters): int
     {
         $specification = $this->prepareSpecification(array_filter($filters));
-        $messages = $this->repository->all()->filter(static function (FailedMessage $message) use ($specification) {
-            return $specification->isSatisfiedBy($message);
-        });
+        $messages = $this->repository->all()
+            ->filter(static fn(FailedMessage $message) => $specification->isSatisfiedBy($message));
 
         if ($messages->isEmpty()) {
             $this->info('There are no failed messages matching your criteria.');

@@ -21,7 +21,7 @@ class FlushFailedCommand extends Command
     /**
      * @var Repository
      */
-    private $repository;
+    private Repository $repository;
 
     /**
      * FailedListCommand constructor.

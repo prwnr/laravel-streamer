@@ -22,12 +22,12 @@ class ListFailedCommand extends Command
     /**
      * @var Repository
      */
-    private $repository;
+    private Repository $repository;
 
     /**
      * @var string[]
      */
-    private $compactHeaders = [
+    private array $compactHeaders = [
         'ID',
         'Stream',
         'Error',
@@ -36,7 +36,7 @@ class ListFailedCommand extends Command
     /**
      * @var string[]
      */
-    private $headers = [
+    private array $headers = [
         'ID',
         'Stream',
         'Receiver',
