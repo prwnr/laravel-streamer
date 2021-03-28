@@ -9,20 +9,13 @@ use Prwnr\Streamer\Contracts\Event;
  */
 class EloquentModelEvent implements Event
 {
-    /**
-     * @var string
-     */
-    private $name;
-
-    /**
-     * @var array
-     */
-    private $payload;
+    private string $name;
+    private array $payload;
 
     /**
      * EloquentModelEvent constructor.
-     * @param string $name
-     * @param array $payload
+     * @param  string  $name
+     * @param  array  $payload
      */
     public function __construct(string $name, array $payload)
     {

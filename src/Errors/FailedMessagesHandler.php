@@ -12,10 +12,7 @@ use Prwnr\Streamer\Stream\Range;
 
 class FailedMessagesHandler implements MessagesFailer
 {
-    /**
-     * @var Repository
-     */
-    private $repository;
+    private Repository $repository;
 
     /**
      * MessagesErrorHandler constructor.

@@ -2,19 +2,16 @@
 
 namespace Prwnr\Streamer\Concerns;
 
+use Illuminate\Database\Eloquent\Model;
 use Prwnr\Streamer\Eloquent\EloquentModelEvent;
 use Prwnr\Streamer\Facades\Streamer;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Trait EmitsStreamerEvents.
  */
 trait EmitsStreamerEvents
 {
-    /**
-     * @var string
-     */
-    protected $baseEventName;
+    protected string $baseEventName;
 
     /**
      * Boot event listeners.

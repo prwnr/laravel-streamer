@@ -9,7 +9,6 @@ interface Emitter
 {
     /**
      * @param  Event  $event
-     *
      * @param  string  $id
      * @return string
      */
