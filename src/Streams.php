@@ -12,10 +12,7 @@ class Streams
 {
     use ConnectsWithRedis;
 
-    /**
-     * @var array
-     */
-    private $streams;
+    private array $streams;
 
     /**
      * Streams constructor.

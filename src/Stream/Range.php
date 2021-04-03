@@ -12,20 +12,9 @@ class Range
     public const FORWARD = 1;
     public const BACKWARD = 2;
 
-    /**
-     * @var string
-     */
-    private $start;
-
-    /**
-     * @var string
-     */
-    private $stop;
-
-    /**
-     * @var int
-     */
-    private $direction;
+    private string $start;
+    private string $stop;
+    private int $direction;
 
     /**
      * @return string

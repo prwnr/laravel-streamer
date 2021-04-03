@@ -2,13 +2,12 @@
 
 namespace Prwnr\Streamer\EventDispatcher;
 
-use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Prwnr\Streamer\Contracts\Emitter;
 use Prwnr\Streamer\Contracts\Event;
+use Prwnr\Streamer\Contracts\History;
 use Prwnr\Streamer\Contracts\Listener;
 use Prwnr\Streamer\Contracts\Replayable;
-use Prwnr\Streamer\Contracts\History;
 use Prwnr\Streamer\Contracts\Waitable;
 use Prwnr\Streamer\History\Snapshot;
 use Prwnr\Streamer\Stream;
@@ -19,59 +18,31 @@ use Throwable;
  */
 class Streamer implements Emitter, Listener
 {
-    /**
-     * @var string
-     */
-    protected $startFrom;
 
     /**
      * Milliseconds.
-     *
-     * @var int
      */
-    protected $readTimeout;
+    protected int $readTimeout;
 
     /**
      * Milliseconds.
-     *
-     * @var int
      */
-    protected $listenTimeout;
+    protected int $listenTimeout;
 
     /**
      * Seconds.
-     *
-     * @var int
      */
-    protected $readSleep;
+    protected int $readSleep;
+
+    protected string $startFrom;
+    private string $group;
+    private string $consumer;
+    private bool $canceled = false;
+    private bool $inLoop = false;
+    private History $history;
 
     /**
-     * @var string
-     */
-    private $group;
-
-    /**
-     * @var string
-     */
-    private $consumer;
-
-    /**
-     * @var bool
-     */
-    private $canceled = false;
-
-    /**
-     * @var bool
-     */
-    private $inLoop = false;
-
-    /**
-     * @var History
-     */
-    private $history;
-
-    /**
-     * @param string $startFrom
+     * @param  string  $startFrom
      *
      * @return Streamer
      */

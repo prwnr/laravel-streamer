@@ -21,10 +21,7 @@ class Stream implements Waitable
     public const NEW_ENTRIES = '$';
     public const FROM_START = '0';
 
-    /**
-     * @var string
-     */
-    private $name;
+    private string $name;
 
     /**
      * @return string

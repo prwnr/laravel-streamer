@@ -18,26 +18,23 @@ class Snapshot implements Arrayable
      *
      * @var string
      */
-    private $id;
+    private string $id;
 
     /**
      * Event name.
      *
      * @var string
      */
-    private $name;
+    private string $name;
 
     /**
      * Unique event resource identifier.
      *
      * @var string
      */
-    private $identifier;
+    private string $identifier;
 
-    /**
-     * @var Carbon
-     */
-    private $date;
+    private Carbon $date;
 
     /**
      * Snapshot constructor.

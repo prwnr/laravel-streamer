@@ -2,6 +2,7 @@
 
 namespace Prwnr\Streamer\EventDispatcher;
 
+use JsonException;
 use Prwnr\Streamer\Concerns\HashableMessage;
 use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\StreamableMessage;
@@ -13,10 +14,7 @@ class Message implements StreamableMessage
 {
     use HashableMessage;
 
-    /**
-     * @var array
-     */
-    protected $content;
+    protected array $content;
 
     /**
      * @inheritdoc}
@@ -31,17 +29,18 @@ class Message implements StreamableMessage
      *
      * @param  array  $meta
      * @param  array  $data
+     * @throws JsonException
      */
     public function __construct(array $meta, array $data)
     {
         $payload = [
-            '_id'     => $meta['_id'] ?? '*',
-            'type'    => $meta['type'] ?? Event::TYPE_EVENT,
+            '_id' => $meta['_id'] ?? '*',
+            'type' => $meta['type'] ?? Event::TYPE_EVENT,
             'version' => '1.3',
-            'name'    => $meta['name'],
-            'domain'  => $meta['domain'],
+            'name' => $meta['name'],
+            'domain' => $meta['domain'],
             'created' => time(),
-            'data'    => json_encode($data),
+            'data' => json_encode($data, JSON_THROW_ON_ERROR),
         ];
 
         $this->content = $payload;
