@@ -2,13 +2,12 @@
 
 namespace Prwnr\Streamer\EventDispatcher;
 
-use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Prwnr\Streamer\Contracts\Emitter;
 use Prwnr\Streamer\Contracts\Event;
+use Prwnr\Streamer\Contracts\History;
 use Prwnr\Streamer\Contracts\Listener;
 use Prwnr\Streamer\Contracts\Replayable;
-use Prwnr\Streamer\Contracts\History;
 use Prwnr\Streamer\Contracts\Waitable;
 use Prwnr\Streamer\History\Snapshot;
 use Prwnr\Streamer\Stream;
@@ -71,7 +70,7 @@ class Streamer implements Emitter, Listener
     private $history;
 
     /**
-     * @param string $startFrom
+     * @param  string  $startFrom
      *
      * @return Streamer
      */
@@ -99,8 +98,8 @@ class Streamer implements Emitter, Listener
     }
 
     /**
-     * @param string $consumer
-     * @param string $group
+     * @param  string  $consumer
+     * @param  string  $group
      *
      * @return Streamer
      */
@@ -118,9 +117,9 @@ class Streamer implements Emitter, Listener
     public function emit(Event $event, string $id = '*'): string
     {
         $meta = [
-            'type'    => $event->type(),
-            'domain'  => config('streamer.domain'),
-            'name'    => $event->name(),
+            'type' => $event->type(),
+            'domain' => config('streamer.domain'),
+            'name' => $event->name(),
             'created' => time(),
         ];
 
@@ -140,21 +139,29 @@ class Streamer implements Emitter, Listener
      * Handler is invoked with \Prwnr\Streamer\EventDispatcher\ReceivedMessage instance as first argument
      * and with \Prwnr\Streamer\EventDispatcher\Streamer as second argument
      * {@inheritdoc}
+     * @throws Throwable
      */
     public function listen(string $event, callable $handler): void
     {
         if ($this->inLoop) {
             return;
         }
+
         $stream = new Stream($event);
-        if ($this->group && $this->consumer) {
+
+        try {
+            if (!$this->group || !$this->consumer) {
+                $this->listenOn($stream, $handler);
+                return;
+            }
+
             $this->adjustGroupReadTimeout();
             $this->listenOn(new Stream\Consumer($this->consumer, $stream, $this->group), $handler);
-
-            return;
+        } catch (Throwable $e) {
+            throw $e;
+        } finally {
+            $this->inLoop = false;
         }
-
-        $this->listenOn($stream, $handler);
     }
 
     /**
@@ -166,8 +173,8 @@ class Streamer implements Emitter, Listener
     }
 
     /**
-     * @param Waitable $on
-     * @param callable $handler
+     * @param  Waitable  $on
+     * @param  callable  $handler
      */
     private function listenOn(Waitable $on, callable $handler): void
     {
@@ -191,14 +198,12 @@ class Streamer implements Emitter, Listener
             $lastSeenId = $lastSeenId ?: $on->getNewEntriesKey();
             $start = microtime(true) * 1000;
         }
-
-        $this->inLoop = false;
     }
 
     /**
-     * @param array    $payload
-     * @param Waitable $on
-     * @param callable $handler
+     * @param  array  $payload
+     * @param  Waitable  $on
+     * @param  callable  $handler
      *
      * @return string
      */
@@ -222,9 +227,9 @@ class Streamer implements Emitter, Listener
     }
 
     /**
-     * @param string   $messageId
-     * @param array    $message
-     * @param callable $handler
+     * @param  string  $messageId
+     * @param  array  $message
+     * @param  callable  $handler
      */
     private function forward(string $messageId, array $message, callable $handler): void
     {
@@ -244,7 +249,7 @@ class Streamer implements Emitter, Listener
     }
 
     /**
-     * @param float $start
+     * @param  float  $start
      *
      * @return bool
      */

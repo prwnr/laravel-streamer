@@ -120,6 +120,8 @@ listening for only new events. This command however has few options that are ext
 --consumer= : Name of your group consumer. If not provided a name will be created as groupname-timestamp
 --reclaim= : Milliseconds of pending messages idle time, that should be reclaimed for current consumer in this group. Can be only used with group listening
 --last_id= : ID from which listener should start reading messages (using 0-0 will process all old messages)
+--keep-alive : Will keep listener alive when any unexpected non-listener related error will occur by simply restarting listening
+--max-attempts= : Number of maximum attempts to restart a listener on an unexpected non-listener related error (requires --keep-alive to be used)
 ```
 
 When `consumer` and `group` options are being in use, every message on a stream will be marked as acknowledged for the

@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Exception;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
 use Prwnr\Streamer\Errors\MessagesRepository;
 use Prwnr\Streamer\Facades\Streamer;
@@ -112,8 +113,7 @@ class ListenCommandTest extends TestCase
             ->assertExitCode(0);
     }
 
-    public function test_command_called_with_events_while_one_of_them_throws_exception_and_stores_failed_messages_info(
-    ): void
+    public function test_command_called_with_events_while_one_of_them_throws_exception_and_stores_failed_messages_info(): void
     {
         $listeners = [
             ExceptionalListener::class,
@@ -262,14 +262,68 @@ class ListenCommandTest extends TestCase
         $this->withLocalListenersConfigured($listeners);
         $args = [
             'event'      => 'foo.bar',
-            '--last_id'  => '0-0',
-            '--group'    => 'bar',
+            '--last_id' => '0-0',
+            '--group' => 'bar',
             '--consumer' => 'foobarB',
-            '--reclaim'  => '10000',
+            '--reclaim' => '10000',
         ];
 
         $this->doesntExpectListenersToBeCalled($listeners);
         $this->artisan('streamer:listen', $args)
+            ->assertExitCode(0);
+    }
+
+    public function test_command_is_killed_when_unexpected_non_listener_exception_occurs(): void
+    {
+        $this->withLocalListenersConfigured([LocalListener::class]);
+
+        $mock = $this->mock(\Prwnr\Streamer\EventDispatcher\Streamer::class);
+        $mock->shouldReceive('listen')
+            ->andThrow(Exception::class, 'Error occurred');
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Error occurred');
+
+        $this->artisan('streamer:listen', ['event' => 'foo.bar']);
+    }
+
+    public function test_command_is_kept_alive_when_unexpected_non_listener_exception_occurs(): void
+    {
+        $this->withLocalListenersConfigured([LocalListener::class]);
+
+        $mock = $this->mock(\Prwnr\Streamer\EventDispatcher\Streamer::class);
+        $mock->shouldReceive('listen')
+            ->once()
+            ->andThrow(Exception::class, 'Error occurred');
+
+        $mock->shouldReceive('listen')
+            ->once()
+            ->andReturn();
+
+        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--keep-alive' => true])
+            ->expectsOutput('Error occurred')
+            ->expectsOutput('Starting listener again due to unexpected error.')
+            ->assertExitCode(0);
+    }
+
+    public function test_command_is_kept_alive_when_unexpected_non_listener_exception_occurs_with_maximum_attempts_limit(
+    ): void
+    {
+        $this->withLocalListenersConfigured([LocalListener::class]);
+
+        $mock = $this->mock(\Prwnr\Streamer\EventDispatcher\Streamer::class);
+        $mock->shouldReceive('listen')
+            ->times(3)
+            ->andThrow(Exception::class, 'Error occurred');
+
+        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--keep-alive' => true, '--max-attempts' => 2])
+            ->expectsOutput('Error occurred')
+            ->expectsOutput('Starting listener again due to unexpected error.')
+            ->expectsOutput('Attempts left: 2')
+            ->expectsOutput('Error occurred')
+            ->expectsOutput('Starting listener again due to unexpected error.')
+            ->expectsOutput('Attempts left: 1')
+            ->expectsOutput('Error occurred')
             ->assertExitCode(0);
     }
 }
