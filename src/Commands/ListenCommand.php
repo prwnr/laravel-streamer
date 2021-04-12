@@ -4,13 +4,14 @@ namespace Prwnr\Streamer\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
-use Illuminate\Container\Container;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Prwnr\Streamer\Contracts\Errors\MessagesFailer;
 use Prwnr\Streamer\Contracts\MessageReceiver;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\EventDispatcher\Streamer;
 use Prwnr\Streamer\ListenersStack;
 use Prwnr\Streamer\Stream;
+use Throwable;
 
 /**
  * Class ListenCommand.
@@ -27,7 +28,9 @@ class ListenCommand extends Command
                             {--group= : Name of your streaming group. Only when group is provided listener will listen on group as consumer}
                             {--consumer= : Name of your group consumer. If not provided a name will be created as groupname-timestamp}
                             {--reclaim= : Milliseconds of pending messages idle time, that should be reclaimed for current consumer in this group. Can be only used with group listening}
-                            {--last_id= : ID from which listener should start reading messages}';
+                            {--last_id= : ID from which listener should start reading messages}
+                            {--keep-alive : Will keep listener alive when any unexpected non-listener related error will occur by simply restarting listening.}
+                            {--max-attempts= : Number of maximum attempts to restart a listener on an unexpected non-listener related error}';
 
     /**
      * The console command description.
@@ -47,6 +50,11 @@ class ListenCommand extends Command
     private $failer;
 
     /**
+     * @var null|int
+     */
+    private $maxAttempts;
+
+    /**
      * ListenCommand constructor.
      *
      * @param  Streamer  $streamer
@@ -63,7 +71,7 @@ class ListenCommand extends Command
     /**
      * Execute the console command.
      *
-     * @throws Exception
+     * @throws Throwable
      */
     public function handle(): int
     {
@@ -85,10 +93,10 @@ class ListenCommand extends Command
             $this->setupGroupListening($stream);
         }
 
-        $container = Container::getInstance();
-        $this->streamer->listen($event, function (ReceivedMessage $message) use ($localListeners, $container) {
+        $this->maxAttempts = $this->option('max-attempts');
+        $this->listen($event, function (ReceivedMessage $message) use ($localListeners) {
             foreach ($localListeners as $listener) {
-                $receiver = $container->make($listener);
+                $receiver = app()->make($listener);
                 if (!$receiver instanceof MessageReceiver) {
                     $this->error("Listener class [{$listener}] needs to implement MessageReceiver");
                     continue;
@@ -108,6 +116,38 @@ class ListenCommand extends Command
         });
 
         return 0;
+    }
+
+    /**
+     * @param  string  $event
+     * @param  callable  $handler
+     * @throws BindingResolutionException
+     * @throws Throwable
+     */
+    private function listen(string $event, callable $handler): void
+    {
+        try {
+            $this->streamer->listen($event, $handler);
+        } catch (Throwable $e) {
+            if (!$this->option('keep-alive')) {
+                throw $e;
+            }
+
+            $this->error($e->getMessage());
+            report($e);
+
+            if ($this->maxAttempts === 0) {
+                return;
+            }
+
+            $this->warn('Starting listener again due to unexpected error.');
+            if ($this->maxAttempts !== null) {
+                $this->warn("Attempts left: $this->maxAttempts");
+                $this->maxAttempts--;
+            }
+
+            $this->listen($event, $handler);
+        }
     }
 
     /**
@@ -166,9 +206,9 @@ class ListenCommand extends Command
     }
 
     /**
-     * @param ReceivedMessage $message
-     * @param string $listener
-     * @param Exception $e
+     * @param  ReceivedMessage  $message
+     * @param  string  $listener
+     * @param  Exception  $e
      */
     private function printError(ReceivedMessage $message, string $listener, Exception $e): void
     {
