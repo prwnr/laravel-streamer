@@ -9,6 +9,7 @@ use Prwnr\Streamer\Contracts\MessageReceiver;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\Exceptions\MessageRetryFailedException;
 use Prwnr\Streamer\Stream\Range;
+use Throwable;
 
 class FailedMessagesHandler implements MessagesFailer
 {
@@ -43,7 +44,7 @@ class FailedMessagesHandler implements MessagesFailer
     /**
      * @inheritDoc
      * @throws MessageRetryFailedException
-     * @throws Exception
+     * @throws Throwable
      */
     public function retry(FailedMessage $message): void
     {
@@ -60,7 +61,7 @@ class FailedMessagesHandler implements MessagesFailer
         try {
             $receivedMessage = new ReceivedMessage($message->getId(), $streamMessage);
             $listener->handle($receivedMessage);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             if (!$receivedMessage) {
                 throw $e;
             }

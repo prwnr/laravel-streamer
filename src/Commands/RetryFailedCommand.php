@@ -118,6 +118,8 @@ class RetryFailedCommand extends Command
                 $this->failer->retry($message);
                 $this->printSuccess($message);
             } catch (MessageRetryFailedException $e) {
+                report($e);
+
                 $this->error($e->getMessage());
             }
         }
