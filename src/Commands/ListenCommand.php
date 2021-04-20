@@ -104,7 +104,9 @@ class ListenCommand extends Command
 
                 try {
                     $receiver->handle($message);
-                } catch (Exception $e) {
+                } catch (Throwable $e) {
+                    report($e);
+
                     $this->printError($message, $listener, $e);
                     $this->failer->store($message, $receiver, $e);
 
