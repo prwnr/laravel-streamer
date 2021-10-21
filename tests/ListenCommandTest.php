@@ -328,7 +328,7 @@ class ListenCommandTest extends TestCase
             ->assertExitCode(0);
     }
 
-    public function test_command_called_with_prune_will_delete_messages_from_stream_on_success(): void
+    public function test_command_called_with_purge_will_delete_messages_from_stream_on_success(): void
     {
         $listeners = [
             LocalListener::class,
@@ -338,18 +338,19 @@ class ListenCommandTest extends TestCase
         $id = Streamer::emit($this->makeEvent());
 
         $this->expectsListenersToBeCalled($listeners);
-        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0', '--prune' => true])
+        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0', '--purge' => true])
             ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
                 LocalListener::class))
             ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
                 AnotherLocalListener::class))
+            ->expectsOutput("Message [$id] has been purged from the 'foo.bar' stream.")
             ->assertExitCode(0);
 
         $stream = new Stream('foo.bar');
         $this->assertCount(0, $stream->read());
     }
 
-    public function test_command_called_with_prune_will_not_delete_messages_from_stream_on_at_least_one_failure(): void
+    public function test_command_called_with_purge_will_not_delete_messages_from_stream_on_at_least_one_failure(): void
     {
         $listeners = [
             ExceptionalListener::class,
@@ -363,7 +364,7 @@ class ListenCommandTest extends TestCase
         $printError = sprintf("Listener error. Failed processing message with ID %s on '%s' stream by %s. Error: Listener failed.",
             $id, $event->name(), ExceptionalListener::class);
 
-        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0', '--prune' => true])
+        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0', '--purge' => true])
             ->expectsOutput($printError)
             ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
                 LocalListener::class))

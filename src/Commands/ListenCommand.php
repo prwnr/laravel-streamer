@@ -113,8 +113,8 @@ class ListenCommand extends Command
                 $this->printInfo($message, $listener);
             }
 
-            if (!$failed && $this->option('prune')) {
-                $this->prune($message);
+            if (!$failed && $this->option('purge')) {
+                $this->purge($message);
             }
         });
 
@@ -197,12 +197,18 @@ class ListenCommand extends Command
     }
 
     /**
+     * Removes message from the stream.
+     * No verification for other consumers is made in this mode.
+     *
      * @param  ReceivedMessage  $message
      */
-    private function prune(ReceivedMessage $message): void
+    private function purge(ReceivedMessage $message): void
     {
         $stream = new Stream($message->getEventName());
-        $stream->delete($message->getId());
+        $result = $stream->delete($message->getId());
+        if ($result) {
+            $this->info("Message [{$message->getId()}] has been purged from the '{$message->getEventName()}' stream.");
+        }
     }
 
     /**
@@ -211,10 +217,12 @@ class ListenCommand extends Command
      */
     private function printInfo(ReceivedMessage $message, string $listener): void
     {
-        $content = $message->getContent();
-        $stream = $content['name'];
-
-        $this->info("Processed message [{$message->getId()}] on '$stream' stream by [$listener] listener.");
+        $this->info(sprintf(
+            "Processed message [%s] on '%s' stream by [%s] listener.",
+            $message->getId(),
+            $message->getEventName(),
+            $listener
+        ));
     }
 
     /**
@@ -224,12 +232,13 @@ class ListenCommand extends Command
      */
     private function printError(ReceivedMessage $message, string $listener, Exception $e): void
     {
-        $content = $message->getContent();
-        $stream = $content['name'];
-
-        $error = "Listener error. Failed processing message with ID {$message->getId()} on '$stream' stream by $listener. Error: {$e->getMessage()}";
-
-        $this->error($error);
+        $this->error(sprintf(
+            "Listener error. Failed processing message with ID %s on '%s' stream by %s. Error: %s",
+            $message->getId(),
+            $message->getEventName(),
+            $listener,
+            $e->getMessage()
+        ));
     }
 
     /**
@@ -277,7 +286,7 @@ class ListenCommand extends Command
                 'Number of maximum attempts to restart a listener on an unexpected non-listener related error'
             ],
             [
-                'prune', null, InputOption::VALUE_NONE,
+                'purge', null, InputOption::VALUE_NONE,
                 'Will remove message from the stream if it will be processed successfully by all listeners in the current stack.'
             ],
             [
