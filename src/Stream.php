@@ -2,6 +2,7 @@
 
 namespace Prwnr\Streamer;
 
+use BadMethodCallException;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\Contracts\Waitable;
@@ -189,7 +190,7 @@ class Stream implements Waitable
 
     /**
      * Returns XINFO for stream with FULL flag.
-     * Available since Redis v6.0.0, in lower version fallbacks to base info()
+     * Available since Redis v6.0.0.
      *
      * @return array
      * @throws StreamNotFoundException
@@ -198,7 +199,7 @@ class Stream implements Waitable
     {
         $info = $this->redis()->info();
         if (!version_compare($info['redis_version'], '6.0.0', '>=')) {
-            return $this->info();
+            throw new BadMethodCallException('fullInfo only available for Redis 6.0 or above.');
         }
 
         $result = $this->redis()->xInfo(self::STREAM, $this->name, 'FULL');

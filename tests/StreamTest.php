@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use BadMethodCallException;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
 use Prwnr\Streamer\Stream;
 use Prwnr\Streamer\Stream\Range;
@@ -313,6 +314,16 @@ class StreamTest extends TestCase
     public function test_full_info_returned_for_stream(): void
     {
         $stream = new Stream('foo');
+
+        $info = $this->redis['phpredis']->connection()->info();
+        if (!version_compare($info['redis_version'], '6.0.0', '>=')) {
+            $this->expectException(BadMethodCallException::class);
+            $this->expectExceptionMessage('fullInfo only available for Redis 6.0 or above.');
+
+            $stream->fullInfo();
+            return;
+        }
+
         //populate stream with messages and group
         $stream->createGroup('bar');
         $message = $this->makeMessage();
