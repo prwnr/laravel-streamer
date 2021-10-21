@@ -64,10 +64,10 @@ class Consumer implements Waitable
     /**
      * {@inheritdoc}
      */
-    public function await(string $lastId = self::NEW_ENTRIES, int $timeout = 0): ?array
+    public function await(string $lastSeenId = self::NEW_ENTRIES, int $timeout = 0): ?array
     {
         return $this->redis()->xReadGroup(
-            $this->group, $this->consumer, [$this->stream->getName() => $lastId], null, $timeout
+            $this->group, $this->consumer, [$this->stream->getName() => $lastSeenId], null, $timeout
         );
     }
 
@@ -95,18 +95,19 @@ class Consumer implements Waitable
     }
 
     /**
-     * Claim all given messages that have minimum idle time of $idleTime miliseconds.
+     * Claim all given messages that have minimum idle time of $idleTime milliseconds.
      *
-     * @param array $ids
-     * @param int   $idleTime
-     * @param bool  $justId
+     * @param  array  $ids
+     * @param  int  $idleTime
+     * @param  bool  $justId
      *
      * @return array
      */
-    public function claim(array $ids, int $idleTime, $justId = true): array
+    public function claim(array $ids, int $idleTime, bool $justId = true): array
     {
         if ($justId) {
-            return $this->redis()->xClaim($this->stream->getName(), $this->group, $this->consumer, $idleTime, $ids, ['JUSTID']);
+            return $this->redis()->xClaim($this->stream->getName(), $this->group, $this->consumer, $idleTime, $ids,
+                ['JUSTID']);
         }
 
         return $this->redis()->xClaim($this->stream->getName(), $this->group, $this->consumer, $idleTime, $ids);

@@ -15,6 +15,7 @@ class StreamTest extends TestCase
     {
         parent::setUp();
         $this->setUpRedis();
+        $this->redis['phpredis']->connection()->flushall();
     }
 
     protected function tearDown(): void
@@ -294,7 +295,12 @@ class StreamTest extends TestCase
 
         $this->assertNotEmpty($actual);
         $this->assertCount(7, $actual);
-        foreach (['length', 'radix-tree-keys', 'radix-tree-nodes', 'groups', 'last-generated-id', 'first-entry', 'last-entry'] as $key) {
+        foreach (
+            [
+                'length', 'radix-tree-keys', 'radix-tree-nodes', 'groups', 'last-generated-id', 'first-entry',
+                'last-entry'
+            ] as $key
+        ) {
             $this->assertArrayHasKey($key, $actual);
         }
         $this->assertEquals(10, $actual['length']);
@@ -302,6 +308,37 @@ class StreamTest extends TestCase
         $this->assertEquals($messages[9], $actual['last-generated-id']);
         $this->assertArrayHasKey($messages[0], $actual['first-entry']);
         $this->assertArrayHasKey($messages[9], $actual['last-entry']);
+    }
+
+    public function test_full_info_returned_for_stream(): void
+    {
+        $stream = new Stream('foo');
+        //populate stream with messages and group
+        $stream->createGroup('bar');
+        $message = $this->makeMessage();
+        $messages = [];
+        for ($i = 0; $i < 10; $i++) {
+            $messages[] = $stream->add($message);
+        }
+
+        $actual = $stream->fullInfo();
+
+        $this->assertNotEmpty($actual);
+        $this->assertCount(6, $actual);
+        foreach (
+            [
+                'length', 'radix-tree-keys', 'radix-tree-nodes', 'last-generated-id', 'last-generated-id', 'entries',
+                'groups'
+            ] as $key
+        ) {
+            $this->assertArrayHasKey($key, $actual);
+        }
+        $this->assertEquals(10, $actual['length']);
+        $this->assertCount(1, $actual['groups']);
+        $this->assertCount(10, $actual['entries']);
+        $this->assertEquals($messages[9], $actual['last-generated-id']);
+
+        $this->assertNotEquals($actual, $stream->info());
     }
 
     public function test_info_throws_stream_not_found_exception_when_stream_does_not_exists(): void

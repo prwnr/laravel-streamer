@@ -11,6 +11,8 @@ use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\EventDispatcher\Streamer;
 use Prwnr\Streamer\ListenersStack;
 use Prwnr\Streamer\Stream;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Throwable;
 
 /**
@@ -19,18 +21,11 @@ use Throwable;
 class ListenCommand extends Command
 {
     /**
-     * The name and signature of the console command.
+     * The console command name.
      *
      * @var string
      */
-    protected $signature = 'streamer:listen
-                            {event : Name of an event that should be listened to}
-                            {--group= : Name of your streaming group. Only when group is provided listener will listen on group as consumer}
-                            {--consumer= : Name of your group consumer. If not provided a name will be created as groupname-timestamp}
-                            {--reclaim= : Milliseconds of pending messages idle time, that should be reclaimed for current consumer in this group. Can be only used with group listening}
-                            {--last_id= : ID from which listener should start reading messages}
-                            {--keep-alive : Will keep listener alive when any unexpected non-listener related error will occur by simply restarting listening.}
-                            {--max-attempts= : Number of maximum attempts to restart a listener on an unexpected non-listener related error}';
+    protected $name = 'streamer:listen';
 
     /**
      * The console command description.
@@ -220,5 +215,52 @@ class ListenCommand extends Command
         $error = "Listener error. Failed processing message with ID {$message->getId()} on '$stream' stream by $listener. Error: {$e->getMessage()}";
 
         $this->error($error);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getArguments(): array
+    {
+        return [
+            [
+                'event',
+                InputArgument::REQUIRED,
+                'Name of an event that should be listened to'
+            ],
+        ];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getOptions(): array
+    {
+        return [
+            [
+                'group', null, InputOption::VALUE_REQUIRED,
+                'Name of your streaming group. Only when group is provided listener will listen on group as consumer'
+            ],
+            [
+                'consumer', null, InputOption::VALUE_REQUIRED,
+                'Name of your group consumer. If not provided a name will be created as groupname-timestamp'
+            ],
+            [
+                'reclaim', null, InputOption::VALUE_REQUIRED,
+                'Milliseconds of pending messages idle time, that should be reclaimed for current consumer in this group. Can be only used with group listening'
+            ],
+            [
+                'last_id', null, InputOption::VALUE_REQUIRED,
+                'ID from which listener should start reading messages'
+            ],
+            [
+                'keep-alive', null, InputOption::VALUE_NONE,
+                'Will keep listener alive when any unexpected non-listener related error will occur by simply restarting listening.'
+            ],
+            [
+                'max-attempts', null, InputOption::VALUE_REQUIRED,
+                'Number of maximum attempts to restart a listener on an unexpected non-listener related error'
+            ],
+        ];
     }
 }
