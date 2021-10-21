@@ -20,6 +20,7 @@ class ListenCommandTest extends TestCase
     {
         parent::setUp();
         $this->setUpRedis();
+        $this->redis['phpredis']->connection()->flushall();
         $this->app['config']->set('streamer.listen_timeout', 0.01);
         $this->app['config']->set('streamer.stream_read_timeout', 0.01);
     }
@@ -325,5 +326,53 @@ class ListenCommandTest extends TestCase
             ->expectsOutput('Attempts left: 1')
             ->expectsOutput('Error occurred')
             ->assertExitCode(0);
+    }
+
+    public function test_command_called_with_prune_will_delete_messages_from_stream_on_success(): void
+    {
+        $listeners = [
+            LocalListener::class,
+            AnotherLocalListener::class,
+        ];
+        $this->withLocalListenersConfigured($listeners);
+        $id = Streamer::emit($this->makeEvent());
+
+        $this->expectsListenersToBeCalled($listeners);
+        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0', '--prune' => true])
+            ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                LocalListener::class))
+            ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                AnotherLocalListener::class))
+            ->assertExitCode(0);
+
+        $stream = new Stream('foo.bar');
+        $this->assertCount(0, $stream->read());
+    }
+
+    public function test_command_called_with_prune_will_not_delete_messages_from_stream_on_at_least_one_failure(): void
+    {
+        $listeners = [
+            ExceptionalListener::class,
+            LocalListener::class,
+        ];
+        $this->withLocalListenersConfigured($listeners);
+
+        $event = $this->makeEvent();
+        $id = Streamer::emit($event);
+
+        $printError = sprintf("Listener error. Failed processing message with ID %s on '%s' stream by %s. Error: Listener failed.",
+            $id, $event->name(), ExceptionalListener::class);
+
+        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0', '--prune' => true])
+            ->expectsOutput($printError)
+            ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                LocalListener::class))
+            ->assertExitCode(0);
+
+        $repository = new MessagesRepository();
+        $this->assertEquals(1, $repository->count());
+
+        $stream = new Stream('foo.bar');
+        $this->assertCount(1, $stream->read());
     }
 }

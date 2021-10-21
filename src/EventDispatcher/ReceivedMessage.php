@@ -29,6 +29,14 @@ class ReceivedMessage implements StreamableMessage
     }
 
     /**
+     * @return string
+     */
+    public function getEventName(): string
+    {
+        return $this->content['name'] ?? '';
+    }
+
+    /**
      * @return array
      */
     public function getContent(): array

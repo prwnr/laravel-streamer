@@ -90,16 +90,18 @@ class ListenCommand extends Command
 
         $this->maxAttempts = $this->option('max-attempts');
         $this->listen($event, function (ReceivedMessage $message) use ($localListeners) {
+            $failed = false;
             foreach ($localListeners as $listener) {
                 $receiver = app()->make($listener);
                 if (!$receiver instanceof MessageReceiver) {
-                    $this->error("Listener class [{$listener}] needs to implement MessageReceiver");
+                    $this->error("Listener class [$listener] needs to implement MessageReceiver");
                     continue;
                 }
 
                 try {
                     $receiver->handle($message);
                 } catch (Throwable $e) {
+                    $failed = true;
                     report($e);
 
                     $this->printError($message, $listener, $e);
@@ -109,6 +111,10 @@ class ListenCommand extends Command
                 }
 
                 $this->printInfo($message, $listener);
+            }
+
+            if (!$failed && $this->option('prune')) {
+                $this->prune($message);
             }
         });
 
@@ -192,6 +198,15 @@ class ListenCommand extends Command
 
     /**
      * @param  ReceivedMessage  $message
+     */
+    private function prune(ReceivedMessage $message): void
+    {
+        $stream = new Stream($message->getEventName());
+        $stream->delete($message->getId());
+    }
+
+    /**
+     * @param  ReceivedMessage  $message
      * @param  string  $listener
      */
     private function printInfo(ReceivedMessage $message, string $listener): void
@@ -260,6 +275,14 @@ class ListenCommand extends Command
             [
                 'max-attempts', null, InputOption::VALUE_REQUIRED,
                 'Number of maximum attempts to restart a listener on an unexpected non-listener related error'
+            ],
+            [
+                'prune', null, InputOption::VALUE_NONE,
+                'Will remove message from the stream if it will be processed successfully by all listeners in the current stack.'
+            ],
+            [
+                'archive', null, InputOption::VALUE_NONE,
+                'Will remove message from the stream and store it in database if it will be processed successfully by all listeners in the current stack.'
             ],
         ];
     }

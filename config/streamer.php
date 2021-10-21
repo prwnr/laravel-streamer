@@ -78,4 +78,15 @@ return [
             //\App\Listeners\ExampleListener::class
         ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Archive Model
+    |--------------------------------------------------------------------------
+    |
+    | Model class that should be used to archive the stream message
+    | and store it in database.
+    |
+    */
+    'archive_model' => null,
 ];
