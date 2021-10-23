@@ -5,6 +5,7 @@ namespace Prwnr\Streamer\Commands;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Prwnr\Streamer\Contracts\Archiver;
 use Prwnr\Streamer\Contracts\Errors\MessagesFailer;
 use Prwnr\Streamer\Contracts\MessageReceiver;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
@@ -50,15 +51,22 @@ class ListenCommand extends Command
     private $maxAttempts;
 
     /**
+     * @var Archiver
+     */
+    private $archiver;
+
+    /**
      * ListenCommand constructor.
      *
      * @param  Streamer  $streamer
      * @param  MessagesFailer  $failer
+     * @param  Archiver  $archiver
      */
-    public function __construct(Streamer $streamer, MessagesFailer $failer)
+    public function __construct(Streamer $streamer, MessagesFailer $failer, Archiver $archiver)
     {
         $this->streamer = $streamer;
         $this->failer = $failer;
+        $this->archiver = $archiver;
 
         parent::__construct();
     }
@@ -113,7 +121,15 @@ class ListenCommand extends Command
                 $this->printInfo($message, $listener);
             }
 
-            if (!$failed && $this->option('purge')) {
+            if ($failed) {
+                return;
+            }
+
+            if ($this->option('archive')) {
+                $this->archive($message);
+            }
+
+            if (!$this->option('archive') && $this->option('purge')) {
                 $this->purge($message);
             }
         });
@@ -197,8 +213,24 @@ class ListenCommand extends Command
     }
 
     /**
+     * Removes message from the stream and stores message in DB.
+     * No verification for other consumers is made in this archiving option.
+     *
+     * @param  ReceivedMessage  $message
+     */
+    private function archive(ReceivedMessage $message): void
+    {
+        try {
+            $this->archiver->archive($message);
+            $this->info("Message [{$message->getId()}] has been archived from the '{$message->getEventName()}' stream.");
+        } catch (Exception $e) {
+            $this->warn("Message [{$message->getId()}] from the '{$message->getEventName()}' stream could not be archived. Error: ".$e->getMessage());
+        }
+    }
+
+    /**
      * Removes message from the stream.
-     * No verification for other consumers is made in this mode.
+     * No verification for other consumers is made in this purging option.
      *
      * @param  ReceivedMessage  $message
      */

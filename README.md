@@ -122,12 +122,23 @@ listening for only new events. This command however has few options that are ext
 --last_id= : ID from which listener should start reading messages (using 0-0 will process all old messages)
 --keep-alive : Will keep listener alive when any unexpected non-listener related error will occur by simply restarting listening
 --max-attempts= : Number of maximum attempts to restart a listener on an unexpected non-listener related error (requires --keep-alive to be used)
+--purge : Will remove message from the stream if it will be processed successfully by all listeners in the current stack.
+--archive : Will remove message from the stream and store it in database if it will be processed successfully by all listeners in the current stack.
 ```
 
 When `consumer` and `group` options are being in use, every message on a stream will be marked as acknowledged for the
 given consumer, thus it will not be processed by consequent
 `streamer:listen` command call with the same options. Note that listening from a specific ID without consumer and group
 being set will ignore acknowledgments.
+
+The `purge` and `archive` options (available since v2.6) are designed to be used to release from memory or storage of
+the Redis instance
+(in a cases when there are tons of streamed messages or the payloads are big and Redis runs out of memory/storage). When
+using those options, keep in mind, that they are not going to take into account listeners running in other instances or
+other servers - meaning, that when first listener hooked to specific event will process its messages, the `purge` and
+`archive` options will delete the message not waiting for other listeners to finish. These options in _listen_ command
+are meant more for a monolith usage. To fully use `archive` option see [Stream Archive][#stream-archive] for more
+details and instructions.
 
 #### Failed List
 
@@ -217,6 +228,33 @@ Table example:
 | other.foo.bar          | Tests\Stubs\LocalListener          |
 |                        | Tests\Stubs\AnotherLocalListener   |
 +------------------------+------------------------------------+
+```
+
+### Stream Archive
+
+Stream Archive allows storing processed message in any kind of storage, to free up Redis memory and/or space since 2.6
+version. Archive allows restoring those messages, releasing them back onto the stream.
+
+To fully use archive storage, a new storage driver needs to be written and added to manager. To do so, few quick steps
+needs to be finished:
+
+1) define your storage driver class and make it implement `\Prwnr\Streamer\Contracts\ArchiveStorage` contract. This
+   interface is mandatory.
+2) extend the manager with your driver like this:
+
+```php
+$manager = $this->app->make(StorageManager::class);
+$manager->extend('your_driver_name', static function () {
+    return new YourDriver();
+});
+```
+
+3) define your driver as default in streamer config file
+
+```php
+'archive' => [
+    'storage_driver' => 'your_driver_name'
+]   
 ```
 
 ### Replaying Events

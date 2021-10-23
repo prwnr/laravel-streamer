@@ -4,17 +4,26 @@ namespace Tests;
 
 use Exception;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
+use Prwnr\Streamer\Archiver\StorageManager;
+use Prwnr\Streamer\Contracts\Archiver;
 use Prwnr\Streamer\Errors\MessagesRepository;
+use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\Facades\Streamer;
 use Prwnr\Streamer\Stream;
 use Tests\Stubs\AnotherLocalListener;
 use Tests\Stubs\ExceptionalListener;
 use Tests\Stubs\LocalListener;
+use Tests\Stubs\MemoryArchiveStorage;
 use Tests\Stubs\NotReceiverListener;
 
 class ListenCommandTest extends TestCase
 {
     use InteractsWithRedis;
+
+    /**
+     * @var StorageManager
+     */
+    private $manager;
 
     protected function setUp(): void
     {
@@ -23,6 +32,14 @@ class ListenCommandTest extends TestCase
         $this->redis['phpredis']->connection()->flushall();
         $this->app['config']->set('streamer.listen_timeout', 0.01);
         $this->app['config']->set('streamer.stream_read_timeout', 0.01);
+
+        $this->app['config']->set('streamer.archive.storage_driver', 'memory');
+
+        /** @var StorageManager $manager */
+        $this->manager = $this->app->make(StorageManager::class);
+        $this->manager->extend('memory', static function () {
+            return new MemoryArchiveStorage();
+        });
     }
 
     protected function tearDown(): void
@@ -30,6 +47,8 @@ class ListenCommandTest extends TestCase
         $this->redis['phpredis']->connection()->flushall();
         $this->tearDownRedis();
         parent::tearDown();
+
+        $this->manager = null;
     }
 
     public function test_command_called_without_listeners_configured_exits_with_error(): void
@@ -375,5 +394,62 @@ class ListenCommandTest extends TestCase
 
         $stream = new Stream('foo.bar');
         $this->assertCount(1, $stream->read());
+    }
+
+    public function test_command_called_with_archive_will_delete_messages_from_stream_and_store_in_different_storage(
+    ): void
+    {
+        $listeners = [
+            LocalListener::class,
+            AnotherLocalListener::class,
+        ];
+        $this->withLocalListenersConfigured($listeners);
+        $event = $this->makeEvent();
+        $id = Streamer::emit($event);
+
+        $this->expectsListenersToBeCalled($listeners);
+        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0', '--archive' => true])
+            ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                LocalListener::class))
+            ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                AnotherLocalListener::class))
+            ->expectsOutput("Message [$id] has been archived from the 'foo.bar' stream.")
+            ->assertExitCode(0);
+
+        $stream = new Stream('foo.bar');
+        $this->assertCount(0, $stream->read());
+
+        $message = $this->manager->driver('memory')->find('foo.bar', $id);
+        $this->assertNotNull($message);
+        $this->assertEquals($event->payload(), $message->getData());
+    }
+
+    public function test_command_called_with_archive_fails(): void
+    {
+        $listeners = [
+            LocalListener::class,
+            AnotherLocalListener::class,
+        ];
+        $this->withLocalListenersConfigured($listeners);
+        $id = Streamer::emit($this->makeEvent());
+
+        $mock = $this->mock(Archiver::class);
+        $mock->shouldReceive('archive')
+            ->with(ReceivedMessage::class)
+            ->andThrow(Exception::class, 'Something went wrong');
+
+        $this->expectsListenersToBeCalled($listeners);
+        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0', '--archive' => true])
+            ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                LocalListener::class))
+            ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                AnotherLocalListener::class))
+            ->expectsOutput("Message [$id] from the 'foo.bar' stream could not be archived. Error: Something went wrong")
+            ->assertExitCode(0);
+
+        $stream = new Stream('foo.bar');
+        $this->assertCount(1, $stream->read());
+
+        $this->assertNull($this->manager->driver('memory')->find('foo.bar', $id));
     }
 }

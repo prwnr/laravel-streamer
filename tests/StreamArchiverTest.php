@@ -26,7 +26,7 @@ class StreamArchiverTest extends TestCase
         $this->setUpRedis();
         $this->redis['phpredis']->connection()->flushall();
 
-        config()->set('streamer.archive.storage_driver', 'memory');
+        $this->app['config']->set('streamer.archive.storage_driver', 'memory');
 
         /** @var StorageManager $manager */
         $this->manager = $this->app->make(StorageManager::class);
