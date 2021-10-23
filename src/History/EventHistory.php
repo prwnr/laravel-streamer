@@ -43,8 +43,12 @@ class EventHistory implements History
                 return $result;
             }
 
-            $record = json_decode($range[$snapshot['id']]['data'], true);
+            $message = $range[$snapshot['id']] ?? null;
+            if (!$message) {
+                continue;
+            }
 
+            $record = json_decode($message['data'], true);
             foreach ($record as $field => $value) {
                 $result[$field] = $value;
             }

@@ -81,12 +81,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Archive Model
+    | Archive Storage Driver
     |--------------------------------------------------------------------------
     |
-    | Model class that should be used to archive the stream message
-    | and store it in database.
+    | Name of the driver that should be used by StreamArchiver while performing
+    | archivisation action.
+    | Null driver being the default driver will not store stream message,
+    | that will make it only removed.
     |
+    | To fully use archiver functionality, the driver should be added to
+    | \Prwnr\Streamer\Archiver\StorageManager and save the received message
+    | in some kind of database.
+    |
+    | Driver should implement \Prwnr\Streamer\Contracts\ArchiveStorage contract.
     */
-    'archive_model' => null,
+    'archive' => [
+        'storage_driver' => 'null'
+    ]
 ];

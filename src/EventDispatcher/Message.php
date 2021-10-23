@@ -4,26 +4,20 @@ namespace Prwnr\Streamer\EventDispatcher;
 
 use Prwnr\Streamer\Concerns\HashableMessage;
 use Prwnr\Streamer\Contracts\Event;
-use Prwnr\Streamer\Contracts\StreamableMessage;
 
 /**
  * Class Message.
  */
-class Message implements StreamableMessage
+class Message extends StreamMessage
 {
     use HashableMessage;
 
     /**
-     * @var array
+     * @inheritDoc
      */
-    protected $content;
-
-    /**
-     * @inheritdoc}
-     */
-    public function getContent(): array
+    public function getData(): array
     {
-        return $this->content;
+        return json_decode($this->content['data'], true);
     }
 
     /**
@@ -35,13 +29,13 @@ class Message implements StreamableMessage
     public function __construct(array $meta, array $data)
     {
         $payload = [
-            '_id'     => $meta['_id'] ?? '*',
-            'type'    => $meta['type'] ?? Event::TYPE_EVENT,
+            '_id' => $meta['_id'] ?? '*',
+            'type' => $meta['type'] ?? Event::TYPE_EVENT,
             'version' => '1.3',
-            'name'    => $meta['name'],
-            'domain'  => $meta['domain'],
-            'created' => time(),
-            'data'    => json_encode($data),
+            'name' => $meta['name'],
+            'domain' => $meta['domain'] ?? '',
+            'created' => $meta['created'] ?? time(),
+            'data' => json_encode($data),
         ];
 
         $this->content = $payload;
