@@ -16,20 +16,9 @@ class Consumer implements Waitable
 
     public const NEW_ENTRIES = '>';
 
-    /**
-     * @var string
-     */
-    private $consumer;
-
-    /**
-     * @var Stream
-     */
-    private $stream;
-
-    /**
-     * @var string
-     */
-    private $group;
+    private string $consumer;
+    private Stream $stream;
+    private string $group;
 
     /**
      * Consumer constructor.

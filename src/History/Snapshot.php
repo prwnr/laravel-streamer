@@ -15,29 +15,19 @@ class Snapshot implements Arrayable
 
     /**
      * Stream message ID.
-     *
-     * @var string
      */
-    private $id;
+    private string $id;
 
     /**
      * Event name.
-     *
-     * @var string
      */
-    private $name;
+    private string $name;
 
     /**
      * Unique event resource identifier.
-     *
-     * @var string
      */
-    private $identifier;
-
-    /**
-     * @var Carbon
-     */
-    private $date;
+    private string $identifier;
+    private Carbon $date;
 
     /**
      * Snapshot constructor.

@@ -5,6 +5,7 @@ namespace Tests;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
 use Illuminate\Redis\Connections\Connection;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
+use Redis;
 
 class ConnectionTest extends TestCase
 {
@@ -35,7 +36,7 @@ class ConnectionTest extends TestCase
         };
 
         $this->assertInstanceOf(Connection::class, $foo->bar());
-        $this->assertInstanceOf(\Redis::class, $foo->bar()->client());
+        $this->assertInstanceOf(Redis::class, $foo->bar()->client());
         $this->assertEquals('default', $foo->bar()->getName());
     }
 
@@ -53,7 +54,7 @@ class ConnectionTest extends TestCase
         };
 
         $this->assertInstanceOf(Connection::class, $foo->bar());
-        $this->assertInstanceOf(\Redis::class, $foo->bar()->client());
+        $this->assertInstanceOf(Redis::class, $foo->bar()->client());
         $this->assertEquals('custom', $foo->bar()->getName());
     }
 
@@ -71,7 +72,7 @@ class ConnectionTest extends TestCase
         };
 
         $this->assertInstanceOf(Connection::class, $foo->bar());
-        $this->assertInstanceOf(\Redis::class, $foo->bar()->client());
+        $this->assertInstanceOf(Redis::class, $foo->bar()->client());
         $this->assertIsString($foo->bar()->XADD('foobar', '*', ['key' => 'value']));
         $this->assertEquals(1, $foo->bar()->XLEN('foobar'));
         $this->assertNotEmpty($foo->bar()->XREAD(['foobar' => '0']));

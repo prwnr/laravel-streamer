@@ -22,11 +22,11 @@ class MessagesRepository implements Repository
             return collect();
         }
 
-        return collect($elements)->map(static function ($item) {
-            return new FailedMessage(...array_values(json_decode($item, true)));
-        })->sortBy(static function (FailedMessage $message) {
-            return $message->getDate();
-        });
+        $decode = static fn ($item) => array_values(json_decode($item, true, 512, JSON_THROW_ON_ERROR));
+
+        return collect($elements)
+            ->map(static fn($item) => new FailedMessage(...$decode($item)))
+            ->sortBy(static fn(FailedMessage $message) => $message->getDate());
     }
 
     /**
@@ -42,7 +42,7 @@ class MessagesRepository implements Repository
      */
     public function add(FailedMessage $message): void
     {
-        $this->redis()->sAdd(self::ERRORS_SET, json_encode($message));
+        $this->redis()->sAdd(self::ERRORS_SET, json_encode($message, JSON_THROW_ON_ERROR));
     }
 
     /**
@@ -50,7 +50,7 @@ class MessagesRepository implements Repository
      */
     public function remove(FailedMessage $message): void
     {
-        $this->redis()->sRem(self::ERRORS_SET, json_encode($message));
+        $this->redis()->sRem(self::ERRORS_SET, json_encode($message, JSON_THROW_ON_ERROR));
     }
 
     /**

@@ -30,7 +30,7 @@ class MessageTest extends TestCase
         $this->assertEquals($meta, Arr::except($actual, ['_id', 'version', 'data', 'hash']));
         $this->assertArrayHasKey('hash', $actual);
         $this->assertJson($actual['data']);
-        $this->assertEquals(json_encode($data), $actual['data']);
+        $this->assertEquals(json_encode($data, JSON_THROW_ON_ERROR), $actual['data']);
     }
 
     public function test_received_message_is_created_with_id_and_content(): void
@@ -49,7 +49,7 @@ class MessageTest extends TestCase
         $message = new ReceivedMessage($expectedId, [
             '_id' => $expectedId,
             'name' => 'foo.bar',
-            'data' => json_encode($data),
+            'data' => json_encode($data, JSON_THROW_ON_ERROR),
         ]);
 
         $this->assertInstanceOf(StreamableMessage::class, $message);
@@ -72,7 +72,7 @@ class MessageTest extends TestCase
             'created' => time(),
         ];
         $data = ['foo' => 'bar'];
-        $key = $meta['type'].$meta['name'].$meta['domain'].json_encode($data);
+        $key = $meta['type'].$meta['name'].$meta['domain'].json_encode($data, JSON_THROW_ON_ERROR);
         $hash = hash('SHA256', $key);
 
         $message = new Message($meta, $data);
@@ -88,7 +88,7 @@ class MessageTest extends TestCase
         $message = new class() implements StreamableMessage {
             use HashableMessage;
 
-            protected $content = [];
+            protected array $content = [];
 
             public function __construct()
             {

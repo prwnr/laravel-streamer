@@ -2,6 +2,7 @@
 
 namespace Prwnr\Streamer\EventDispatcher;
 
+use JsonException;
 use Prwnr\Streamer\Concerns\HashableMessage;
 use Prwnr\Streamer\Contracts\Event;
 
@@ -17,7 +18,7 @@ class Message extends StreamMessage
      */
     public function getData(): array
     {
-        return json_decode($this->content['data'], true);
+        return json_decode($this->content['data'], true, 512, JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -25,6 +26,7 @@ class Message extends StreamMessage
      *
      * @param  array  $meta
      * @param  array  $data
+     * @throws JsonException
      */
     public function __construct(array $meta, array $data)
     {
@@ -35,7 +37,7 @@ class Message extends StreamMessage
             'name' => $meta['name'],
             'domain' => $meta['domain'] ?? '',
             'created' => $meta['created'] ?? time(),
-            'data' => json_encode($data),
+            'data' => json_encode($data, JSON_THROW_ON_ERROR),
         ];
 
         $this->content = $payload;

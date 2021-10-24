@@ -63,7 +63,7 @@ class ModelEventsTest extends TestCase
         $this->assertNotEmpty($actual);
         $this->assertArrayHasKey('model.created', $actual);
         $message = array_pop($actual['model.created']);
-        $this->assertEquals(json_encode($expected), $message['data']);
+        $this->assertEquals(json_encode($expected, JSON_THROW_ON_ERROR), $message['data']);
     }
 
     public function test_saving_model_emits_updated_event_to_stream(): void
@@ -91,7 +91,7 @@ class ModelEventsTest extends TestCase
         $this->assertNotEmpty($actual);
         $this->assertArrayHasKey('model.updated', $actual);
         $message = array_pop($actual['model.updated']);
-        $this->assertEquals(json_encode($expected), $message['data']);
+        $this->assertEquals(json_encode($expected, JSON_THROW_ON_ERROR), $message['data']);
     }
 
     public function test_saving_model_without_changes_wont_emit_updated_event_to_stream(): void
@@ -121,7 +121,7 @@ class ModelEventsTest extends TestCase
         $this->assertNotEmpty($actual);
         $this->assertArrayHasKey('model.deleted', $actual);
         $message = array_pop($actual['model.deleted']);
-        $this->assertEquals(json_encode($expected), $message['data']);
+        $this->assertEquals(json_encode($expected, JSON_THROW_ON_ERROR), $message['data']);
     }
 
     public function test_model_with_changed_base_name_emits_different_name_of_event_to_stream(): void
@@ -168,7 +168,7 @@ class ModelEventsTest extends TestCase
         $this->assertNotEmpty($actual);
         $this->assertArrayHasKey('model.with.additional.created', $actual);
         $message = array_pop($actual['model.with.additional.created']);
-        $this->assertEquals(json_encode($expected), $message['data']);
+        $this->assertEquals(json_encode($expected, JSON_THROW_ON_ERROR), $message['data']);
     }
 
     public function test_creating_model_with_empty_additional_payload_data_emits_created_event_to_stream_without_that_data(): void
@@ -197,6 +197,6 @@ class ModelEventsTest extends TestCase
         $this->assertNotEmpty($actual);
         $this->assertArrayHasKey('model.with.additional.created', $actual);
         $message = array_pop($actual['model.with.additional.created']);
-        $this->assertEquals(json_encode($expected), $message['data']);
+        $this->assertEquals(json_encode($expected, JSON_THROW_ON_ERROR), $message['data']);
     }
 }

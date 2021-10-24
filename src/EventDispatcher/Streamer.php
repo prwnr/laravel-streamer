@@ -3,6 +3,7 @@
 namespace Prwnr\Streamer\EventDispatcher;
 
 use Illuminate\Support\Facades\Log;
+use JsonException;
 use Prwnr\Streamer\Contracts\Emitter;
 use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\History;
@@ -18,56 +19,15 @@ use Throwable;
  */
 class Streamer implements Emitter, Listener
 {
-    /**
-     * @var string
-     */
-    protected $startFrom;
-
-    /**
-     * Milliseconds.
-     *
-     * @var int
-     */
-    protected $readTimeout;
-
-    /**
-     * Milliseconds.
-     *
-     * @var int
-     */
-    protected $listenTimeout;
-
-    /**
-     * Seconds.
-     *
-     * @var int
-     */
-    protected $readSleep;
-
-    /**
-     * @var string
-     */
-    private $group;
-
-    /**
-     * @var string
-     */
-    private $consumer;
-
-    /**
-     * @var bool
-     */
-    private $canceled = false;
-
-    /**
-     * @var bool
-     */
-    private $inLoop = false;
-
-    /**
-     * @var History
-     */
-    private $history;
+    protected string $startFrom;
+    protected float $readTimeout;
+    protected float $listenTimeout;
+    protected float $readSleep;
+    private string $group = '';
+    private string $consumer = '';
+    private bool $canceled = false;
+    private bool $inLoop = false;
+    private History $history;
 
     /**
      * @param  string  $startFrom
@@ -88,8 +48,8 @@ class Streamer implements Emitter, Listener
      */
     public function __construct(History $history)
     {
-        $this->readTimeout = config('streamer.stream_read_timeout', 0);
-        $this->listenTimeout = config('streamer.listen_timeout', 0);
+        $this->readTimeout = config('streamer.stream_read_timeout', 1);
+        $this->listenTimeout = config('streamer.listen_timeout', 1);
         $this->readSleep = config('streamer.read_sleep', 1);
         $this->readTimeout *= 1000;
         $this->listenTimeout *= 1000;
@@ -138,7 +98,9 @@ class Streamer implements Emitter, Listener
     /**
      * Handler is invoked with \Prwnr\Streamer\EventDispatcher\ReceivedMessage instance as first argument
      * and with \Prwnr\Streamer\EventDispatcher\Streamer as second argument
-     * {@inheritdoc}
+     *
+     * @inheritdoc
+     *
      * @throws Throwable
      */
     public function listen(string $event, callable $handler): void
@@ -157,8 +119,6 @@ class Streamer implements Emitter, Listener
 
             $this->adjustGroupReadTimeout();
             $this->listenOn(new Stream\Consumer($this->consumer, $stream, $this->group), $handler);
-        } catch (Throwable $e) {
-            throw $e;
         } finally {
             $this->inLoop = false;
         }
@@ -230,6 +190,7 @@ class Streamer implements Emitter, Listener
      * @param  string  $messageId
      * @param  array  $message
      * @param  callable  $handler
+     * @throws JsonException
      */
     private function forward(string $messageId, array $message, callable $handler): void
     {
@@ -273,7 +234,7 @@ class Streamer implements Emitter, Listener
      */
     private function report(string $id, Waitable $on, Throwable $ex): void
     {
-        $error = "Listener error. Failed processing message with ID {$id} on '{$on->getName()}' stream. Error: {$ex->getMessage()}";
+        $error = "Listener error. Failed processing message with ID $id on '{$on->getName()}' stream. Error: {$ex->getMessage()}";
         Log::error($error);
     }
 }

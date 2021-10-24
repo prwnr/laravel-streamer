@@ -10,7 +10,7 @@ abstract class StreamMessage implements StreamableMessage
     /**
      * @var array
      */
-    protected $content;
+    protected array $content;
 
     /**
      * @return string

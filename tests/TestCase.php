@@ -3,6 +3,7 @@
 namespace Tests;
 
 use Exception;
+use JsonException;
 use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\MessageReceiver;
 use Prwnr\Streamer\Contracts\StreamableMessage;
@@ -79,7 +80,7 @@ class TestCase extends \Orchestra\Testbench\TestCase
         $handler = $this->app->make(FailedMessagesHandler::class);
         $message = new ReceivedMessage($id, [
             'name' => $stream,
-            'data' => json_encode($data)
+            'data' => json_encode($data, JSON_THROW_ON_ERROR)
         ]);
         $listener = $listener ?? new LocalListener();
         $e = new Exception('error');

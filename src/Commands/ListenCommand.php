@@ -35,25 +35,10 @@ class ListenCommand extends Command
      */
     protected $description = 'RedisStream listen command that awaits for new messages on given Stream and fires local events based on streamer configuration';
 
-    /**
-     * @var Streamer
-     */
-    private $streamer;
-
-    /**
-     * @var MessagesFailer
-     */
-    private $failer;
-
-    /**
-     * @var null|int
-     */
-    private $maxAttempts;
-
-    /**
-     * @var Archiver
-     */
-    private $archiver;
+    private Streamer $streamer;
+    private MessagesFailer $failer;
+    private ?int $maxAttempts;
+    private Archiver $archiver;
 
     /**
      * ListenCommand constructor.

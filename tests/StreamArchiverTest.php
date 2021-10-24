@@ -15,10 +15,7 @@ class StreamArchiverTest extends TestCase
 {
     use InteractsWithRedis;
 
-    /**
-     * @var StorageManager
-     */
-    protected $manager;
+    protected ?StorageManager $manager;
 
     protected function setUp(): void
     {

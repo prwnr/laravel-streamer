@@ -7,7 +7,7 @@ use Prwnr\Streamer\EventDispatcher\Message;
 
 class MemoryArchiveStorage implements ArchiveStorage
 {
-    private $items = [];
+    private array $items = [];
 
     /**
      * @inheritDoc

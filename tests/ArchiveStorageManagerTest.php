@@ -65,10 +65,7 @@ class ArchiveStorageManagerTest extends TestCase
     public function testCustomDriverNeedsToImplementStorageContract(): void
     {
         $manager = new StorageManager($this->app);
-        $manager->extend('custom', static function () {
-            return new class {
-            };
-        });
+        $manager->extend('custom', static fn() => new class {});
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage(sprintf('Custom driver needs to implement [%s] interface.',

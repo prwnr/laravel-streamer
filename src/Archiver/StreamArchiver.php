@@ -11,10 +11,7 @@ use Prwnr\Streamer\Stream;
 
 class StreamArchiver implements Archiver
 {
-    /**
-     * @var ArchiveStorage
-     */
-    private $storage;
+    private ArchiveStorage $storage;
 
     /**
      * StreamArchiver constructor.

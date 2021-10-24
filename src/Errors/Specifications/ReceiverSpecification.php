@@ -7,10 +7,7 @@ use Prwnr\Streamer\Errors\FailedMessage;
 
 class ReceiverSpecification implements Specification
 {
-    /**
-     * @var string
-     */
-    private $receiver;
+    private string $receiver;
 
     /**
      * IdentifierSpecification constructor.

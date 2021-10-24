@@ -32,7 +32,6 @@ class ListenCommandTest extends TestCase
         $this->redis['phpredis']->connection()->flushall();
         $this->app['config']->set('streamer.listen_timeout', 0.01);
         $this->app['config']->set('streamer.stream_read_timeout', 0.01);
-
         $this->app['config']->set('streamer.archive.storage_driver', 'memory');
 
         /** @var StorageManager $manager */
