@@ -3,22 +3,16 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
-use Prwnr\Streamer\Archiver\StorageManager;
 use Prwnr\Streamer\Archiver\StreamArchiver;
 use Prwnr\Streamer\EventDispatcher\Message;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\Exceptions\ArchivizationFailedException;
 use Prwnr\Streamer\Stream;
-use Tests\Stubs\MemoryArchiveStorage;
 
 class StreamArchiverTest extends TestCase
 {
     use InteractsWithRedis;
-
-    /**
-     * @var StorageManager
-     */
-    protected $manager;
+    use WithMemoryManager;
 
     protected function setUp(): void
     {
@@ -26,13 +20,7 @@ class StreamArchiverTest extends TestCase
         $this->setUpRedis();
         $this->redis['phpredis']->connection()->flushall();
 
-        $this->app['config']->set('streamer.archive.storage_driver', 'memory');
-
-        /** @var StorageManager $manager */
-        $this->manager = $this->app->make(StorageManager::class);
-        $this->manager->extend('memory', static function () {
-            return new MemoryArchiveStorage();
-        });
+        $this->setUpMemoryManager();
     }
 
     protected function tearDown(): void
