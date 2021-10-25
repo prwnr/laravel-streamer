@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Illuminate\Support\Collection;
 use Prwnr\Streamer\Archiver\NullStorage;
 use Prwnr\Streamer\Archiver\StorageManager;
 use Prwnr\Streamer\Contracts\ArchiveStorage;
@@ -46,6 +47,34 @@ class ArchiveStorageManagerTest extends TestCase
                     ], ['foo']);
                 }
 
+                public function findMany(string $event): Collection
+                {
+                    if ($event !== 'foo.bar') {
+                        return collect();
+                    }
+
+                    return collect([
+                        new Message([
+                            '_id' => '123',
+                            'type' => Event::TYPE_EVENT,
+                            'name' => 'foo.bar',
+                            'created' => time(),
+                        ], ['foo'])
+                    ]);
+                }
+
+                public function all(): Collection
+                {
+                    return collect([
+                        new Message([
+                            '_id' => '123',
+                            'type' => Event::TYPE_EVENT,
+                            'name' => 'foo.bar',
+                            'created' => time(),
+                        ], ['foo'])
+                    ]);
+                }
+
                 public function delete(string $event, string $id): void
                 {
                 }
@@ -53,13 +82,18 @@ class ArchiveStorageManagerTest extends TestCase
         });
 
         $driver = $manager->driver('custom');
+
+        $this->assertCount(1, $driver->all());
+        $this->assertCount(1, $driver->findMany('foo.bar'));
         $this->assertEquals(new Message([
             '_id' => '123',
             'type' => Event::TYPE_EVENT,
             'name' => 'foo.bar',
             'created' => time(),
         ], ['foo']), $driver->find('foo.bar', '123'));
+
         $this->assertNull($driver->find('bar', '123'));
+        $this->assertCount(0, $driver->findMany('foo'));
     }
 
     public function testCustomDriverNeedsToImplementStorageContract(): void

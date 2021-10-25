@@ -19,9 +19,9 @@ class StreamArchiver implements Archiver
     /**
      * StreamArchiver constructor.
      */
-    public function __construct(StorageManager $storage)
+    public function __construct(StorageManager $manager)
     {
-        $this->storage = $storage->driver(config('streamer.archive.storage_driver'));
+        $this->storage = $manager->driver(config('streamer.archive.storage_driver'));
     }
 
     /**
