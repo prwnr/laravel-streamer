@@ -28,6 +28,22 @@ class ArchiveRestoreCommandTest extends ArchiveTestCase
         $this->tearDownRedis();
     }
 
+    public function test_restoring_message_assigns_new_id_for_it(): void
+    {
+        $message = $this->addArchiveMessage('foo.bar', '123-0', ['foo' => 'bar']);
+
+        $mock = $this->mock(Archiver::class);
+        $mock->shouldReceive('restore')
+            ->with($message)
+            ->andReturn('234-0');
+
+        $this->artisan('streamer:archive:restore', ['--all' => true])
+            ->expectsQuestion('Restoring a message will add it back onto the stream and will trigger listeners hooked to its event. Do you want to continue?',
+                true)
+            ->expectsOutput('Successfully restored [foo.bar][123-0] message. New ID: 234-0')
+            ->assertExitCode(0);
+    }
+
     public function test_restores_all_messages_from_archive(): void
     {
         $this->addArchiveMessage('foo.bar', '123-0', ['foo' => 'bar']);
@@ -44,9 +60,6 @@ class ArchiveRestoreCommandTest extends ArchiveTestCase
         $this->artisan('streamer:archive:restore', ['--all' => true])
             ->expectsQuestion('Restoring a message will add it back onto the stream and will trigger listeners hooked to its event. Do you want to continue?',
                 true)
-            ->expectsOutput('Successfully restored [foo.bar][123-0] message.')
-            ->expectsOutput('Successfully restored [foo.bar][345-0] message.')
-            ->expectsOutput('Successfully restored [foo][123-0] message.')
             ->assertExitCode(0);
 
         $this->assertCount(2, $fooBarStream->read()['foo.bar']);
@@ -70,8 +83,6 @@ class ArchiveRestoreCommandTest extends ArchiveTestCase
         $this->artisan('streamer:archive:restore', ['--stream' => 'foo.bar'])
             ->expectsQuestion('Restoring a message will add it back onto the stream and will trigger listeners hooked to its event. Do you want to continue?',
                 true)
-            ->expectsOutput('Successfully restored [foo.bar][123-0] message.')
-            ->expectsOutput('Successfully restored [foo.bar][345-0] message.')
             ->assertExitCode(0);
 
         $this->assertCount(2, $fooBarStream->read()['foo.bar']);
@@ -95,7 +106,6 @@ class ArchiveRestoreCommandTest extends ArchiveTestCase
         $this->artisan('streamer:archive:restore', ['--stream' => 'foo.bar', '--id' => '345-0'])
             ->expectsQuestion('Restoring a message will add it back onto the stream and will trigger listeners hooked to its event. Do you want to continue?',
                 true)
-            ->expectsOutput('Successfully restored [foo.bar][345-0] message.')
             ->assertExitCode(0);
 
         $this->assertCount(1, $fooBarStream->read()['foo.bar']);

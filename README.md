@@ -251,6 +251,10 @@ This command has few options that are available:
 At least one of those options is required to attempt restoration of the messages. If any error occurs while restoring a
 message, it will be reported for that particular attempt not preventing other message from being processed.
 
+Restoring message puts it back onto a stream with NEW ID - this is Redis requirement and limitation, that any message
+added to stream, needs to have ID higher than the last generated one. The original ID of the message that is being
+restored will be stored in meta information in `original_id` field.
+
 ### Stream Archive
 
 Stream Archive allows storing processed message in any kind of storage, to free up Redis memory and/or space since 2.6

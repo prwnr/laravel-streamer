@@ -101,8 +101,8 @@ class ArchiveRestoreCommand extends Command
     private function restore(Message $message): void
     {
         try {
-            $this->archiver->restore($message);
-            $this->info("Successfully restored [{$message->getEventName()}][{$message->getId()}] message.");
+            $id = $this->archiver->restore($message);
+            $this->info("Successfully restored [{$message->getEventName()}][{$message->getId()}] message. New ID: $id");
         } catch (Exception $e) {
             $this->info("Failed to restore [{$message->getEventName()}][{$message->getId()}] message. Error: {$e->getMessage()}");
         }

@@ -98,8 +98,11 @@ class StreamArchiverTest extends TestCase
         $messages = $stream->read();
         $this->assertCount(1, $messages);
         $this->assertArrayHasKey('foo.bar', $messages);
-        $this->assertArrayHasKey('123-0', $messages['foo.bar']);
-        $this->assertEquals($message->getContent(), $messages['foo.bar']['123-0']);
+
+        $actualMessage = array_pop($messages['foo.bar']);
+
+        $this->assertEquals('123-0', $actualMessage['original_id']);
+        $this->assertEquals($message->getContent()['data'], $actualMessage['data']);
     }
 
     public function test_wont_restore_not_archived_message(): void

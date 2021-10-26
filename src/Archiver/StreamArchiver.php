@@ -52,19 +52,30 @@ class StreamArchiver implements Archiver
      * @inheritDoc
      * @throws RestoringFailedException
      */
-    public function restore(Message $message): void
+    public function restore(Message $message): string
     {
         $result = $this->storage->delete($message->getEventName(), $message->getId());
         if (!$result) {
             throw new RestoringFailedException('Message was not deleted from the archive storage, message will not be restored.');
         }
 
+        $content = $message->getContent();
+        $message = new Message([
+            'original_id' => $message->getId(),
+            'type' => $content['type'],
+            'name' => $content['name'],
+            'domain' => $content['domain'],
+            'created' => $content['created'],
+        ], $message->getData());
+
         $stream = new Stream($message->getEventName());
-        $id = $stream->add($message, $message->getId());
-        if ($id !== $message->getId()) {
+        $id = $stream->add($message);
+        if (!$id) {
             $this->storage->create($message);
 
             throw new RestoringFailedException('Message was not deleted from the archive storage, message will not be restored.');
         }
+
+        return $id;
     }
 }
