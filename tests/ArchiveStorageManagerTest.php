@@ -75,8 +75,12 @@ class ArchiveStorageManagerTest extends TestCase
                     ]);
                 }
 
-                public function delete(string $event, string $id): void
+                public function delete(string $event, string $id): int
                 {
+                    if ($event === 'foo.bar' && $id === '123') {
+                        return 1;
+                    }
+                    return 0;
                 }
             };
         });
@@ -94,6 +98,9 @@ class ArchiveStorageManagerTest extends TestCase
 
         $this->assertNull($driver->find('bar', '123'));
         $this->assertCount(0, $driver->findMany('foo'));
+
+        $this->assertEquals(1, $driver->delete('foo.bar', '123'));
+        $this->assertEquals(0, $driver->delete('foo', '123'));
     }
 
     public function testCustomDriverNeedsToImplementStorageContract(): void

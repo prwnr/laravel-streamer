@@ -41,6 +41,10 @@ interface ArchiveStorage
 
     /**
      * Deletes message from the storage.
+     *
+     * @param  string  $event
+     * @param  string  $id
+     * @return int count of deleted messages (1/0)
      */
-    public function delete(string $event, string $id): void;
+    public function delete(string $event, string $id): int;
 }

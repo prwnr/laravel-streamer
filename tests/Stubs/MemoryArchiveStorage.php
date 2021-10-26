@@ -40,8 +40,8 @@ class MemoryArchiveStorage implements ArchiveStorage
     public function all(): Collection
     {
         $collection = collect();
-        foreach ($this->items as $message) {
-            $collection->push($message);
+        foreach ($this->items as $messages) {
+            $collection->push(...array_values($messages));
         }
 
         return $collection;
@@ -50,8 +50,13 @@ class MemoryArchiveStorage implements ArchiveStorage
     /**
      * @inheritDoc
      */
-    public function delete(string $event, string $id): void
+    public function delete(string $event, string $id): int
     {
-        unset($this->items[$event][$id]);
+        if (isset($this->items[$event][$id])) {
+            unset($this->items[$event][$id]);
+            return 1;
+        }
+
+        return 0;
     }
 }

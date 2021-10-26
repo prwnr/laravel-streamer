@@ -5,6 +5,7 @@ namespace Prwnr\Streamer;
 use Illuminate\Support\ServiceProvider;
 use Prwnr\Streamer\Archiver\StorageManager;
 use Prwnr\Streamer\Archiver\StreamArchiver;
+use Prwnr\Streamer\Commands\Archive\ArchiveRestoreCommand;
 use Prwnr\Streamer\Commands\FailedMessages\FlushFailedCommand;
 use Prwnr\Streamer\Commands\FailedMessages\ListFailedCommand;
 use Prwnr\Streamer\Commands\FailedMessages\RetryFailedCommand;
@@ -87,6 +88,7 @@ class StreamerProvider extends ServiceProvider
                 ListFailedCommand::class,
                 RetryFailedCommand::class,
                 FlushFailedCommand::class,
+                ArchiveRestoreCommand::class,
             ]);
         }
     }

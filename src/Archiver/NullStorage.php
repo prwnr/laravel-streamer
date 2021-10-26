@@ -43,8 +43,8 @@ class NullStorage implements ArchiveStorage
     /**
      * @inheritDoc
      */
-    public function delete(string $event, string $id): void
+    public function delete(string $event, string $id): int
     {
-        //
+        return 0;
     }
 }
