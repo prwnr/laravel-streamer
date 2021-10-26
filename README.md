@@ -208,7 +208,7 @@ acknowledged by its original consumer (if used).
 #### List
 
 ```bash
-streamer::list
+streamer:list
 ```
 
 This command will list all registered events, and their associated listeners. The option `--compact` will yield only a
@@ -229,6 +229,27 @@ Table example:
 |                        | Tests\Stubs\AnotherLocalListener   |
 +------------------------+------------------------------------+
 ```
+
+#### Archive Restore
+
+```bash
+streamer:archive:restore
+```
+
+This command will restore archived stream messages from the associated archive storage. It will essentially fetch
+messages (all or selection) and will try to put them back onto the stream, while also deleting them from the archive.
+This action will trigger listeners that are hooked to the restored streams!
+
+This command has few options that are available:
+
+```text
+--all : restores all archived messages back to the stream.
+--id= : restores archived message back to the stream by ID. Requires --stream option to be used as well.
+--stream= : restores all archived messages from a selected stream.
+```
+
+At least one of those options is required to attempt restoration of the messages. If any error occurs while restoring a
+message, it will be reported for that particular attempt not preventing other message from being processed.
 
 ### Stream Archive
 
@@ -275,9 +296,9 @@ we will emit 3 different events:
 - second event that will change only `name` into `foo bar`
 - third event that changes name again to `bar foo`. 
 
-While replaying this set of messages (remember that each one has the same unique identifier) 
-our final replayed resource will be: `name: bar foo; surname: bar`. 
-If we would replay the event until the time before third change, we would have `name: foo bar; surname: bar`
+While replaying this set of messages (remember that each one has the same unique identifier)
+our final replayed resource will be: `name: bar foo; surname: bar`. If we replay the event until the time before third
+change, we would have `name: foo bar; surname: bar`
  
 #### Usage
 
