@@ -26,15 +26,8 @@ class ArchiveRestoreCommand extends Command
      */
     protected $description = 'Streamer Archive Restore command, to restore archived messages from database storage back to Stream.';
 
-    /**
-     * @var Archiver
-     */
-    private $archiver;
-
-    /**
-     * @var ArchiveStorage
-     */
-    private $storage;
+    private Archiver $archiver;
+    private ArchiveStorage $storage;
 
     /**
      * ArchiveRestoreCommand constructor.
@@ -52,8 +45,11 @@ class ArchiveRestoreCommand extends Command
 
     public function handle(): int
     {
-        $confirm = $this->confirm('Restoring a message will add it back onto the stream and will trigger listeners hooked to its event. Do you want to continue?',
-            true);
+        $confirm = $this->confirm(
+            'Restoring a message will add it back onto the stream and will trigger listeners hooked to its event. Do you want to continue?',
+            true
+        );
+
         if (!$confirm) {
             return 0;
         }
@@ -115,21 +111,15 @@ class ArchiveRestoreCommand extends Command
     {
         return [
             [
-                'all',
-                null,
-                InputOption::VALUE_NONE,
+                'all', null, InputOption::VALUE_NONE,
                 'Restores all archived messages back to the stream.'
             ],
             [
-                'id',
-                null,
-                InputOption::VALUE_REQUIRED,
+                'id', null, InputOption::VALUE_REQUIRED,
                 'Restores archived message back to the stream by ID. Requires --stream option to be used as well.'
             ],
             [
-                'stream',
-                null,
-                InputOption::VALUE_REQUIRED,
+                'stream', null, InputOption::VALUE_REQUIRED,
                 'Restores all archived messages from a selected stream.'
             ],
         ];

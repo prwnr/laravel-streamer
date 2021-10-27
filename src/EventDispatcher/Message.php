@@ -15,6 +15,7 @@ class Message extends StreamMessage
 
     /**
      * @inheritDoc
+     * @throws JsonException
      */
     public function getData(): array
     {

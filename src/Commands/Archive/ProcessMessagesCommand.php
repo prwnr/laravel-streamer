@@ -10,7 +10,9 @@ use Symfony\Component\Console\Input\InputOption;
 
 abstract class ProcessMessagesCommand extends Command
 {
-
+    /**
+     * @return int
+     */
     public function handle(): int
     {
         if (!$this->option('streams')) {
@@ -58,15 +60,11 @@ abstract class ProcessMessagesCommand extends Command
     {
         return [
             [
-                'streams',
-                null,
-                InputOption::VALUE_REQUIRED,
+                'streams', null, InputOption::VALUE_REQUIRED,
                 'List of streams to process separated by comma.'
             ],
             [
-                'older_than',
-                null,
-                InputOption::VALUE_REQUIRED,
+                'older_than', null, InputOption::VALUE_REQUIRED,
                 'How old messages should be to get process. The format to use this option looks like: 1 day, 1 week, 5 days, 4 weeks etc. It will take the current time and subtract the option value.'
             ],
         ];

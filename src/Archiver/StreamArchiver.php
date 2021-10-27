@@ -2,6 +2,7 @@
 
 namespace Prwnr\Streamer\Archiver;
 
+use JsonException;
 use Prwnr\Streamer\Contracts\Archiver;
 use Prwnr\Streamer\Contracts\ArchiveStorage;
 use Prwnr\Streamer\EventDispatcher\Message;
@@ -25,6 +26,7 @@ class StreamArchiver implements Archiver
     /**
      * @inheritDoc
      * @throws ArchivizationFailedException
+     * @throws JsonException
      */
     public function archive(ReceivedMessage $message): void
     {
@@ -48,6 +50,7 @@ class StreamArchiver implements Archiver
     /**
      * @inheritDoc
      * @throws RestoringFailedException
+     * @throws JsonException
      */
     public function restore(Message $message): string
     {

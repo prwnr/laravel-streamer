@@ -72,7 +72,8 @@ class Streamer implements Emitter, Listener
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
+     * @throws JsonException
      */
     public function emit(Event $event, string $id = '*'): string
     {
