@@ -141,7 +141,7 @@ class FailedMessagesHandlerTest extends TestCase
         $handler = $this->app->make(FailedMessagesHandler::class);
 
         $this->expectException(MessageRetryFailedException::class);
-        $this->expectExceptionMessage('No matching messages found on a Stream to retry');
+        $this->expectExceptionMessage("No matching messages found on a 'foo.bar' stream for ID #123");
 
         $handler->retry(new FailedMessage('123', 'foo.bar', LocalListener::class, 'error'));
     }

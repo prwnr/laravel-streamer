@@ -2,6 +2,7 @@
 
 namespace Prwnr\Streamer\Contracts;
 
+use Illuminate\Support\Collection;
 use Prwnr\Streamer\EventDispatcher\Message;
 
 interface ArchiveStorage
@@ -23,7 +24,27 @@ interface ArchiveStorage
     public function find(string $event, string $id): ?Message;
 
     /**
-     * Deletes message from the storage.
+     * Finds messages in storage by stream name.
+     *
+     * @param  string  $event
+     * @return Collection&Message[]
      */
-    public function delete(string $event, string $id): void;
+    public function findMany(string $event): Collection;
+
+    /**
+     * Returns all archived messages.
+     * Do consider that the amount of messages may be huge, and it may impact performance.
+     *
+     * @return Collection&Message[]
+     */
+    public function all(): Collection;
+
+    /**
+     * Deletes message from the storage.
+     *
+     * @param  string  $event
+     * @param  string  $id
+     * @return int count of deleted messages (1/0)
+     */
+    public function delete(string $event, string $id): int;
 }

@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Illuminate\Support\Collection;
 use Prwnr\Streamer\Archiver\NullStorage;
 use Prwnr\Streamer\Archiver\StorageManager;
 use Prwnr\Streamer\Contracts\ArchiveStorage;
@@ -46,20 +47,60 @@ class ArchiveStorageManagerTest extends TestCase
                     ], ['foo']);
                 }
 
-                public function delete(string $event, string $id): void
+                public function findMany(string $event): Collection
                 {
+                    if ($event !== 'foo.bar') {
+                        return collect();
+                    }
+
+                    return collect([
+                        new Message([
+                            '_id' => '123',
+                            'type' => Event::TYPE_EVENT,
+                            'name' => 'foo.bar',
+                            'created' => time(),
+                        ], ['foo'])
+                    ]);
+                }
+
+                public function all(): Collection
+                {
+                    return collect([
+                        new Message([
+                            '_id' => '123',
+                            'type' => Event::TYPE_EVENT,
+                            'name' => 'foo.bar',
+                            'created' => time(),
+                        ], ['foo'])
+                    ]);
+                }
+
+                public function delete(string $event, string $id): int
+                {
+                    if ($event === 'foo.bar' && $id === '123') {
+                        return 1;
+                    }
+                    return 0;
                 }
             };
         });
 
         $driver = $manager->driver('custom');
+
+        $this->assertCount(1, $driver->all());
+        $this->assertCount(1, $driver->findMany('foo.bar'));
         $this->assertEquals(new Message([
             '_id' => '123',
             'type' => Event::TYPE_EVENT,
             'name' => 'foo.bar',
             'created' => time(),
         ], ['foo']), $driver->find('foo.bar', '123'));
+
         $this->assertNull($driver->find('bar', '123'));
+        $this->assertCount(0, $driver->findMany('foo'));
+
+        $this->assertEquals(1, $driver->delete('foo.bar', '123'));
+        $this->assertEquals(0, $driver->delete('foo', '123'));
     }
 
     public function testCustomDriverNeedsToImplementStorageContract(): void

@@ -2,6 +2,7 @@
 
 namespace Prwnr\Streamer\Archiver;
 
+use Illuminate\Support\Collection;
 use Prwnr\Streamer\Contracts\ArchiveStorage;
 use Prwnr\Streamer\EventDispatcher\Message;
 
@@ -26,8 +27,24 @@ class NullStorage implements ArchiveStorage
     /**
      * @inheritDoc
      */
-    public function delete(string $event, string $id): void
+    public function findMany(string $event): Collection
     {
-        //
+        return collect();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function all(): Collection
+    {
+        return collect();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function delete(string $event, string $id): int
+    {
+        return 0;
     }
 }

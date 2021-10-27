@@ -1,6 +1,6 @@
 <?php
 
-namespace Prwnr\Streamer\Commands;
+namespace Prwnr\Streamer\Commands\FailedMessages;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;

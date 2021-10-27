@@ -2,6 +2,7 @@
 
 namespace Tests\Stubs;
 
+use Illuminate\Support\Collection;
 use Prwnr\Streamer\Contracts\ArchiveStorage;
 use Prwnr\Streamer\EventDispatcher\Message;
 
@@ -28,8 +29,34 @@ class MemoryArchiveStorage implements ArchiveStorage
     /**
      * @inheritDoc
      */
-    public function delete(string $event, string $id): void
+    public function findMany(string $event): Collection
     {
-        unset($this->items[$event][$id]);
+        return collect($this->items[$event] ?? []);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function all(): Collection
+    {
+        $collection = collect();
+        foreach ($this->items as $messages) {
+            $collection->push(...array_values($messages));
+        }
+
+        return $collection;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function delete(string $event, string $id): int
+    {
+        if (isset($this->items[$event][$id])) {
+            unset($this->items[$event][$id]);
+            return 1;
+        }
+
+        return 0;
     }
 }

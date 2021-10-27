@@ -3,19 +3,17 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
-use Prwnr\Streamer\Archiver\StorageManager;
 use Prwnr\Streamer\Archiver\StreamArchiver;
 use Prwnr\Streamer\EventDispatcher\Message;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\Exceptions\ArchivizationFailedException;
+use Prwnr\Streamer\Exceptions\RestoringFailedException;
 use Prwnr\Streamer\Stream;
-use Tests\Stubs\MemoryArchiveStorage;
 
 class StreamArchiverTest extends TestCase
 {
     use InteractsWithRedis;
-
-    protected ?StorageManager $manager;
+    use WithMemoryManager;
 
     protected function setUp(): void
     {
@@ -23,13 +21,7 @@ class StreamArchiverTest extends TestCase
         $this->setUpRedis();
         $this->redis['phpredis']->connection()->flushall();
 
-        $this->app['config']->set('streamer.archive.storage_driver', 'memory');
-
-        /** @var StorageManager $manager */
-        $this->manager = $this->app->make(StorageManager::class);
-        $this->manager->extend('memory', static function () {
-            return new MemoryArchiveStorage();
-        });
+        $this->setUpMemoryManager();
     }
 
     protected function tearDown(): void
@@ -89,7 +81,7 @@ class StreamArchiverTest extends TestCase
     {
         $stream = new Stream('foo.bar');
         $message = new Message([
-            '_id' => '123',
+            '_id' => '123-0',
             'name' => 'foo.bar',
             'domain' => 'foo'
         ], ['foo']);
@@ -99,27 +91,38 @@ class StreamArchiverTest extends TestCase
 
         /** @var StreamArchiver $archiver */
         $archiver = $this->app->make(StreamArchiver::class);
-        $restored = $archiver->restore('foo.bar', '123');
+        $archiver->restore($message);
 
-        $this->assertEquals($message, $restored);
         $this->assertNull($this->manager->driver('memory')->find('foo.bar', '123'));
 
         $messages = $stream->read();
         $this->assertCount(1, $messages);
         $this->assertArrayHasKey('foo.bar', $messages);
-        $this->assertArrayHasKey('123-0', $messages['foo.bar']);
-        $this->assertEquals($message->getContent(), $messages['foo.bar']['123-0']);
+
+        $actualMessage = array_pop($messages['foo.bar']);
+
+        $this->assertEquals('123-0', $actualMessage['original_id']);
+        $this->assertEquals($message->getContent()['data'], $actualMessage['data']);
     }
 
     public function test_wont_restore_not_archived_message(): void
     {
         $stream = new Stream('foo.bar');
+        $message = new Message([
+            '_id' => '123-0',
+            'name' => 'foo.bar',
+            'domain' => 'foo'
+        ], ['foo']);
 
         /** @var StreamArchiver $archiver */
         $archiver = $this->app->make(StreamArchiver::class);
-        $restored = $archiver->restore('foo.bar', '123');
 
-        $this->assertNull($restored);
+        $this->expectException(RestoringFailedException::class);
+        $this->expectExceptionMessage('Message was not deleted from the archive storage, message will not be restored.');
+
+        $archiver->restore($message);
+
         $this->assertCount(0, $stream->read());
+        $this->assertNotNull($this->manager->driver('memory')->find('foo.bar', '123'));
     }
 }

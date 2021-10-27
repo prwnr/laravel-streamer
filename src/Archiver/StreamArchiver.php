@@ -7,6 +7,7 @@ use Prwnr\Streamer\Contracts\ArchiveStorage;
 use Prwnr\Streamer\EventDispatcher\Message;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\Exceptions\ArchivizationFailedException;
+use Prwnr\Streamer\Exceptions\RestoringFailedException;
 use Prwnr\Streamer\Stream;
 
 class StreamArchiver implements Archiver
@@ -16,9 +17,9 @@ class StreamArchiver implements Archiver
     /**
      * StreamArchiver constructor.
      */
-    public function __construct(StorageManager $storage)
+    public function __construct(StorageManager $manager)
     {
-        $this->storage = $storage->driver(config('streamer.archive.storage_driver'));
+        $this->storage = $manager->driver(config('streamer.archive.storage_driver'));
     }
 
     /**
@@ -46,19 +47,32 @@ class StreamArchiver implements Archiver
 
     /**
      * @inheritDoc
+     * @throws RestoringFailedException
      */
-    public function restore(string $event, string $id): ?Message
+    public function restore(Message $message): string
     {
-        $message = $this->storage->find($event, $id);
-        if (!$message) {
-            return null;
+        $result = $this->storage->delete($message->getEventName(), $message->getId());
+        if (!$result) {
+            throw new RestoringFailedException('Message was not deleted from the archive storage, message will not be restored.');
         }
 
-        $this->storage->delete($event, $id);
+        $content = $message->getContent();
+        $message = new Message([
+            'original_id' => $message->getId(),
+            'type' => $content['type'],
+            'name' => $content['name'],
+            'domain' => $content['domain'],
+            'created' => $content['created'],
+        ], $message->getData());
 
-        $stream = new Stream($event);
-        $stream->add($message, $id);
+        $stream = new Stream($message->getEventName());
+        $id = $stream->add($message);
+        if (!$id) {
+            $this->storage->create($message);
 
-        return $message;
+            throw new RestoringFailedException('Message was not deleted from the archive storage, message will not be restored.');
+        }
+
+        return $id;
     }
 }

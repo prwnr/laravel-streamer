@@ -8,7 +8,6 @@ use Prwnr\Streamer\Contracts\Errors\Repository;
 use Prwnr\Streamer\Contracts\MessageReceiver;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\Exceptions\MessageRetryFailedException;
-use Prwnr\Streamer\Stream\Range;
 use Throwable;
 
 class FailedMessagesHandler implements MessagesFailer
@@ -47,16 +46,9 @@ class FailedMessagesHandler implements MessagesFailer
     {
         $listener = $this->makeReceiver($message);
 
-        $range = new Range($message->getId(), $message->getId());
-        $messages = $message->getStream()->readRange($range, 1);
-        if (!$messages || count($messages) !== 1) {
-            throw new MessageRetryFailedException($message, 'No matching messages found on a Stream to retry');
-        }
-
-        $streamMessage = array_pop($messages);
         $receivedMessage = null;
         try {
-            $receivedMessage = new ReceivedMessage($message->getId(), $streamMessage);
+            $receivedMessage = new ReceivedMessage($message->getId(), $message->getStreamMessage());
             $listener->handle($receivedMessage);
         } catch (Throwable $e) {
             if (!$receivedMessage) {

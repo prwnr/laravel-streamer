@@ -1,7 +1,7 @@
 # Laravel Streamer
 
-Streamer is a Laravel package for events functionality between different applications, powered by Redis Streams.
-This package utilizes all main commands of Redis 5.0 Streams providing a simple usage of Streams as Events.
+Streamer is a Laravel package for events functionality between different applications, powered by Redis Streams. This
+package utilizes all main commands of Redis 5.0 Streams providing a simple usage of Streams as Events.
 
 Main concept of this package is to provide easy way of emitting new events from your application and to allow listening to them in your other applications that are using same Redis server.
 
@@ -122,8 +122,8 @@ listening for only new events. This command however has few options that are ext
 --last_id= : ID from which listener should start reading messages (using 0-0 will process all old messages)
 --keep-alive : Will keep listener alive when any unexpected non-listener related error will occur by simply restarting listening
 --max-attempts= : Number of maximum attempts to restart a listener on an unexpected non-listener related error (requires --keep-alive to be used)
---purge : Will remove message from the stream if it will be processed successfully by all listeners in the current stack.
---archive : Will remove message from the stream and store it in database if it will be processed successfully by all listeners in the current stack.
+--purge : Will remove message from the stream if it will be processed successfully by all local listeners in the current stack.
+--archive : Will remove message from the stream and store it in database if it will be processed successfully by all local listeners in the current stack.
 ```
 
 When `consumer` and `group` options are being in use, every message on a stream will be marked as acknowledged for the
@@ -131,14 +131,13 @@ given consumer, thus it will not be processed by consequent
 `streamer:listen` command call with the same options. Note that listening from a specific ID without consumer and group
 being set will ignore acknowledgments.
 
-The `purge` and `archive` options (available since v2.6) are designed to be used to release from memory or storage of
-the Redis instance
+The `purge` and `archive` options (available since v2.6) are designed to be used to release memory or storage of the
+Redis instance
 (in a cases when there are tons of streamed messages or the payloads are big and Redis runs out of memory/storage). When
 using those options, keep in mind, that they are not going to take into account listeners running in other instances or
 other servers - meaning, that when first listener hooked to specific event will process its messages, the `purge` and
-`archive` options will delete the message not waiting for other listeners to finish. These options in _listen_ command
-are meant more for a monolith usage. To fully use `archive` option see [Stream Archive][#stream-archive] for more
-details and instructions.
+`archive` options will delete the message not waiting for other listeners to finish. To fully use `archive` option
+see [Stream Archive][#stream-archive] for more details and instructions.
 
 #### Failed List
 
@@ -208,7 +207,7 @@ acknowledged by its original consumer (if used).
 #### List
 
 ```bash
-streamer::list
+streamer:list
 ```
 
 This command will list all registered events, and their associated listeners. The option `--compact` will yield only a
@@ -229,6 +228,73 @@ Table example:
 |                        | Tests\Stubs\AnotherLocalListener   |
 +------------------------+------------------------------------+
 ```
+
+#### Archive
+
+```bash
+streamer:archive
+```
+
+This command will archive messages from a selected streams older than days/weeks or so. It will process all stream
+messages, verifying their `created` timestamp and will attempt to archive (deleting them from redis and attempting to
+store them in associated archive [storage](#stream-archive))
+each one of them.
+
+This command has two required options:
+
+```text
+--streams : list of streams separated by comma to archive messages from
+--older_than= : information how old messages should be to archive them. The suggested format is: 60 min, 1 day, 1 week, 5 days, 2 weeks etc.
+```
+
+Be aware of using this command, as it will not take into account whether listeners processed messages it tries to
+archive or not. This should be used with caution and only for older messages, so that it will be more certain, that all
+listeners processed their messages.
+
+#### Purge
+
+```bash
+streamer:purge
+```
+
+This command will purge messages from a selected streams older than days/weeks or so. It will process all stream
+messages, verifying their `created` timestamp and will attempt to purge them (deleting them from the redis entirely).
+
+This command has two required options:
+
+```text
+--streams : list of streams separated by comma to purge messages from
+--older_than= : information how old messages should be to purge them. The suggested format is: 60 min, 1 day, 1 week, 5 days, 2 weeks etc.
+```
+
+Be aware of using this command, as it will not take into account whether listeners processed messages it tries to purge
+or not. This should be used with caution and only for older messages, so that it will be more certain, that all
+listeners processed their messages.
+
+#### Archive Restore
+
+```bash
+streamer:archive:restore
+```
+
+This command will restore archived stream messages from the associated archive storage. It will essentially fetch
+messages (all or selection) and will try to put them back onto the stream, while also deleting them from the archive.
+This action will trigger listeners that are hooked to the restored streams!
+
+This command has few options that are available:
+
+```text
+--all : restores all archived messages back to the stream.
+--id= : restores archived message back to the stream by ID. Requires --stream option to be used as well.
+--stream= : restores all archived messages from a selected stream.
+```
+
+At least one of those options is required to attempt restoration of the messages. If any error occurs while restoring a
+message, it will be reported for that particular attempt not preventing other message from being processed.
+
+Restoring message puts it back onto a stream with NEW ID - this is Redis requirement and limitation, that any message
+added to stream, needs to have ID higher than the last generated one. The original ID of the message that is being
+restored will be stored in meta information in `original_id` field.
 
 ### Stream Archive
 
@@ -275,9 +341,9 @@ we will emit 3 different events:
 - second event that will change only `name` into `foo bar`
 - third event that changes name again to `bar foo`. 
 
-While replaying this set of messages (remember that each one has the same unique identifier) 
-our final replayed resource will be: `name: bar foo; surname: bar`. 
-If we would replay the event until the time before third change, we would have `name: foo bar; surname: bar`
+While replaying this set of messages (remember that each one has the same unique identifier)
+our final replayed resource will be: `name: bar foo; surname: bar`. If we replay the event until the time before third
+change, we would have `name: foo bar; surname: bar`
  
 #### Usage
 

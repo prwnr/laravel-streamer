@@ -4,7 +4,6 @@ namespace Tests;
 
 use Exception;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
-use Prwnr\Streamer\Archiver\StorageManager;
 use Prwnr\Streamer\Contracts\Archiver;
 use Prwnr\Streamer\Errors\MessagesRepository;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
@@ -13,17 +12,12 @@ use Prwnr\Streamer\Stream;
 use Tests\Stubs\AnotherLocalListener;
 use Tests\Stubs\ExceptionalListener;
 use Tests\Stubs\LocalListener;
-use Tests\Stubs\MemoryArchiveStorage;
 use Tests\Stubs\NotReceiverListener;
 
 class ListenCommandTest extends TestCase
 {
     use InteractsWithRedis;
-
-    /**
-     * @var StorageManager
-     */
-    private $manager;
+    use WithMemoryManager;
 
     protected function setUp(): void
     {
@@ -32,13 +26,8 @@ class ListenCommandTest extends TestCase
         $this->redis['phpredis']->connection()->flushall();
         $this->app['config']->set('streamer.listen_timeout', 0.01);
         $this->app['config']->set('streamer.stream_read_timeout', 0.01);
-        $this->app['config']->set('streamer.archive.storage_driver', 'memory');
 
-        /** @var StorageManager $manager */
-        $this->manager = $this->app->make(StorageManager::class);
-        $this->manager->extend('memory', static function () {
-            return new MemoryArchiveStorage();
-        });
+        $this->setUpMemoryManager();
     }
 
     protected function tearDown(): void
@@ -392,7 +381,7 @@ class ListenCommandTest extends TestCase
         $this->assertEquals(1, $repository->count());
 
         $stream = new Stream('foo.bar');
-        $this->assertCount(1, $stream->read());
+        $this->assertCount(1, $stream->read()['foo.bar']);
     }
 
     public function test_command_called_with_archive_will_delete_messages_from_stream_and_store_in_different_storage(
@@ -447,7 +436,7 @@ class ListenCommandTest extends TestCase
             ->assertExitCode(0);
 
         $stream = new Stream('foo.bar');
-        $this->assertCount(1, $stream->read());
+        $this->assertCount(1, $stream->read()['foo.bar']);
 
         $this->assertNull($this->manager->driver('memory')->find('foo.bar', $id));
     }
