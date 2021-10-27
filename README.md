@@ -1,4 +1,4 @@
-w# Laravel Streamer
+# Laravel Streamer
 
 Streamer is a Laravel package for events functionality between different applications, powered by Redis Streams. This
 package utilizes all main commands of Redis 5.0 Streams providing a simple usage of Streams as Events.
@@ -122,8 +122,8 @@ listening for only new events. This command however has few options that are ext
 --last_id= : ID from which listener should start reading messages (using 0-0 will process all old messages)
 --keep-alive : Will keep listener alive when any unexpected non-listener related error will occur by simply restarting listening
 --max-attempts= : Number of maximum attempts to restart a listener on an unexpected non-listener related error (requires --keep-alive to be used)
---purge : Will remove message from the stream if it will be processed successfully by all listeners in the current stack.
---archive : Will remove message from the stream and store it in database if it will be processed successfully by all listeners in the current stack.
+--purge : Will remove message from the stream if it will be processed successfully by all local listeners in the current stack.
+--archive : Will remove message from the stream and store it in database if it will be processed successfully by all local listeners in the current stack.
 ```
 
 When `consumer` and `group` options are being in use, every message on a stream will be marked as acknowledged for the
@@ -131,14 +131,13 @@ given consumer, thus it will not be processed by consequent
 `streamer:listen` command call with the same options. Note that listening from a specific ID without consumer and group
 being set will ignore acknowledgments.
 
-The `purge` and `archive` options (available since v2.6) are designed to be used to release from memory or storage of
-the Redis instance
+The `purge` and `archive` options (available since v2.6) are designed to be used to release memory or storage of the
+Redis instance
 (in a cases when there are tons of streamed messages or the payloads are big and Redis runs out of memory/storage). When
 using those options, keep in mind, that they are not going to take into account listeners running in other instances or
 other servers - meaning, that when first listener hooked to specific event will process its messages, the `purge` and
-`archive` options will delete the message not waiting for other listeners to finish. These options in _listen_ command
-are meant more for a monolith usage. To fully use `archive` option see [Stream Archive][#stream-archive] for more
-details and instructions.
+`archive` options will delete the message not waiting for other listeners to finish. To fully use `archive` option
+see [Stream Archive][#stream-archive] for more details and instructions.
 
 #### Failed List
 
@@ -244,7 +243,7 @@ each one of them.
 This command has two required options:
 
 ```text
---streams : list of streams to archive messages
+--streams : list of streams separated by comma to archive messages from
 --older_than= : information how old messages should be to archive them. The suggested format is: 60 min, 1 day, 1 week, 5 days, 2 weeks etc.
 ```
 
@@ -264,7 +263,7 @@ messages, verifying their `created` timestamp and will attempt to purge them (de
 This command has two required options:
 
 ```text
---streams : list of streams to purge messages
+--streams : list of streams separated by comma to purge messages from
 --older_than= : information how old messages should be to purge them. The suggested format is: 60 min, 1 day, 1 week, 5 days, 2 weeks etc.
 ```
 

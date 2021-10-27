@@ -13,19 +13,19 @@ abstract class ProcessMessagesCommand extends Command
 
     public function handle(): int
     {
-        $olderThan = new Carbon('-'.$this->option('older_than'));
-
-        $streams = $this->option('streams');
-        if (!$streams || !is_array($streams)) {
+        if (!$this->option('streams')) {
             $this->error('Streams option is required with at least one stream name provided.');
             return 1;
         }
+
+        $olderThan = new Carbon('-'.$this->option('older_than'));
+        $streams = explode(',', $this->option('streams'));
 
         $messageCount = 0;
         foreach ($streams as $name) {
             $stream = new Stream($name);
             $messages = $stream->read();
-            foreach ($messages[$name] as $id => $message) {
+            foreach ($messages[$name] ?? [] as $id => $message) {
                 if ($olderThan->lt(Carbon::createFromTimestamp($message['created']))) {
                     continue;
                 }
@@ -60,8 +60,8 @@ abstract class ProcessMessagesCommand extends Command
             [
                 'streams',
                 null,
-                InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
-                'List of streams to process.'
+                InputOption::VALUE_REQUIRED,
+                'List of streams to process separated by comma.'
             ],
             [
                 'older_than',

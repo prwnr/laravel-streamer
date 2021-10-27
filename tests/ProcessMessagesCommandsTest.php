@@ -61,7 +61,7 @@ class ProcessMessagesCommandsTest extends TestCase
 
         $this->assertCount(4, $stream->read()['foo.bar']);
 
-        $this->artisan('streamer:archive', ['--older_than' => '3 days', '--streams' => ['foo.bar']])
+        $this->artisan('streamer:archive', ['--older_than' => '3 days', '--streams' => 'foo.bar'])
             ->expectsOutput("Message [123-0] has been archived from the 'foo.bar' stream.")
             ->expectsOutput("Message [234-0] has been archived from the 'foo.bar' stream.")
             ->expectsOutput('Total of 2 messages processed.')
@@ -73,7 +73,7 @@ class ProcessMessagesCommandsTest extends TestCase
         $this->assertEquals('{"foo":"fourth"}', array_shift($messages)['data']);
         $this->assertCount(2, $this->manager->driver('memory')->all());
 
-        $this->artisan('streamer:archive', ['--older_than' => '60 minutes', '--streams' => ['foo.bar']])
+        $this->artisan('streamer:archive', ['--older_than' => '60 minutes', '--streams' => 'foo.bar'])
             ->expectsOutput("Message [345-0] has been archived from the 'foo.bar' stream.")
             ->expectsOutput("Message [456-0] has been archived from the 'foo.bar' stream.")
             ->expectsOutput('Total of 2 messages processed.')
@@ -100,7 +100,7 @@ class ProcessMessagesCommandsTest extends TestCase
         $this->assertCount(2, $streamA->read()['foo.barA']);
         $this->assertCount(2, $streamB->read()['foo.barB']);
 
-        $this->artisan('streamer:archive', ['--older_than' => '3 days', '--streams' => ['foo.barA', 'foo.barB']])
+        $this->artisan('streamer:archive', ['--older_than' => '3 days', '--streams' => 'foo.barA,foo.barB'])
             ->expectsOutput("Message [123-0] has been archived from the 'foo.barA' stream.")
             ->expectsOutput("Message [123-0] has been archived from the 'foo.barB' stream.")
             ->expectsOutput('Total of 2 messages processed.')
@@ -112,7 +112,7 @@ class ProcessMessagesCommandsTest extends TestCase
         $this->assertEquals('{"foo":"second"}', array_shift($streamB->read()['foo.barB'])['data']);
         $this->assertCount(2, $this->manager->driver('memory')->all());
 
-        $this->artisan('streamer:archive', ['--older_than' => '60 minutes', '--streams' => ['foo.barA', 'foo.barB']])
+        $this->artisan('streamer:archive', ['--older_than' => '60 minutes', '--streams' => 'foo.barA,foo.barB'])
             ->expectsOutput("Message [234-0] has been archived from the 'foo.barA' stream.")
             ->expectsOutput("Message [234-0] has been archived from the 'foo.barB' stream.")
             ->expectsOutput('Total of 2 messages processed.')
@@ -136,13 +136,20 @@ class ProcessMessagesCommandsTest extends TestCase
             ->with(ReceivedMessage::class)
             ->andThrow(Exception::class, 'unknown');
 
-        $this->artisan('streamer:archive', ['--older_than' => '3 days', '--streams' => ['foo.bar']])
+        $this->artisan('streamer:archive', ['--older_than' => '3 days', '--streams' => 'foo.bar'])
             ->expectsOutput("Message [123-0] from the 'foo.bar' stream could not be archived. Error: unknown")
             ->expectsOutput('Total of 1 message processed.')
             ->assertExitCode(0);
 
         $this->assertCount(1, $stream->read()['foo.bar']);
         $this->assertCount(0, $this->manager->driver('memory')->all());
+    }
+
+    public function test_fails_to_archive_messages_from_non_existing_stream(): void
+    {
+        $this->artisan('streamer:archive', ['--older_than' => '1 days', '--streams' => 'foo.bar'])
+            ->expectsOutput('Total of 0 messages processed.')
+            ->assertExitCode(0);
     }
 
     public function test_purges_messages_from_one_stream(): void
@@ -160,7 +167,7 @@ class ProcessMessagesCommandsTest extends TestCase
 
         $this->assertCount(4, $stream->read()['foo.bar']);
 
-        $this->artisan('streamer:purge', ['--older_than' => '3 days', '--streams' => ['foo.bar']])
+        $this->artisan('streamer:purge', ['--older_than' => '3 days', '--streams' => 'foo.bar'])
             ->expectsOutput("Message [123-0] has been purged from the 'foo.bar' stream.")
             ->expectsOutput("Message [234-0] has been purged from the 'foo.bar' stream.")
             ->expectsOutput('Total of 2 messages processed.')
@@ -171,7 +178,7 @@ class ProcessMessagesCommandsTest extends TestCase
         $this->assertEquals('{"foo":"third"}', array_shift($messages)['data']);
         $this->assertEquals('{"foo":"fourth"}', array_shift($messages)['data']);
 
-        $this->artisan('streamer:purge', ['--older_than' => '60 minutes', '--streams' => ['foo.bar']])
+        $this->artisan('streamer:purge', ['--older_than' => '60 minutes', '--streams' => 'foo.bar'])
             ->expectsOutput("Message [345-0] has been purged from the 'foo.bar' stream.")
             ->expectsOutput("Message [456-0] has been purged from the 'foo.bar' stream.")
             ->expectsOutput('Total of 2 messages processed.')
@@ -197,7 +204,7 @@ class ProcessMessagesCommandsTest extends TestCase
         $this->assertCount(2, $streamA->read()['foo.barA']);
         $this->assertCount(2, $streamB->read()['foo.barB']);
 
-        $this->artisan('streamer:purge', ['--older_than' => '3 days', '--streams' => ['foo.barA', 'foo.barB']])
+        $this->artisan('streamer:purge', ['--older_than' => '3 days', '--streams' => 'foo.barA,foo.barB'])
             ->expectsOutput("Message [123-0] has been purged from the 'foo.barA' stream.")
             ->expectsOutput("Message [123-0] has been purged from the 'foo.barB' stream.")
             ->expectsOutput('Total of 2 messages processed.')
@@ -208,7 +215,7 @@ class ProcessMessagesCommandsTest extends TestCase
         $this->assertEquals('{"foo":"second"}', array_shift($streamA->read()['foo.barA'])['data']);
         $this->assertEquals('{"foo":"second"}', array_shift($streamB->read()['foo.barB'])['data']);
 
-        $this->artisan('streamer:purge', ['--older_than' => '60 minutes', '--streams' => ['foo.barA', 'foo.barB']])
+        $this->artisan('streamer:purge', ['--older_than' => '60 minutes', '--streams' => 'foo.barA,foo.barB'])
             ->expectsOutput("Message [234-0] has been purged from the 'foo.barA' stream.")
             ->expectsOutput("Message [234-0] has been purged from the 'foo.barB' stream.")
             ->expectsOutput('Total of 2 messages processed.')
@@ -234,7 +241,7 @@ class ProcessMessagesCommandsTest extends TestCase
         ]);
         $mock->shouldReceive('xDel')->with('foo.bar', ['123-0'])->once()->andReturnFalse();
 
-        $this->artisan('streamer:purge', ['--older_than' => '3 days', '--streams' => ['foo.bar']])
+        $this->artisan('streamer:purge', ['--older_than' => '3 days', '--streams' => 'foo.bar'])
             ->expectsOutput("Message [123-0] from the 'foo.bar' stream could not be purged or is already deleted.")
             ->expectsOutput('Total of 1 message processed.')
             ->assertExitCode(0);
@@ -244,9 +251,16 @@ class ProcessMessagesCommandsTest extends TestCase
             ->once()
             ->andThrow(Exception::class, 'unknown');
 
-        $this->artisan('streamer:purge', ['--older_than' => '3 days', '--streams' => ['foo.bar']])
+        $this->artisan('streamer:purge', ['--older_than' => '3 days', '--streams' => 'foo.bar'])
             ->expectsOutput("Message [123-0] from the 'foo.bar' stream could not be purged. Error: unknown")
             ->expectsOutput('Total of 1 message processed.')
+            ->assertExitCode(0);
+    }
+
+    public function test_fails_to_purge_messages_from_non_existing_stream(): void
+    {
+        $this->artisan('streamer:purge', ['--older_than' => '1 days', '--streams' => 'foo.bar'])
+            ->expectsOutput('Total of 0 messages processed.')
             ->assertExitCode(0);
     }
 }
