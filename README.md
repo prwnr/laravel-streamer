@@ -1,7 +1,7 @@
-# Laravel Streamer
+w# Laravel Streamer
 
-Streamer is a Laravel package for events functionality between different applications, powered by Redis Streams.
-This package utilizes all main commands of Redis 5.0 Streams providing a simple usage of Streams as Events.
+Streamer is a Laravel package for events functionality between different applications, powered by Redis Streams. This
+package utilizes all main commands of Redis 5.0 Streams providing a simple usage of Streams as Events.
 
 Main concept of this package is to provide easy way of emitting new events from your application and to allow listening to them in your other applications that are using same Redis server.
 
@@ -229,6 +229,48 @@ Table example:
 |                        | Tests\Stubs\AnotherLocalListener   |
 +------------------------+------------------------------------+
 ```
+
+#### Archive
+
+```bash
+streamer:archive
+```
+
+This command will archive messages from a selected streams older than days/weeks or so. It will process all stream
+messages, verifying their `created` timestamp and will attempt to archive (deleting them from redis and attempting to
+store them in associated archive [storage](#stream-archive))
+each one of them.
+
+This command has two required options:
+
+```text
+--streams : list of streams to archive messages
+--older_than= : information how old messages should be to archive them. The suggested format is: 60 min, 1 day, 1 week, 5 days, 2 weeks etc.
+```
+
+Be aware of using this command, as it will not take into account whether listeners processed messages it tries to
+archive or not. This should be used with caution and only for older messages, so that it will be more certain, that all
+listeners processed their messages.
+
+#### Purge
+
+```bash
+streamer:purge
+```
+
+This command will purge messages from a selected streams older than days/weeks or so. It will process all stream
+messages, verifying their `created` timestamp and will attempt to purge them (deleting them from the redis entirely).
+
+This command has two required options:
+
+```text
+--streams : list of streams to purge messages
+--older_than= : information how old messages should be to purge them. The suggested format is: 60 min, 1 day, 1 week, 5 days, 2 weeks etc.
+```
+
+Be aware of using this command, as it will not take into account whether listeners processed messages it tries to purge
+or not. This should be used with caution and only for older messages, so that it will be more certain, that all
+listeners processed their messages.
 
 #### Archive Restore
 
