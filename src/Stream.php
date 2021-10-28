@@ -2,6 +2,7 @@
 
 namespace Prwnr\Streamer;
 
+use BadMethodCallException;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\Contracts\Waitable;
@@ -91,9 +92,9 @@ class Stream implements Waitable
     /**
      * {@inheritdoc}
      */
-    public function await(string $lastId = self::FROM_START, int $timeout = 0): ?array
+    public function await(string $lastSeenId = self::FROM_START, int $timeout = 0): ?array
     {
-        return $this->redis()->xRead([$this->name => $lastId], null, $timeout);
+        return $this->redis()->xRead([$this->name => $lastSeenId], null, $timeout);
     }
 
     /**
@@ -188,9 +189,31 @@ class Stream implements Waitable
     }
 
     /**
-     * @throws StreamNotFoundException
+     * Returns XINFO for stream with FULL flag.
+     * Available since Redis v6.0.0.
      *
      * @return array
+     * @throws StreamNotFoundException
+     */
+    public function fullInfo(): array
+    {
+        $info = $this->redis()->info();
+        if (!version_compare($info['redis_version'], '6.0.0', '>=')) {
+            throw new BadMethodCallException('fullInfo only available for Redis 6.0 or above.');
+        }
+
+        $result = $this->redis()->xInfo(self::STREAM, $this->name, 'FULL');
+        if (!$result) {
+            throw new StreamNotFoundException("No results for stream $this->name");
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return array
+     * @throws StreamNotFoundException
+     *
      */
     public function groups(): array
     {

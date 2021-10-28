@@ -3,11 +3,17 @@
 namespace Prwnr\Streamer;
 
 use Illuminate\Support\ServiceProvider;
-use Prwnr\Streamer\Commands\FlushFailedCommand;
+use Prwnr\Streamer\Archiver\StorageManager;
+use Prwnr\Streamer\Archiver\StreamArchiver;
+use Prwnr\Streamer\Commands\Archive\ArchiveCommand;
+use Prwnr\Streamer\Commands\Archive\ArchiveRestoreCommand;
+use Prwnr\Streamer\Commands\Archive\PurgeCommand;
+use Prwnr\Streamer\Commands\FailedMessages\FlushFailedCommand;
+use Prwnr\Streamer\Commands\FailedMessages\ListFailedCommand;
+use Prwnr\Streamer\Commands\FailedMessages\RetryFailedCommand;
 use Prwnr\Streamer\Commands\ListCommand;
 use Prwnr\Streamer\Commands\ListenCommand;
-use Prwnr\Streamer\Commands\ListFailedCommand;
-use Prwnr\Streamer\Commands\RetryFailedCommand;
+use Prwnr\Streamer\Contracts\Archiver;
 use Prwnr\Streamer\Contracts\Errors\MessagesFailer;
 use Prwnr\Streamer\Contracts\Errors\Repository;
 use Prwnr\Streamer\Contracts\History;
@@ -29,6 +35,12 @@ class StreamerProvider extends ServiceProvider
         $this->app->bind(History::class, EventHistory::class);
         $this->app->bind(MessagesFailer::class, FailedMessagesHandler::class);
         $this->app->bind(Repository::class, MessagesRepository::class);
+        $this->app->bind(Archiver::class, StreamArchiver::class);
+
+        $this->app->when(StorageManager::class)
+            ->needs('$container')
+            ->give($this->app);
+        $this->app->singleton(StorageManager::class);
 
         $this->app->bind('Streamer', function () {
             return $this->app->make(Streamer::class);
@@ -78,6 +90,9 @@ class StreamerProvider extends ServiceProvider
                 ListFailedCommand::class,
                 RetryFailedCommand::class,
                 FlushFailedCommand::class,
+                ArchiveRestoreCommand::class,
+                ArchiveCommand::class,
+                PurgeCommand::class,
             ]);
         }
     }

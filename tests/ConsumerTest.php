@@ -97,7 +97,7 @@ class ConsumerTest extends TestCase
         $this->assertEmpty($actual);
     }
 
-    public function test_acknowledging_not_existing_message_thorws_exception(): void
+    public function test_acknowledging_not_existing_message_throws_exception(): void
     {
         $stream = new Stream('foo');
         $stream->createGroup('bar');

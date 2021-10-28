@@ -8,6 +8,7 @@ use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\Replayable;
 use Prwnr\Streamer\EventDispatcher\Streamer;
 use Prwnr\Streamer\History\EventHistory;
+use Prwnr\Streamer\Stream;
 
 class ReplayStreamTest extends TestCase
 {
@@ -153,6 +154,39 @@ class ReplayStreamTest extends TestCase
             'bar' => 'bar',
             'foobar' => 'foobar-10'
         ], $recorder->replay('foo.bar', '123'));
+    }
+
+    public function testReplayingFractionOfTheEventWhenSomeMessagesAreDeleted(): void
+    {
+        $recorder = new EventHistory();
+        $streamer = new Streamer($recorder);
+
+        $streamer->emit(new ReplayableFooBarEvent('123', [
+            'foo' => 'foo initial',
+            'bar' => 'bar initial',
+            'new bar' => false,
+        ]));
+
+        $deleted = $streamer->emit(new ReplayableFooBarEvent('123', [
+            'foo' => 'changed',
+            'new bar' => true,
+        ]));
+
+        $streamer->emit(new ReplayableFooBarEvent('123', [
+            'foo' => 'changed again',
+            'bar' => 'different value',
+        ]));
+
+        $stream = new Stream('foo.bar');
+        $stream->delete($deleted);
+
+        $payload = $recorder->replay('foo.bar', '123');
+
+        $this->assertEquals([
+            'foo' => 'changed again',
+            'bar' => 'different value',
+            'new bar' => false,
+        ], $payload);
     }
 }
 

@@ -3,9 +3,9 @@
 namespace Tests;
 
 use Illuminate\Support\Arr;
+use Prwnr\Streamer\Concerns\HashableMessage;
 use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\StreamableMessage;
-use Prwnr\Streamer\Concerns\HashableMessage;
 use Prwnr\Streamer\EventDispatcher\Message;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 
@@ -41,18 +41,21 @@ class MessageTest extends TestCase
         ];
         $expectedId = '1-0';
         $expected = [
-            '_id'  => $expectedId,
+            '_id' => $expectedId,
+            'name' => 'foo.bar',
             'data' => $data,
         ];
 
         $message = new ReceivedMessage($expectedId, [
-            '_id'  => $expectedId,
+            '_id' => $expectedId,
+            'name' => 'foo.bar',
             'data' => json_encode($data),
         ]);
 
         $this->assertInstanceOf(StreamableMessage::class, $message);
         $this->assertNotEmpty($message->getContent());
         $this->assertEquals($data, $message->get());
+        $this->assertEquals('foo.bar', $message->getEventName());
         $this->assertEquals('bar', $message->get('foo'));
         $this->assertEquals(['foo' => 'bar'], $message->only('foo'));
         $this->assertEquals(['bar' => 'foo bar foo'], $message->except('foo'));

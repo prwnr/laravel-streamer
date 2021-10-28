@@ -78,4 +78,24 @@ return [
             //\App\Listeners\ExampleListener::class
         ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Archive Storage Driver
+    |--------------------------------------------------------------------------
+    |
+    | Name of the driver that should be used by StreamArchiver while performing
+    | archivisation action.
+    | Null driver being the default driver will not store stream message,
+    | that will make it only removed.
+    |
+    | To fully use archiver functionality, the driver should be added to
+    | \Prwnr\Streamer\Archiver\StorageManager and save the received message
+    | in some kind of database.
+    |
+    | Driver should implement \Prwnr\Streamer\Contracts\ArchiveStorage contract.
+    */
+    'archive' => [
+        'storage_driver' => 'null'
+    ]
 ];
