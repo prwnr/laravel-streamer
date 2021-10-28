@@ -34,6 +34,7 @@ class StreamArchiver implements Archiver
         $content = $message->getContent();
         $this->storage->create(new Message([
             '_id' => $message->getId(),
+            'original_id' => $content['original_id'] ?? null,
             'name' => $content['name'],
             'domain' => $content['domain'],
             'created' => $content['created'] ?? null,
