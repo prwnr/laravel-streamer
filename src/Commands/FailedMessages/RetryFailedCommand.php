@@ -154,6 +154,7 @@ class RetryFailedCommand extends Command
             $this->archiver->archive($receivedMessage);
             $this->info("Message [{$message->getId()}] has been archived from the '{$message->getStream()->getName()}' stream.");
         } catch (Exception $e) {
+            report($e);
             $this->warn("Message [{$message->getId()}] from the '{$message->getStream()->getName()}' stream could not be archived. Error: ".$e->getMessage());
         }
     }

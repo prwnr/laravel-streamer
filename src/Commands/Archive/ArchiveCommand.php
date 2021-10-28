@@ -50,6 +50,7 @@ class ArchiveCommand extends ProcessMessagesCommand
             $this->archiver->archive($received);
             $this->info("Message [$id] has been archived from the '$stream' stream.");
         } catch (Exception $e) {
+            report($e);
             $this->error("Message [$id] from the '$stream' stream could not be archived. Error: ".$e->getMessage());
         }
     }

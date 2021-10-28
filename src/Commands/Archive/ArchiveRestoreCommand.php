@@ -104,6 +104,7 @@ class ArchiveRestoreCommand extends Command
             $id = $this->archiver->restore($message);
             $this->info("Successfully restored [{$message->getEventName()}][{$message->getId()}] message. New ID: $id");
         } catch (Exception $e) {
+            report($e);
             $this->info("Failed to restore [{$message->getEventName()}][{$message->getId()}] message. Error: {$e->getMessage()}");
         }
     }

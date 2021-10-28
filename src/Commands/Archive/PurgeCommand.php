@@ -35,6 +35,7 @@ class PurgeCommand extends ProcessMessagesCommand
 
             $this->info("Message [$id] has been purged from the '$stream' stream.");
         } catch (Exception $e) {
+            report($e);
             $this->warn("Message [$id] from the '$stream' stream could not be purged. Error: ".$e->getMessage());
         }
     }
