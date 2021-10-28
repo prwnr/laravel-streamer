@@ -50,8 +50,14 @@ class MemoryArchiveStorage implements ArchiveStorage
     /**
      * @inheritDoc
      */
-    public function delete(string $event, string $id): int
+    public function delete(string $event, string $id = null): int
     {
+        if ($id === null && isset($this->items[$event])) {
+            $count = count($this->items[$event]);
+            unset($this->items[$event]);
+            return $count;
+        }
+
         if (isset($this->items[$event][$id])) {
             unset($this->items[$event][$id]);
             return 1;
