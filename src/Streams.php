@@ -25,10 +25,10 @@ class Streams
     }
 
     /**
-     * @param StreamableMessage $message
-     * @param string            $id
+     * @param  StreamableMessage  $message
+     * @param  string  $id
      *
-     * @return arrat
+     * @return array
      */
     public function add(StreamableMessage $message, string $id = '*'): array
     {

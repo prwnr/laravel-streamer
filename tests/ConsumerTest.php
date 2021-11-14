@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Exception;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
 use Prwnr\Streamer\Stream;
 
@@ -103,7 +104,7 @@ class ConsumerTest extends TestCase
         $stream->createGroup('bar');
         $consumer = new Stream\Consumer('foobar', $stream, 'bar');
 
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
         $consumer->acknowledge('0-0');
     }
 

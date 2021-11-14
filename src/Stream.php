@@ -51,22 +51,22 @@ class Stream implements Waitable
     }
 
     /**
-     * @param StreamableMessage $message
-     * @param string            $id
+     * @param  StreamableMessage  $message
+     * @param  string  $id
      *
-     * @return mixed
+     * @return string
      */
-    public function add(StreamableMessage $message, string $id = '*')
+    public function add(StreamableMessage $message, string $id = '*'): string
     {
         return $this->redis()->xAdd($this->name, $id, $message->getContent());
     }
 
     /**
-     * @param string $id
+     * @param  string  $id
      *
-     * @return mixed
+     * @return int
      */
-    public function delete(string $id)
+    public function delete(string $id): int
     {
         return $this->redis()->xDel($this->name, [$id]);
     }
