@@ -13,26 +13,11 @@ use Prwnr\Streamer\Stream\Range;
  */
 class FailedMessage implements JsonSerializable
 {
-    /**
-     * @var string
-     */
-    private $id;
-    /**
-     * @var string
-     */
-    private $stream;
-    /**
-     * @var string
-     */
-    private $receiver;
-    /**
-     * @var string
-     */
-    private $error;
-    /**
-     * @var string
-     */
-    private $date;
+    private string $id;
+    private string $stream;
+    private string $receiver;
+    private string $error;
+    private string $date;
 
     /**
      * FailedMessage constructor.

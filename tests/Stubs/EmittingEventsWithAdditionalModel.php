@@ -9,7 +9,7 @@ class EmittingEventsWithAdditionalModel extends Model
 {
     use EmitsStreamerEvents;
 
-    protected $additional;
+    protected array $additional;
 
     protected $fillable = [
         'foo', 'id'

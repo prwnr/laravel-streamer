@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Exception;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
 use Illuminate\Support\Facades\Log;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
@@ -154,10 +155,10 @@ class StreamerTest extends TestCase
 
         $id = $streamer->emit($event);
         Log::shouldReceive('error')
-            ->with("Listener error. Failed processing message with ID {$id} on '{$event->name()}' stream. Error: error");
+            ->with("Listener error. Failed processing message with ID $id on '{$event->name()}' stream. Error: error");
 
-        $callback = function ($message) {
-            throw new \Exception('error');
+        $callback = function () {
+            throw new Exception('error');
         };
 
         $streamer->startFrom('0-0');
@@ -172,7 +173,7 @@ class StreamerTest extends TestCase
         $event = $this->makeEvent();
         $id = $streamer->emit($event);
         $callback = function ($message, $streamer) use ($id) {
-            $streamer->listen('bar.foo', function ($message, $streamer) {
+            $streamer->listen('bar.foo', static function ($message, $streamer) {
             });
             $content = $message->getContent();
             $this->assertInstanceOf(ReceivedMessage::class, $message);

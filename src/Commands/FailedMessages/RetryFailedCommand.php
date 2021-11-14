@@ -31,25 +31,10 @@ class RetryFailedCommand extends Command
      */
     protected $description = 'Retries failed messages by passing them to their original Listeners.';
 
-    /**
-     * @var MessagesFailer
-     */
-    private $failer;
-
-    /**
-     * @var Repository
-     */
-    private $repository;
-
-    /**
-     * @var Archiver
-     */
-    private $archiver;
-
-    /**
-     * @var string[]
-     */
-    private $specifications = [
+    private MessagesFailer $failer;
+    private Repository $repository;
+    private Archiver $archiver;
+    private array $specifications = [
         'id' => IdentifierSpecification::class,
         'receiver' => ReceiverSpecification::class,
         'stream' => StreamSpecification::class,
@@ -194,9 +179,8 @@ class RetryFailedCommand extends Command
     {
         $specification = $this->prepareSpecification(array_filter($filters));
 
-        return $this->repository->all()->filter(static function (FailedMessage $message) use ($specification) {
-            return $specification->isSatisfiedBy($message);
-        });
+        return $this->repository->all()
+            ->filter(static fn(FailedMessage $message) => $specification->isSatisfiedBy($message));
     }
 
     /**
@@ -237,27 +221,19 @@ class RetryFailedCommand extends Command
     {
         return [
             [
-                'all',
-                null,
-                InputOption::VALUE_NONE,
+                'all', null, InputOption::VALUE_NONE,
                 'Retries all failed messages.'
             ],
             [
-                'id',
-                null,
-                InputOption::VALUE_REQUIRED,
+                'id', null, InputOption::VALUE_REQUIRED,
                 'Retries messages with given ID (messages from different streams may have same IDs and some messages may fail for multiple listeners).'
             ],
             [
-                'stream',
-                null,
-                InputOption::VALUE_REQUIRED,
+                'stream', null, InputOption::VALUE_REQUIRED,
                 'Retries messages from given Stream name.'
             ],
             [
-                'receiver',
-                null,
-                InputOption::VALUE_REQUIRED,
+                'receiver', null, InputOption::VALUE_REQUIRED,
                 'Retries messages with given receiver associated with them.'
             ],
             [

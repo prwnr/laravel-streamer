@@ -19,24 +19,13 @@ class ListFailedCommand extends Command
      */
     protected $description = 'Lists all failed stream messages with error messages.';
 
-    /**
-     * @var Repository
-     */
-    private $repository;
-
-    /**
-     * @var string[]
-     */
-    private $compactHeaders = [
+    private Repository $repository;
+    private array $compactHeaders = [
         'ID',
         'Stream',
         'Error',
     ];
-
-    /**
-     * @var string[]
-     */
-    private $headers = [
+    private array $headers = [
         'ID',
         'Stream',
         'Receiver',
@@ -98,9 +87,7 @@ class ListFailedCommand extends Command
     {
         return [
             [
-                'compact',
-                null,
-                InputOption::VALUE_NONE,
+                'compact', null, InputOption::VALUE_NONE,
                 'Returns only IDs, Stream names and Errors of failed messages.'
             ]
         ];

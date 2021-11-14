@@ -40,7 +40,7 @@ class FailedMessagesHandlerTest extends TestCase
         $handler = $this->app->make(FailedMessagesHandler::class);
         $message = new ReceivedMessage('123', [
             'name' => 'foo.bar',
-            'data' => json_encode('payload')
+            'data' => json_encode('payload', JSON_THROW_ON_ERROR)
         ]);
         $listener = new LocalListener();
         $e = new Exception('error');
@@ -50,7 +50,7 @@ class FailedMessagesHandlerTest extends TestCase
         $this->assertNotEmpty($failed);
         $this->assertCount(1, $failed);
 
-        $actual = json_decode($failed[0], true);
+        $actual = json_decode($failed[0], true, 512, JSON_THROW_ON_ERROR);
         $this->assertEquals([
             'id' => $message->getId(),
             'stream' => 'foo.bar',

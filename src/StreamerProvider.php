@@ -42,9 +42,7 @@ class StreamerProvider extends ServiceProvider
             ->give($this->app);
         $this->app->singleton(StorageManager::class);
 
-        $this->app->bind('Streamer', function () {
-            return $this->app->make(Streamer::class);
-        });
+        $this->app->bind('Streamer', fn() => $this->app->make(Streamer::class));
 
         $this->offerPublishing();
         $this->configure();

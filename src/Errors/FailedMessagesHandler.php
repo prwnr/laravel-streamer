@@ -12,10 +12,7 @@ use Throwable;
 
 class FailedMessagesHandler implements MessagesFailer
 {
-    /**
-     * @var Repository
-     */
-    private $repository;
+    private Repository $repository;
 
     /**
      * MessagesErrorHandler constructor.

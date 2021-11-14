@@ -77,9 +77,7 @@ class ListCommand extends Command
     {
         return [
             [
-                'compact',
-                null,
-                InputOption::VALUE_NONE,
+                'compact', null, InputOption::VALUE_NONE,
                 'Returns only names of events that are registered in streamer.'
             ]
         ];

@@ -11,10 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 trait EmitsStreamerEvents
 {
-    /**
-     * @var string
-     */
-    protected $baseEventName;
+    protected string $baseEventName;
 
     /**
      * Boot event listeners.

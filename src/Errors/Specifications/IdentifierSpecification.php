@@ -7,10 +7,7 @@ use Prwnr\Streamer\Errors\FailedMessage;
 
 class IdentifierSpecification implements Specification
 {
-    /**
-     * @var string
-     */
-    private $id;
+    private string $id;
 
     /**
      * IdentifierSpecification constructor.

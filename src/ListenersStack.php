@@ -8,10 +8,7 @@ namespace Prwnr\Streamer;
 final class ListenersStack
 {
 
-    /**
-     * @var array
-     */
-    private static $events = [];
+    private static array $events = [];
 
     /**
      * @param  array  $events

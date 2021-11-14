@@ -10,7 +10,7 @@ class MatchAllSpecification implements Specification
     /**
      * @var Specification[]
      */
-    private $specifications;
+    private array $specifications;
 
     /**
      * MatchAllSpecification constructor.
