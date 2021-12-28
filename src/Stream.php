@@ -153,6 +153,10 @@ class Stream implements Waitable
     public function pending(string $group, ?string $consumer = null): array
     {
         $pending = $this->redis()->xPending($this->name, $group);
+        if (!$pending || !is_array($pending)) {
+            return [];
+        }
+
         $pendingCount = array_shift($pending);
 
         if ($consumer) {

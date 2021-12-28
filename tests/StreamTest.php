@@ -271,6 +271,16 @@ class StreamTest extends TestCase
         $this->assertEquals(1, $message[3]);
     }
 
+    public function test_pending_messages_not_returned_when_stream_or_group_does_not_exists(): void
+    {
+        $stream = new Stream('foo');
+
+        $this->assertEmpty($stream->pending('bar', 'foobar'));
+
+        $stream->add($this->makeMessage());
+        $this->assertEmpty($stream->pending('bar', 'foobar'));
+    }
+
     public function test_len_returns_number_of_messages_on_stream(): void
     {
         $streamA = new Stream('fooA');
