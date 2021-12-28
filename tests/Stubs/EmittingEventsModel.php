@@ -13,10 +13,26 @@ class EmittingEventsModel extends Model
         'foo', 'id'
     ];
 
+    private $shouldStream = true;
+
     public function __construct(array $attributes = [])
     {
         $this->baseEventName = 'model';
         parent::__construct($attributes);
     }
 
+    public function disableStreaming(): void
+    {
+        $this->shouldStream = false;
+    }
+
+    public function enableStreaming(): void
+    {
+        $this->shouldStream = true;
+    }
+
+    protected function canStream(): bool
+    {
+        return $this->shouldStream;
+    }
 }
