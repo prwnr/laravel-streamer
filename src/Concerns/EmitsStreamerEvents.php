@@ -2,9 +2,9 @@
 
 namespace Prwnr\Streamer\Concerns;
 
+use Illuminate\Database\Eloquent\Model;
 use Prwnr\Streamer\Eloquent\EloquentModelEvent;
 use Prwnr\Streamer\Facades\Streamer;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Trait EmitsStreamerEvents.
@@ -36,7 +36,7 @@ trait EmitsStreamerEvents
      */
     public function postSave(): void
     {
-        if (! $this->wasChanged()) {
+        if (!$this->wasChanged() || !$this->canStream()) {
             return;
         }
 
@@ -55,6 +55,9 @@ trait EmitsStreamerEvents
      */
     public function postCreate(): void
     {
+        if (!$this->canStream()) {
+            return;
+        }
         $payload = $this->makeBasePayload();
         foreach ($this->getAttributes() as $field => $change) {
             $payload['fields'][] = $field;
@@ -70,6 +73,10 @@ trait EmitsStreamerEvents
      */
     public function postDelete(): void
     {
+        if (!$this->canStream()) {
+            return;
+        }
+
         $payload = $this->makeBasePayload();
         $payload['deleted'] = true;
         Streamer::emit(new EloquentModelEvent($this->getEventName('deleted'), $payload));
@@ -88,7 +95,19 @@ trait EmitsStreamerEvents
     }
 
     /**
-     * @param string $action
+     * Method that can be overridden to add custom logic which will determine
+     * whether the given model should have events emitted or not.
+     * Returns true by default, emitting events for any case.
+     *
+     * @return bool
+     */
+    protected function canStream(): bool
+    {
+        return true;
+    }
+
+    /**
+     * @param  string  $action
      * @return string
      */
     private function getEventName(string $action): string
