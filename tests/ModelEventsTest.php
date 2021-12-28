@@ -2,11 +2,11 @@
 
 namespace Tests;
 
-use Prwnr\Streamer\Stream;
-use Prwnr\Streamer\Contracts\Event;
-use Tests\Stubs\EmittingEventsModel;
-use Prwnr\Streamer\Eloquent\EloquentModelEvent;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
+use Prwnr\Streamer\Contracts\Event;
+use Prwnr\Streamer\Eloquent\EloquentModelEvent;
+use Prwnr\Streamer\Stream;
+use Tests\Stubs\EmittingEventsModel;
 use Tests\Stubs\EmittingEventsWithAdditionalModel;
 
 class ModelEventsTest extends TestCase
@@ -198,5 +198,49 @@ class ModelEventsTest extends TestCase
         $this->assertArrayHasKey('model.with.additional.created', $actual);
         $message = array_pop($actual['model.with.additional.created']);
         $this->assertEquals(json_encode($expected, JSON_THROW_ON_ERROR), $message['data']);
+    }
+
+    public function test_model_with_disabled_streaming_wont_emit_any_events(): void
+    {
+        $model = new EmittingEventsModel(['id' => 123, 'foo' => 'bar']);
+        $model->disableStreaming();
+
+        $model->postCreate();
+
+        $model->syncOriginal();
+        $model->foo = 'bar';
+        $model->syncChanges();
+        $model->postSave();
+
+        $model->postDelete();
+
+        $stream = new Stream('model.created');
+        $this->assertEmpty($stream->read());
+
+        $stream = new Stream('model.updated');
+        $this->assertEmpty($stream->read());
+
+        $stream = new Stream('model.deleted');
+        $this->assertEmpty($stream->read());
+
+        $model->enableStreaming();
+
+        $model->postCreate();
+
+        $model->syncOriginal();
+        $model->foo = 'foobar';
+        $model->syncChanges();
+        $model->postSave();
+
+        $model->postDelete();
+
+        $stream = new Stream('model.created');
+        $this->assertNotEmpty($stream->read());
+
+        $stream = new Stream('model.updated');
+        $this->assertNotEmpty($stream->read());
+
+        $stream = new Stream('model.deleted');
+        $this->assertNotEmpty($stream->read());
     }
 }
