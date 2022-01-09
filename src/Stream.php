@@ -72,12 +72,12 @@ class Stream implements Waitable
     }
 
     /**
-     * @param string   $from
-     * @param int|null $limit
+     * @param  string  $from
+     * @param  int  $limit
      *
      * @return array
      */
-    public function read(string $from = self::FROM_START, ?int $limit = null): array
+    public function read(string $from = self::FROM_START, int $limit = 0): array
     {
         if ($limit) {
             return $this->redis()->xRead([$this->name => $from], $limit);
@@ -91,7 +91,7 @@ class Stream implements Waitable
      */
     public function await(string $lastSeenId = self::FROM_START, int $timeout = 0): ?array
     {
-        return $this->redis()->xRead([$this->name => $lastSeenId], null, $timeout);
+        return $this->redis()->xRead([$this->name => $lastSeenId], 0, $timeout);
     }
 
     /**

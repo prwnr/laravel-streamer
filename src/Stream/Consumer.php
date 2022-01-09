@@ -56,7 +56,7 @@ class Consumer implements Waitable
     public function await(string $lastSeenId = self::NEW_ENTRIES, int $timeout = 0): ?array
     {
         return $this->redis()->xReadGroup(
-            $this->group, $this->consumer, [$this->stream->getName() => $lastSeenId], null, $timeout
+            $this->group, $this->consumer, [$this->stream->getName() => $lastSeenId], 0, $timeout
         );
     }
 
