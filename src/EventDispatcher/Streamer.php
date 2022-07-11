@@ -118,7 +118,7 @@ class Streamer implements Emitter, Listener
         }
 
         try {
-            $multiStream = new Stream\MultiStream($events, $this->consumer, $this->group);
+            $multiStream = new Stream\MultiStream($events, $this->group, $this->consumer);
             $this->listenOn($multiStream, $handlers);
         } finally {
             $this->inLoop = false;

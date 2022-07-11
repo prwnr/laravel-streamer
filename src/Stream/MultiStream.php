@@ -26,7 +26,7 @@ class MultiStream
      * @param  string  $consumer
      * @param  string  $group
      */
-    public function __construct(array $streams, string $consumer = '', string $group = '')
+    public function __construct(array $streams, string $group = '', string $consumer = '')
     {
         $this->streams = new Collection();
 

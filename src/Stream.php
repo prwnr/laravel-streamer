@@ -152,6 +152,10 @@ class Stream
     public function pending(string $group, ?string $consumer = null): array
     {
         $pending = $this->redis()->xPending($this->name, $group);
+        if (!$pending) {
+            return [];
+        }
+
         $pendingCount = array_shift($pending);
 
         if ($consumer) {

@@ -36,7 +36,7 @@ class MultiStreamTest extends TestCase
 
     public function test_new_multi_streams_with_consumer_and_group(): void
     {
-        $multi = new MultiStream(['foo', 'bar'], 'consumer', 'group');
+        $multi = new MultiStream(['foo', 'bar'], 'group', 'consumer');
 
         $this->assertCount(2, $multi->streams());
         $streams = $multi->streams();
@@ -144,7 +144,7 @@ class MultiStreamTest extends TestCase
 
     public function test_awaits_single_stream_consumer_new_messages(): void
     {
-        $multi = new MultiStream(['foo'], 'consumer', 'group');
+        $multi = new MultiStream(['foo'], 'group', 'consumer');
 
         $multi->add(['foo' => '1-0'], $this->makeMessage());
         $multi->add(['foo' => '2-0'], $this->makeMessage());
@@ -169,7 +169,7 @@ class MultiStreamTest extends TestCase
 
     public function test_awaits_multiple_stream_consumer_new_messages(): void
     {
-        $multi = new MultiStream(['foo', 'bar'], 'consumer', 'group');
+        $multi = new MultiStream(['foo', 'bar'], 'group', 'consumer');
 
         $multi->add(['foo' => '1-0', 'bar' => '1-0'], $this->makeMessage());
         $multi->add(['foo' => '2-0', 'bar' => '2-0'], $this->makeMessage());
@@ -204,7 +204,7 @@ class MultiStreamTest extends TestCase
 
     public function test_acknowledges_messages_for_consumer(): void
     {
-        $multi = new MultiStream(['foo', 'bar'], 'consumer', 'group');
+        $multi = new MultiStream(['foo', 'bar'], 'group', 'consumer');
 
         $multi->add(['foo' => '1-0', 'bar' => '1-0'], $this->makeMessage());
         $multi->add(['foo' => '2-0', 'bar' => '2-0'], $this->makeMessage());
@@ -223,7 +223,7 @@ class MultiStreamTest extends TestCase
 
     public function test_not_all_streams_are_acknowledged(): void
     {
-        $multi = new MultiStream(['foo', 'bar'], 'consumer', 'group');
+        $multi = new MultiStream(['foo', 'bar'], 'group', 'consumer');
 
         $multi->add(['foo' => '1-0', 'bar' => '3-0'], $this->makeMessage());
 
