@@ -7,6 +7,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\StreamableMessage;
+use Prwnr\Streamer\Exceptions\AcknowledgingFailedException;
 use Prwnr\Streamer\Stream;
 
 class MultiStream
@@ -49,7 +50,7 @@ class MultiStream
     /**
      * @return Collection&Stream[]
      */
-    public function getStreams(): Collection
+    public function streams(): Collection
     {
         return $this->streams;
     }
@@ -164,8 +165,9 @@ class MultiStream
         }
 
         if ($notAcknowledged) {
-            throw new Exception("Not all messages were acknowledged. Streams affected: ".implode(', ',
-                    $notAcknowledged));
+            throw new AcknowledgingFailedException(
+                "Not all messages were acknowledged. Streams affected: ".implode(', ', $notAcknowledged)
+            );
         }
     }
 
@@ -206,10 +208,29 @@ class MultiStream
     }
 
     /**
+     * @param $result
+     * @return array
+     */
+    private function parseResult($result): array
+    {
+        $list = [];
+        foreach ($result as $stream => $messages) {
+            foreach ($messages as $id => $message) {
+                $list[] = [
+                    'stream' => $stream,
+                    'id' => $id,
+                    'message' => $message
+                ];
+            }
+        }
+        return $list;
+    }
+
+    /**
      * @param  array  $list
      * @return array
      */
-    protected function sortByTimestamps(array $list): array
+    private function sortByTimestamps(array $list): array
     {
         usort($list, static function ($a, $b) {
             $aID = $a['id'] ?? null;
@@ -244,25 +265,6 @@ class MultiStream
             return 0;
         });
 
-        return $list;
-    }
-
-    /**
-     * @param $result
-     * @return array
-     */
-    private function parseResult($result): array
-    {
-        $list = [];
-        foreach ($result as $stream => $messages) {
-            foreach ($messages as $id => $message) {
-                $list[] = [
-                    'stream' => $stream,
-                    'id' => $id,
-                    'message' => $message
-                ];
-            }
-        }
         return $list;
     }
 }

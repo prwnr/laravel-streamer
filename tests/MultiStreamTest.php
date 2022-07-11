@@ -28,8 +28,8 @@ class MultiStreamTest extends TestCase
     {
         $multi = new MultiStream(['foo', 'bar']);
 
-        $this->assertCount(2, $multi->getStreams());
-        $streams = $multi->getStreams();
+        $this->assertCount(2, $multi->streams());
+        $streams = $multi->streams();
         $this->assertArrayHasKey('foo', $streams);
         $this->assertArrayHasKey('bar', $streams);
     }
@@ -38,8 +38,8 @@ class MultiStreamTest extends TestCase
     {
         $multi = new MultiStream(['foo', 'bar'], 'consumer', 'group');
 
-        $this->assertCount(2, $multi->getStreams());
-        $streams = $multi->getStreams();
+        $this->assertCount(2, $multi->streams());
+        $streams = $multi->streams();
         $this->assertArrayHasKey('foo', $streams);
         $this->assertArrayHasKey('bar', $streams);
 
@@ -216,7 +216,7 @@ class MultiStreamTest extends TestCase
 
         $multi->acknowledge(['foo' => ['1-0'], ['bar' => ['1-0', '2-0']]]);
 
-        $consumer = new Stream\Consumer('consumer', $multi->getStreams()->get('foo'), 'group');
+        $consumer = new Stream\Consumer('consumer', $multi->streams()->get('foo'), 'group');
 
         $this->assertCount(1, $consumer->pending());
     }
@@ -237,7 +237,7 @@ class MultiStreamTest extends TestCase
 
         $multi->acknowledge(['foo' => ['1-0'], 'bar' => ['1-0', '2-0']]);
 
-        $consumer = new Stream\Consumer('consumer', $multi->getStreams()->get('foo'), 'group');
+        $consumer = new Stream\Consumer('consumer', $multi->streams()->get('foo'), 'group');
 
         $this->assertCount(0, $consumer->pending());
     }

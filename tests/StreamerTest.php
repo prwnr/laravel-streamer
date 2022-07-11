@@ -10,6 +10,8 @@ use Prwnr\Streamer\EventDispatcher\Streamer;
 use Prwnr\Streamer\Facades\Streamer as StreamerFacade;
 use Prwnr\Streamer\History\EventHistory;
 use Prwnr\Streamer\Stream;
+use Tests\Stubs\FooBarStreamerEventStub;
+use Tests\Stubs\OtherBarStreamerEventStub;
 
 class StreamerTest extends TestCase
 {
@@ -19,6 +21,7 @@ class StreamerTest extends TestCase
     {
         parent::setUp();
         $this->setUpRedis();
+        $this->redis['phpredis']->connection()->flushall();
     }
 
     protected function tearDown(): void
@@ -185,5 +188,78 @@ class StreamerTest extends TestCase
 
         $streamer->startFrom('0-0');
         $streamer->listen('foo.bar', $callback);
+    }
+
+    public function test_streamer_listen_listens_to_multiple_events_with_multiple_handlers(): void
+    {
+        $this->app['config']->set('streamer.stream_read_timeout', 0.01);
+        $streamer = new Streamer(new EventHistory());
+
+        $ids = [];
+        $ids[] = $streamer->emit(new FooBarStreamerEventStub());
+        $ids[] = $streamer->emit(new FooBarStreamerEventStub());
+        $ids[] = $streamer->emit(new OtherBarStreamerEventStub());
+        $ids[] = $streamer->emit(new OtherBarStreamerEventStub());
+
+        $fooBarHandler = function ($message, $streamer) use (&$ids) {
+            $content = $message->getContent();
+            $this->assertInstanceOf(ReceivedMessage::class, $message);
+            $this->assertInstanceOf(Streamer::class, $streamer);
+            $this->assertNotEmpty($content);
+            $this->assertEquals(array_shift($ids), $message->getId());
+            $this->assertEquals(['foo' => 'bar'], $content['data']);
+
+            if (empty($ids)) {
+                $streamer->cancel(); // break out of the listener loop
+            }
+        };
+
+        $otherBarHandler = function ($message, $streamer) use (&$ids) {
+            $content = $message->getContent();
+            $this->assertInstanceOf(ReceivedMessage::class, $message);
+            $this->assertInstanceOf(Streamer::class, $streamer);
+            $this->assertNotEmpty($content);
+            $this->assertEquals(array_shift($ids), $message->getId());
+            $this->assertEquals(['other' => 'bar'], $content['data']);
+
+            if (empty($ids)) {
+                $streamer->cancel(); // break out of the listener loop
+            }
+        };
+
+        $streamer->startFrom('0-0');
+        $streamer->listen(
+            ['foo.bar', 'other.bar'],
+            ['foo.bar' => $fooBarHandler, 'other.bar' => $otherBarHandler]
+        );
+    }
+
+    public function test_streamer_listen_listens_to_multiple_events_with_single_handlers(): void
+    {
+        $this->app['config']->set('streamer.stream_read_timeout', 0.01);
+        $streamer = new Streamer(new EventHistory());
+
+        $ids = [];
+        $ids[] = $streamer->emit(new FooBarStreamerEventStub());
+        $ids[] = $streamer->emit(new FooBarStreamerEventStub());
+        $ids[] = $streamer->emit(new OtherBarStreamerEventStub());
+        $ids[] = $streamer->emit(new OtherBarStreamerEventStub());
+
+        $handler = function ($message, $streamer) use (&$ids) {
+            $content = $message->getContent();
+            $this->assertInstanceOf(ReceivedMessage::class, $message);
+            $this->assertInstanceOf(Streamer::class, $streamer);
+            $this->assertNotEmpty($content);
+            $this->assertEquals(array_shift($ids), $message->getId());
+            $this->assertContains($message->getEventName(), ['foo.bar', 'other.bar']);
+
+            if (empty($ids)) {
+                $streamer->cancel(); // break out of the listener loop
+            }
+        };
+
+
+        $streamer->startFrom('0-0');
+        $streamer->listen(['foo.bar', 'other.bar'], $handler);
     }
 }

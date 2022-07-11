@@ -5,13 +5,12 @@ namespace Prwnr\Streamer;
 use BadMethodCallException;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\StreamableMessage;
-use Prwnr\Streamer\Contracts\Waitable;
 use Prwnr\Streamer\Stream\Range;
 
 /**
  * Class Stream.
  */
-class Stream implements Waitable
+class Stream
 {
     use ConnectsWithRedis;
 

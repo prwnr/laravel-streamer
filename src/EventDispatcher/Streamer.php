@@ -2,6 +2,7 @@
 
 namespace Prwnr\Streamer\EventDispatcher;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use JsonException;
 use Prwnr\Streamer\Contracts\Emitter;
@@ -10,6 +11,7 @@ use Prwnr\Streamer\Contracts\History;
 use Prwnr\Streamer\Contracts\Listener;
 use Prwnr\Streamer\Contracts\Replayable;
 use Prwnr\Streamer\Contracts\Waitable;
+use Prwnr\Streamer\Exceptions\InvalidListeningArgumentsException;
 use Prwnr\Streamer\History\Snapshot;
 use Prwnr\Streamer\Stream;
 use Throwable;
@@ -20,7 +22,7 @@ use Throwable;
 class Streamer implements Emitter, Listener
 {
     protected string $startFrom;
-    protected float $readTimeout;
+    protected float $readTimeout = 0.0;
     protected float $listenTimeout;
     protected float $readSleep;
     private string $group = '';
@@ -104,22 +106,21 @@ class Streamer implements Emitter, Listener
      *
      * @throws Throwable
      */
-    public function listen(string $event, callable $handler): void
+    public function listen($events, $handlers): void
     {
         if ($this->inLoop) {
             return;
         }
 
-        $stream = new Stream($event);
+        [$events, $handlers] = $this->parseArgs($events, $handlers);
+
+        if ($this->consumer && $this->group) {
+            $this->adjustGroupReadTimeout();
+        }
 
         try {
-            if (!$this->group || !$this->consumer) {
-                $this->listenOn($stream, $handler);
-                return;
-            }
-
-            $this->adjustGroupReadTimeout();
-            $this->listenOn(new Stream\Consumer($this->consumer, $stream, $this->group), $handler);
+            $multiStream = new Stream\MultiStream($events, $this->consumer, $this->group);
+            $this->listenOn($multiStream, $handlers);
         } finally {
             $this->inLoop = false;
         }
@@ -134,20 +135,19 @@ class Streamer implements Emitter, Listener
     }
 
     /**
-     * @param  Waitable  $on
-     * @param  callable  $handler
+     * @param  Stream\MultiStream  $streams
+     * @param  array  $handlers
+     * @return void
      */
-    private function listenOn(Waitable $on, callable $handler): void
+    private function listenOn(Stream\MultiStream $streams, array $handlers): void
     {
         $start = microtime(true) * 1000;
-        $lastSeenId = $this->startFrom ?? $on->getNewEntriesKey();
+        $lastSeenId = $this->startFrom ?? $streams->getNewEntriesKey();
         while (!$this->canceled) {
             $this->inLoop = true;
-            $payload = $on->await($lastSeenId, $this->readTimeout);
+            $payload = $streams->await($lastSeenId, $this->readTimeout);
             if (!$payload) {
-                if ($on->getNewEntriesKey() === Stream\Consumer::NEW_ENTRIES) {
-                    $lastSeenId = $on->getNewEntriesKey();
-                }
+                $lastSeenId = $streams->getNewEntriesKey();
                 sleep($this->readSleep);
                 if ($this->shouldStop($start)) {
                     break;
@@ -155,47 +155,82 @@ class Streamer implements Emitter, Listener
                 continue;
             }
 
-            $lastSeenId = $this->processPayload($payload, $on, $handler);
-            $lastSeenId = $lastSeenId ?: $on->getNewEntriesKey();
+            $this->processPayload($payload, $handlers, $streams);
+
+            $lastSeenId = $streams->getNewEntriesKey();
+
             $start = microtime(true) * 1000;
         }
     }
 
     /**
      * @param  array  $payload
-     * @param  Waitable  $on
-     * @param  callable  $handler
-     *
-     * @return string
+     * @param  array  $handlers
+     * @param  Stream\MultiStream  $streams
+     * @return void
      */
-    private function processPayload(array $payload, Waitable $on, callable $handler): ?string
+    private function processPayload(array $payload, array $handlers, Stream\MultiStream $streams): void
     {
-        $messageId = null;
-        foreach ($payload[$on->getName()] as $messageId => $message) {
+        foreach ($payload as $message) {
             try {
-                $this->forward($messageId, $message, $handler);
-                $on->acknowledge($messageId);
+                $this->forward($message, $this->getHandler($message['stream'], $handlers));
+                $streams->acknowledge([$message['stream'] => $message['id']]);
                 if ($this->canceled) {
                     break;
                 }
             } catch (Throwable $ex) {
-                $this->report($messageId, $on, $ex);
+                $this->report($message['id'], $streams->streams()->get($message['stream']), $ex);
                 continue;
             }
         }
-
-        return $messageId;
     }
 
     /**
-     * @param  string  $messageId
      * @param  array  $message
      * @param  callable  $handler
+     * @return void
      * @throws JsonException
      */
-    private function forward(string $messageId, array $message, callable $handler): void
+    private function forward(array $message, callable $handler): void
     {
-        $handler(new ReceivedMessage($messageId, $message), $this);
+        $handler(new ReceivedMessage($message['id'], $message['message']), $this);
+    }
+
+    /**
+     * @param $events
+     * @param $handlers
+     * @return array
+     * @throws \Exception
+     */
+    private function parseArgs($events, $handlers): array
+    {
+        $eventsList = Arr::wrap($events);
+
+        if (is_callable($handlers)) {
+            return [$eventsList, [$handlers]];
+        }
+
+        foreach ($eventsList as $event) {
+            if (!isset($handlers[$event])) {
+                throw new InvalidListeningArgumentsException();
+            }
+        }
+
+        return [$eventsList, $handlers];
+    }
+
+    /**
+     * @param  string  $stream
+     * @param  array  $handlers
+     * @return callable
+     */
+    private function getHandler(string $stream, array $handlers): callable
+    {
+        if (count($handlers) === 1) {
+            return Arr::first($handlers);
+        }
+
+        return $handlers[$stream];
     }
 
     /**
@@ -205,7 +240,7 @@ class Streamer implements Emitter, Listener
      */
     private function adjustGroupReadTimeout(): void
     {
-        if ($this->readTimeout === 0) {
+        if ($this->readTimeout === 0.0) {
             $this->readTimeout = 2000;
         }
     }
@@ -217,7 +252,7 @@ class Streamer implements Emitter, Listener
      */
     private function shouldStop(float $start): bool
     {
-        if ($this->listenTimeout === 0) {
+        if ($this->listenTimeout === 0.0) {
             return false;
         }
 

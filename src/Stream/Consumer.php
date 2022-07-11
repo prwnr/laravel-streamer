@@ -4,13 +4,13 @@ namespace Prwnr\Streamer\Stream;
 
 use Exception;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
-use Prwnr\Streamer\Contracts\Waitable;
+use Prwnr\Streamer\Exceptions\AcknowledgingFailedException;
 use Prwnr\Streamer\Stream;
 
 /**
  * Class Consumer.
  */
-class Consumer implements Waitable
+class Consumer
 {
     use ConnectsWithRedis;
 
@@ -69,7 +69,7 @@ class Consumer implements Waitable
     {
         $result = $this->redis()->xAck($this->stream->getName(), $this->group, [$id]);
         if ($result === 0) {
-            throw new Exception("Could not acknowledge message with ID $id");
+            throw new AcknowledgingFailedException("Could not acknowledge message with ID $id");
         }
     }
 
