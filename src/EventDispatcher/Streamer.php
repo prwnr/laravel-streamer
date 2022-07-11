@@ -10,7 +10,6 @@ use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\History;
 use Prwnr\Streamer\Contracts\Listener;
 use Prwnr\Streamer\Contracts\Replayable;
-use Prwnr\Streamer\Contracts\Waitable;
 use Prwnr\Streamer\Exceptions\InvalidListeningArgumentsException;
 use Prwnr\Streamer\History\Snapshot;
 use Prwnr\Streamer\Stream;
@@ -265,10 +264,11 @@ class Streamer implements Emitter, Listener
 
     /**
      * @param  string  $id
-     * @param  Waitable  $on
+     * @param  Stream  $on
      * @param  Throwable  $ex
+     * @return void
      */
-    private function report(string $id, Waitable $on, Throwable $ex): void
+    private function report(string $id, Stream $on, Throwable $ex): void
     {
         $error = "Listener error. Failed processing message with ID $id on '{$on->getName()}' stream. Error: {$ex->getMessage()}";
         Log::error($error);
