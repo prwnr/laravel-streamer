@@ -5,13 +5,12 @@ namespace Prwnr\Streamer;
 use BadMethodCallException;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\StreamableMessage;
-use Prwnr\Streamer\Contracts\Waitable;
 use Prwnr\Streamer\Stream\Range;
 
 /**
  * Class Stream.
  */
-class Stream implements Waitable
+class Stream
 {
     use ConnectsWithRedis;
 
@@ -153,6 +152,10 @@ class Stream implements Waitable
     public function pending(string $group, ?string $consumer = null): array
     {
         $pending = $this->redis()->xPending($this->name, $group);
+        if (!$pending) {
+            return [];
+        }
+
         $pendingCount = array_shift($pending);
 
         if ($consumer) {

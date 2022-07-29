@@ -55,6 +55,28 @@ final class ListenersStack
     }
 
     /**
+     * @param  string  $event
+     * @return bool
+     */
+    public static function hasListener(string $event): bool
+    {
+        return isset(self::$events[$event]);
+    }
+
+    /**
+     * @param  string  $event
+     * @return array
+     */
+    public static function getListenersFor(string $event): array
+    {
+        if (self::hasListener($event)) {
+            return self::$events[$event];
+        }
+
+        return [];
+    }
+
+    /**
      * @return array
      */
     public static function all(): array

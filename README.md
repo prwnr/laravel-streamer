@@ -64,7 +64,8 @@ Then, at any point in your application all you need to do is to emit that event 
 $event = new ExampleStreamerEvent();
 $id = \Prwnr\Streamer\Facades\Streamer::emit($event);
 ```
-This will create a message on a stream named (if such does not exists): `example.streamer.event`. Emit method will return an ID if emitting your event ended up with success. 
+This will create a message on a stream named (if such does not exist): `example.streamer.event`. Emit method will return
+an ID if emitting your event ended up with success.
 
 ### Listening for new messages on events
 
@@ -110,14 +111,17 @@ To start listening for an event, use [listen](#listen) command.
 streamer:listen example.streamer.event 
 ```
 
-This command will start listening on a given stream starting from "now". It will be listening in a blocking way, meaning
-that it will run until Redis will time out or crash. All listener related errors are being caught and logged into
+This command will start listening on a given stream (or streams separated by comma) starting from "now".
+It will be listening in a blocking way, meaning that it will run until Redis will time out or crash.
+All listener related errors are being caught and logged into
 console as well as stored in Failed Messages list for later debugging and/or retrying.
 
-That's a basic usage of this command, where event name is a required argument. So in this case it simply starts
-listening for only new events. This command however has few options that are extending its usage, those are:
+That's a basic usage of this command, where event name is a required argument (unless `--all` option is provided).
+So in this case it simply starts listening for only new events.
+This command however has few options that are extending its usage, those are:
 
 ```text
+--all= : Will trigger listener mode to start listening on all events that are registered with local listeners classes (from the ListenersStack). Event name argument is no longer required in this case.
 --group= : Name of your streaming group. Only when group is provided listener will listen on group as consumer
 --consumer= : Name of your group consumer. If not provided a name will be created as groupname-timestamp
 --reclaim= : Milliseconds of pending messages idle time, that should be reclaimed for current consumer in this group. Can be only used with group listening
@@ -140,6 +144,9 @@ using those options, keep in mind, that they are not going to take into account 
 other servers - meaning, that when first listener hooked to specific event will process its messages, the `purge` and
 `archive` options will delete the message not waiting for other listeners to finish. To fully use `archive` option
 see [Stream Archive][#stream-archive] for more details and instructions.
+
+Using multiple events in argument or the `--all` option with any other option (like group, consumer, last_id)
+will apply those options to every stream event that is being in use.
 
 #### Failed List
 

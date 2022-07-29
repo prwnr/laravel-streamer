@@ -14,9 +14,9 @@ use Prwnr\Streamer\Facades\Streamer;
 use Prwnr\Streamer\ListenersStack;
 use Prwnr\Streamer\Stream;
 use Prwnr\Streamer\StreamerProvider;
+use Tests\Stubs\FooBarStreamerEventStub;
 use Tests\Stubs\LocalListener;
 use Tests\Stubs\MessageStub;
-use Tests\Stubs\StreamerEventStub;
 
 class TestCase extends \Orchestra\Testbench\TestCase
 {
@@ -41,7 +41,7 @@ class TestCase extends \Orchestra\Testbench\TestCase
 
     protected function makeEvent(): Event
     {
-        return new StreamerEventStub();
+        return new FooBarStreamerEventStub();
     }
 
     protected function withLocalListenersConfigured(array $listeners): void

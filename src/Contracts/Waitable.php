@@ -4,6 +4,7 @@ namespace Prwnr\Streamer\Contracts;
 
 /**
  * Interface Waitable.
+ * @deprecated will be removed with next major version
  */
 interface Waitable
 {

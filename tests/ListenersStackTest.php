@@ -86,4 +86,39 @@ class ListenersStackTest extends TestCase
 
         $this->assertEquals($expected, ListenersStack::all());
     }
+
+    public function test_listeners_stack_has_listener_for_event(): void
+    {
+        $expected = [
+            'foo.bar' => [
+                LocalListener::class,
+                AnotherLocalListener::class
+            ],
+            'bar.foo' => LocalListener::class
+        ];
+
+        ListenersStack::addMany($expected);
+
+        $this->assertTrue(ListenersStack::hasListener('foo.bar'));
+        $this->assertTrue(ListenersStack::hasListener('bar.foo'));
+    }
+
+    public function test_listeners_stack_get_listeners_for_event(): void
+    {
+        $expected = [
+            'foo.bar' => [
+                LocalListener::class,
+                AnotherLocalListener::class
+            ],
+            'bar.foo' => LocalListener::class
+        ];
+
+        ListenersStack::addMany($expected);
+
+        $this->assertEquals([
+            LocalListener::class,
+            AnotherLocalListener::class
+        ], ListenersStack::getListenersFor('foo.bar'));
+        $this->assertEquals([LocalListener::class], ListenersStack::getListenersFor('bar.foo'));
+    }
 }

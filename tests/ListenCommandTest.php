@@ -8,11 +8,14 @@ use Prwnr\Streamer\Contracts\Archiver;
 use Prwnr\Streamer\Errors\MessagesRepository;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\Facades\Streamer;
+use Prwnr\Streamer\ListenersStack;
 use Prwnr\Streamer\Stream;
 use Tests\Stubs\AnotherLocalListener;
 use Tests\Stubs\ExceptionalListener;
+use Tests\Stubs\FooBarStreamerEventStub;
 use Tests\Stubs\LocalListener;
 use Tests\Stubs\NotReceiverListener;
+use Tests\Stubs\OtherBarStreamerEventStub;
 
 class ListenCommandTest extends TestCase
 {
@@ -41,10 +44,9 @@ class ListenCommandTest extends TestCase
 
     public function test_command_called_without_listeners_configured_exits_with_error(): void
     {
-        Streamer::emit($this->makeEvent());
-
-        $this->artisan('streamer:listen', ['event' => 'foo.bar'])
-            ->expectsOutput('There are no local listeners associated with foo.bar event in configuration.')
+        $this->artisan('streamer:listen', ['events' => 'foo.bar,other.bar'])
+            ->expectsOutput("There are no local listeners associated with 'foo.bar' event in configuration.")
+            ->expectsOutput("There are no local listeners associated with 'other.bar' event in configuration.")
             ->assertExitCode(1);
     }
 
@@ -67,7 +69,7 @@ class ListenCommandTest extends TestCase
 
         Streamer::emit($this->makeEvent());
 
-        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0'])
+        $this->artisan('streamer:listen', ['events' => 'foo.bar', '--last_id' => '0-0'])
             ->expectsOutput(sprintf('Listener class [%s] needs to implement MessageReceiver', NotReceiverListener::class))
             ->assertExitCode(0);
     }
@@ -81,7 +83,7 @@ class ListenCommandTest extends TestCase
         $this->withLocalListenersConfigured($listeners);
 
         $this->doesntExpectListenersToBeCalled($listeners);
-        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0'])
+        $this->artisan('streamer:listen', ['events' => 'foo.bar', '--last_id' => '0-0'])
             ->assertExitCode(0);
     }
 
@@ -95,7 +97,7 @@ class ListenCommandTest extends TestCase
         $printError = sprintf("Listener error. Failed processing message with ID %s on '%s' stream by %s. Error: Listener failed.",
             $id, $event->name(), ExceptionalListener::class);
 
-        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0'])
+        $this->artisan('streamer:listen', ['events' => 'foo.bar', '--last_id' => '0-0'])
             ->expectsOutput($printError)
             ->assertExitCode(0);
 
@@ -113,7 +115,7 @@ class ListenCommandTest extends TestCase
         $id = Streamer::emit($this->makeEvent());
 
         $this->expectsListenersToBeCalled($listeners);
-        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0'])
+        $this->artisan('streamer:listen', ['events' => 'foo.bar', '--last_id' => '0-0'])
             ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
                 LocalListener::class))
             ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
@@ -121,7 +123,38 @@ class ListenCommandTest extends TestCase
             ->assertExitCode(0);
     }
 
-    public function test_command_called_with_events_while_one_of_them_throws_exception_and_stores_failed_messages_info(): void
+    public function test_command_called_with_all_will_listen_and_handle_all_events_received(): void
+    {
+        ListenersStack::addMany([
+            'foo.bar' => [
+                LocalListener::class,
+                AnotherLocalListener::class,
+            ],
+            'other.bar' => [
+                LocalListener::class,
+            ]
+        ]);
+
+        $fooId = Streamer::emit(new FooBarStreamerEventStub());
+        $otherId = Streamer::emit(new OtherBarStreamerEventStub());
+
+        $this->expectsListenersToBeCalled([
+            LocalListener::class,
+            AnotherLocalListener::class,
+        ]);
+
+        $this->artisan('streamer:listen', ['--all' => true, '--last_id' => '0-0'])
+            ->expectsOutput(sprintf("Processed message [$fooId] on 'foo.bar' stream by [%s] listener.",
+                LocalListener::class))
+            ->expectsOutput(sprintf("Processed message [$fooId] on 'foo.bar' stream by [%s] listener.",
+                AnotherLocalListener::class))
+            ->expectsOutput(sprintf("Processed message [$otherId] on 'other.bar' stream by [%s] listener.",
+                LocalListener::class))
+            ->assertExitCode(0);
+    }
+
+    public function test_command_called_with_events_while_one_of_them_throws_exception_and_stores_failed_messages_info(
+    ): void
     {
         $listeners = [
             ExceptionalListener::class,
@@ -135,7 +168,7 @@ class ListenCommandTest extends TestCase
         $printError = sprintf("Listener error. Failed processing message with ID %s on '%s' stream by %s. Error: Listener failed.",
             $id, $event->name(), ExceptionalListener::class);
 
-        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0'])
+        $this->artisan('streamer:listen', ['events' => 'foo.bar', '--last_id' => '0-0'])
             ->expectsOutput($printError)
             ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
                 LocalListener::class))
@@ -156,9 +189,9 @@ class ListenCommandTest extends TestCase
         $stream->createGroup('bar');
         Streamer::emit($this->makeEvent());
         $args = [
-            'event'      => 'foo.bar',
-            '--last_id'  => '0-0',
-            '--group'    => 'bar',
+            'events' => 'foo.bar',
+            '--last_id' => '0-0',
+            '--group' => 'bar',
             '--consumer' => 'foobar',
         ];
 
@@ -178,9 +211,9 @@ class ListenCommandTest extends TestCase
         $stream->createGroup('bar');
         Streamer::emit($this->makeEvent());
         $args = [
-            'event'     => 'foo.bar',
+            'events' => 'foo.bar',
             '--last_id' => '0-0',
-            '--group'   => 'bar',
+            '--group' => 'bar',
         ];
 
         $this->expectsListenersToBeCalled($listeners);
@@ -197,16 +230,18 @@ class ListenCommandTest extends TestCase
         $this->withLocalListenersConfigured($listeners);
         Streamer::emit($this->makeEvent());
         $args = [
-            'event'      => 'foo.bar',
-            '--last_id'  => '0-0',
-            '--group'    => 'bar',
+            'events' => 'foo.bar',
+            '--last_id' => '0-0',
+            '--group' => 'bar',
             '--consumer' => 'foobar',
         ];
 
         $this->expectsListenersToBeCalled($listeners);
         $this->artisan('streamer:listen', $args)
-            ->expectsOutput('Created new group: bar on a stream: foo.bar')
             ->assertExitCode(0);
+
+        $stream = new Stream('foo.bar');
+        $this->assertTrue($stream->groupExists('bar'));
     }
 
     public function test_command_called_with_reclaim_option_claims_all_pending_messages(): void
@@ -223,11 +258,11 @@ class ListenCommandTest extends TestCase
         //Consume messages without acknowledging them, so that they will stays as pending
         $consumer->await($consumer->getNewEntriesKey());
         $args = [
-            'event'      => 'foo.bar',
-            '--last_id'  => '0-0',
-            '--group'    => 'bar',
+            'events' => 'foo.bar',
+            '--last_id' => '0-0',
+            '--group' => 'bar',
             '--consumer' => 'foobarB',
-            '--reclaim'  => '1',
+            '--reclaim' => '1',
         ];
 
         $this->expectsListenersToBeCalled($listeners);
@@ -249,11 +284,11 @@ class ListenCommandTest extends TestCase
         //Consume messages without acknowledging them, so that they will stays as pending
         $consumer->await($consumer->getNewEntriesKey());
         $args = [
-            'event'      => 'foo.bar',
-            '--last_id'  => '0-0',
-            '--group'    => 'bar',
+            'events' => 'foo.bar',
+            '--last_id' => '0-0',
+            '--group' => 'bar',
             '--consumer' => 'foobarB',
-            '--reclaim'  => '10000',
+            '--reclaim' => '10000',
         ];
 
         $this->doesntExpectListenersToBeCalled($listeners);
@@ -269,7 +304,7 @@ class ListenCommandTest extends TestCase
         ];
         $this->withLocalListenersConfigured($listeners);
         $args = [
-            'event'      => 'foo.bar',
+            'events' => 'foo.bar',
             '--last_id' => '0-0',
             '--group' => 'bar',
             '--consumer' => 'foobarB',
@@ -292,7 +327,7 @@ class ListenCommandTest extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Error occurred');
 
-        $this->artisan('streamer:listen', ['event' => 'foo.bar']);
+        $this->artisan('streamer:listen', ['events' => 'foo.bar']);
     }
 
     public function test_command_is_kept_alive_when_unexpected_non_listener_exception_occurs(): void
@@ -308,7 +343,7 @@ class ListenCommandTest extends TestCase
             ->once()
             ->andReturn();
 
-        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--keep-alive' => true])
+        $this->artisan('streamer:listen', ['events' => 'foo.bar', '--keep-alive' => true])
             ->expectsOutput('Error occurred')
             ->expectsOutput('Starting listener again due to unexpected error.')
             ->assertExitCode(0);
@@ -324,7 +359,7 @@ class ListenCommandTest extends TestCase
             ->times(3)
             ->andThrow(Exception::class, 'Error occurred');
 
-        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--keep-alive' => true, '--max-attempts' => 2])
+        $this->artisan('streamer:listen', ['events' => 'foo.bar', '--keep-alive' => true, '--max-attempts' => 2])
             ->expectsOutput('Error occurred')
             ->expectsOutput('Starting listener again due to unexpected error.')
             ->expectsOutput('Attempts left: 2')
@@ -345,7 +380,7 @@ class ListenCommandTest extends TestCase
         $id = Streamer::emit($this->makeEvent());
 
         $this->expectsListenersToBeCalled($listeners);
-        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0', '--purge' => true])
+        $this->artisan('streamer:listen', ['events' => 'foo.bar', '--last_id' => '0-0', '--purge' => true])
             ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
                 LocalListener::class))
             ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
@@ -371,7 +406,7 @@ class ListenCommandTest extends TestCase
         $printError = sprintf("Listener error. Failed processing message with ID %s on '%s' stream by %s. Error: Listener failed.",
             $id, $event->name(), ExceptionalListener::class);
 
-        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0', '--purge' => true])
+        $this->artisan('streamer:listen', ['events' => 'foo.bar', '--last_id' => '0-0', '--purge' => true])
             ->expectsOutput($printError)
             ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
                 LocalListener::class))
@@ -396,7 +431,7 @@ class ListenCommandTest extends TestCase
         $id = Streamer::emit($event);
 
         $this->expectsListenersToBeCalled($listeners);
-        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0', '--archive' => true])
+        $this->artisan('streamer:listen', ['events' => 'foo.bar', '--last_id' => '0-0', '--archive' => true])
             ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
                 LocalListener::class))
             ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
@@ -427,7 +462,7 @@ class ListenCommandTest extends TestCase
             ->andThrow(Exception::class, 'Something went wrong');
 
         $this->expectsListenersToBeCalled($listeners);
-        $this->artisan('streamer:listen', ['event' => 'foo.bar', '--last_id' => '0-0', '--archive' => true])
+        $this->artisan('streamer:listen', ['events' => 'foo.bar', '--last_id' => '0-0', '--archive' => true])
             ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",
                 LocalListener::class))
             ->expectsOutput(sprintf("Processed message [$id] on 'foo.bar' stream by [%s] listener.",

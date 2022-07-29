@@ -4,7 +4,6 @@ namespace Prwnr\Streamer\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Prwnr\Streamer\Contracts\Archiver;
 use Prwnr\Streamer\Contracts\Errors\MessagesFailer;
 use Prwnr\Streamer\Contracts\MessageReceiver;
@@ -63,28 +62,36 @@ class ListenCommand extends Command
      */
     public function handle(): int
     {
-        $event = $this->argument('event');
-        $listeners = ListenersStack::all();
-        $localListeners = $listeners[$event] ?? null;
-        if (!$localListeners) {
-            $this->error("There are no local listeners associated with $event event in configuration.");
+        $events = $this->getEventsToListen();
+        $missingListeners = 0;
+        foreach ($events as $event) {
+            if (ListenersStack::hasListener($event)) {
+                continue;
+            }
 
+            $this->warn("There are no local listeners associated with '$event' event in configuration.");
+            $missingListeners++;
+        }
+
+        if (count($events) === $missingListeners) {
             return 1;
         }
 
         if ($this->option('last_id') !== null) {
+            if (count($events) > 1) {
+                $this->info('The last_id value will be used for all listened events.');
+            }
             $this->streamer->startFrom($this->option('last_id'));
         }
 
         if ($this->option('group')) {
-            $stream = new Stream($this->argument('event'));
-            $this->setupGroupListening($stream);
+            $this->setupGroupListening();
         }
 
         $this->maxAttempts = $this->option('max-attempts');
-        $this->listen($event, function (ReceivedMessage $message) use ($localListeners) {
+        $this->listen($events, function (ReceivedMessage $message) {
             $failed = false;
-            foreach ($localListeners as $listener) {
+            foreach (ListenersStack::getListenersFor($message->getEventName()) as $listener) {
                 $receiver = app()->make($listener);
                 if (!$receiver instanceof MessageReceiver) {
                     $this->error("Listener class [$listener] needs to implement MessageReceiver");
@@ -123,15 +130,15 @@ class ListenCommand extends Command
     }
 
     /**
-     * @param  string  $event
+     * @param  array  $events
      * @param  callable  $handler
-     * @throws BindingResolutionException
+     * @return void
      * @throws Throwable
      */
-    private function listen(string $event, callable $handler): void
+    private function listen(array $events, callable $handler): void
     {
         try {
-            $this->streamer->listen($event, $handler);
+            $this->streamer->listen($events, $handler);
         } catch (Throwable $e) {
             if (!$this->option('keep-alive')) {
                 throw $e;
@@ -150,51 +157,48 @@ class ListenCommand extends Command
                 $this->maxAttempts--;
             }
 
-            $this->listen($event, $handler);
+            $this->listen($events, $handler);
         }
     }
 
     /**
-     * @param  Stream  $stream
+     * @return void
      */
-    private function setupGroupListening(Stream $stream): void
+    private function setupGroupListening(): void
     {
-        if (!$stream->groupExists($this->option('group'))) {
-            $stream->createGroup($this->option('group'));
-            $this->info("Created new group: {$this->option('group')} on a stream: {$this->argument('event')}");
-        }
-
+        $multiStream = new Stream\MultiStream($this->getEventsToListen(), $this->option('group'));
         $consumer = $this->option('consumer');
         if (!$consumer) {
             $consumer = $this->option('group').'-'.time();
         }
 
         if ($this->option('reclaim')) {
-            $this->reclaimMessages($stream, $consumer);
+            if ($multiStream->streams()->count() > 1) {
+                $this->info('Reclaiming will reclaim pending messages on all listened events.');
+            }
+            $this->reclaimMessages($multiStream, $consumer);
         }
 
         $this->streamer->asConsumer($consumer, $this->option('group'));
     }
 
     /**
-     * @param  Stream  $stream
+     * @param  Stream\MultiStream  $multiStream
      * @param  string  $consumerName
+     * @return void
      */
-    private function reclaimMessages(Stream $stream, string $consumerName): void
+    private function reclaimMessages(Stream\MultiStream $multiStream, string $consumerName): void
     {
-        $pendingMessages = $stream->pending($this->option('group'));
+        foreach ($multiStream->streams() as $stream) {
+            $pendingMessages = $stream->pending($this->option('group'));
+            $messages = array_map(static fn($message) => $message[0], $pendingMessages);
+            if (!$messages) {
+                continue;
+            }
 
-        $messages = [];
-        foreach ($pendingMessages as $message) {
-            $messages[] = $message[0];
+            $consumer = new Stream\Consumer($consumerName, $stream, $this->option('group'));
+            $consumer->claim($messages, $this->option('reclaim'));
         }
-
-        if (!$messages) {
-            return;
-        }
-
-        $consumer = new Stream\Consumer($consumerName, $stream, $this->option('group'));
-        $consumer->claim($messages, $this->option('reclaim'));
     }
 
     /**
@@ -226,6 +230,23 @@ class ListenCommand extends Command
         if ($result) {
             $this->info("Message [{$message->getId()}] has been purged from the '{$message->getEventName()}' stream.");
         }
+    }
+
+    /**
+     * @return array
+     */
+    private function getEventsToListen(): array
+    {
+        if ($this->option('all')) {
+            return array_keys(ListenersStack::all());
+        }
+
+        $events = $this->argument('events');
+        if (!$events) {
+            $this->error('Either "events" argument with list of events or "--all" option is required to start listening.');
+        }
+
+        return explode(',', $events);
     }
 
     /**
@@ -265,9 +286,9 @@ class ListenCommand extends Command
     {
         return [
             [
-                'event',
-                InputArgument::REQUIRED,
-                'Name of an event that should be listened to'
+                'events',
+                InputArgument::OPTIONAL,
+                'Name (or names separated by comma) of an event(s) that should be listened to'
             ],
         ];
     }
@@ -278,6 +299,10 @@ class ListenCommand extends Command
     protected function getOptions(): array
     {
         return [
+            [
+                'all', null, InputOption::VALUE_NONE,
+                'Will start listening to all events that are registered in Listeners Stack. Will override usage of "events" argument'
+            ],
             [
                 'group', null, InputOption::VALUE_REQUIRED,
                 'Name of your streaming group. Only when group is provided listener will listen on group as consumer'

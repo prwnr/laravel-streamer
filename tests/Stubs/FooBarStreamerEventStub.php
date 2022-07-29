@@ -4,7 +4,7 @@ namespace Tests\Stubs;
 
 use Prwnr\Streamer\Contracts\Event;
 
-class StreamerEventStub implements Event
+class FooBarStreamerEventStub implements Event
 {
     public function name(): string
     {
