@@ -35,7 +35,7 @@ $id = $streamer->emit($event);
 
 // Basic listen usage without using group or consumers. It will receive all messages from Stream
 // Listen method on a streamer instance allows listening for any new incoming events
-// It accepts two arguments, event name and a callback handler
+// It accepts two arguments, event name (or multiple names) and a callback handler (or multiple handlers associated to events lik [stream => handler])
 // Callback is called with argument of ReceivedMessage instance (it has message ID and content)
 // and a Streamer instance, that lets you cancel the listener loop whenever you want
 // or emit event mid loop
