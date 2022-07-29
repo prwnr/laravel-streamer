@@ -204,6 +204,9 @@ class Streamer implements Emitter, Listener
     private function parseArgs($events, $handlers): array
     {
         $eventsList = Arr::wrap($events);
+        if (is_array($handlers) && count($eventsList) === 1 && count($handlers) > 1) {
+            throw new InvalidListeningArgumentsException();
+        }
 
         if (is_callable($handlers)) {
             return [$eventsList, [$handlers]];
