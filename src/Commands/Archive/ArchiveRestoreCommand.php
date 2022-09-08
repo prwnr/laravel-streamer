@@ -26,8 +26,7 @@ class ArchiveRestoreCommand extends Command
      */
     protected $description = 'Streamer Archive Restore command, to restore archived messages from database storage back to Stream.';
 
-    private Archiver $archiver;
-    private ArchiveStorage $storage;
+    private readonly ArchiveStorage $storage;
 
     /**
      * ArchiveRestoreCommand constructor.
@@ -35,11 +34,9 @@ class ArchiveRestoreCommand extends Command
      * @param  Archiver  $archiver
      * @param  StorageManager  $manager
      */
-    public function __construct(Archiver $archiver, StorageManager $manager)
+    public function __construct(private readonly Archiver $archiver, StorageManager $manager)
     {
         parent::__construct();
-
-        $this->archiver = $archiver;
         $this->storage = $manager->driver(config('streamer.archive.storage_driver'));
     }
 
@@ -69,7 +66,7 @@ class ArchiveRestoreCommand extends Command
             }
 
             $message = $this->storage->find($this->option('stream'), $this->option('id'));
-            if (!$message) {
+            if (!$message instanceof Message) {
                 $this->error('The message could not be found in archive storage.');
                 return 1;
             }
@@ -91,17 +88,16 @@ class ArchiveRestoreCommand extends Command
         return 1;
     }
 
-    /**
-     * @param  Message  $message
-     */
     private function restore(Message $message): void
     {
         try {
             $id = $this->archiver->restore($message);
-            $this->info("Successfully restored [{$message->getEventName()}][{$message->getId()}] message. New ID: $id");
-        } catch (Exception $e) {
-            report($e);
-            $this->info("Failed to restore [{$message->getEventName()}][{$message->getId()}] message. Error: {$e->getMessage()}");
+            $this->info(sprintf('Successfully restored [%s][%s] message. New ID: %s', $message->getEventName(),
+                $message->getId(), $id));
+        } catch (Exception $exception) {
+            report($exception);
+            $this->info(sprintf('Failed to restore [%s][%s] message. Error: %s', $message->getEventName(),
+                $message->getId(), $exception->getMessage()));
         }
     }
 

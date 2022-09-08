@@ -18,15 +18,15 @@ trait EmitsStreamerEvents
      */
     public static function bootEmitsStreamerEvents(): void
     {
-        static::saved(static function (Model $model) {
+        static::saved(static function (Model $model): void {
             $model->postSave();
         });
 
-        static::created(static function (Model $model) {
+        static::created(static function (Model $model): void {
             $model->postCreate();
         });
 
-        static::deleted(static function (Model $model) {
+        static::deleted(static function (Model $model): void {
             $model->postDelete();
         });
     }
@@ -58,6 +58,7 @@ trait EmitsStreamerEvents
         if (!$this->canStream()) {
             return;
         }
+
         $payload = $this->makeBasePayload();
         foreach ($this->getAttributes() as $field => $change) {
             $payload['fields'][] = $field;
@@ -98,18 +99,12 @@ trait EmitsStreamerEvents
      * Method that can be overridden to add custom logic which will determine
      * whether the given model should have events emitted or not.
      * Returns true by default, emitting events for any case.
-     *
-     * @return bool
      */
     protected function canStream(): bool
     {
         return true;
     }
 
-    /**
-     * @param  string  $action
-     * @return string
-     */
     private function getEventName(string $action): string
     {
         $suffix = '.'.$action;
@@ -122,7 +117,7 @@ trait EmitsStreamerEvents
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     private function makeBasePayload(): array
     {

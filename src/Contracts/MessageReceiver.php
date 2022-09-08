@@ -9,9 +9,8 @@ use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
  */
 interface MessageReceiver
 {
-
     /**
-     * @param  ReceivedMessage  $message
+     * Handles event as ReceivedMessage
      */
     public function handle(ReceivedMessage $message): void;
 }

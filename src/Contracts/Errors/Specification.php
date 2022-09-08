@@ -7,8 +7,7 @@ use Prwnr\Streamer\Errors\FailedMessage;
 interface Specification
 {
     /**
-     * @param  FailedMessage  $message
-     * @return bool
+     * Verifies if the message satisfies the specification.
      */
     public function isSatisfiedBy(FailedMessage $message): bool;
 }

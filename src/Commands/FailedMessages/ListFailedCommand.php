@@ -19,12 +19,12 @@ class ListFailedCommand extends Command
      */
     protected $description = 'Lists all failed stream messages with error messages.';
 
-    private Repository $repository;
     private array $compactHeaders = [
         'ID',
         'Stream',
         'Error',
     ];
+
     private array $headers = [
         'ID',
         'Stream',
@@ -36,21 +36,16 @@ class ListFailedCommand extends Command
     /**
      * FailedListCommand constructor.
      *
-     * @param  Repository  $errorsRepository
+     * @param  Repository  $repository
      */
-    public function __construct(Repository $errorsRepository)
+    public function __construct(private readonly Repository $repository)
     {
         parent::__construct();
-
-        $this->repository = $errorsRepository;
     }
 
-    /**
-     * @return int
-     */
     public function handle(): int
     {
-        if (!$this->repository->count()) {
+        if ($this->repository->count() === 0) {
             $this->info('No failed messages');
             return 0;
         }
@@ -70,14 +65,16 @@ class ListFailedCommand extends Command
     {
         $isCompact = $this->option('compact');
 
-        return $this->repository->all()->map(static function (FailedMessage $message) use ($isCompact) {
+        $callback = static function (FailedMessage $message) use ($isCompact): array {
             $serialized = $message->jsonSerialize();
             if ($isCompact) {
                 unset($serialized['receiver'], $serialized['date']);
             }
 
             return $serialized;
-        })->toArray();
+        };
+
+        return $this->repository->all()->map($callback)->toArray();
     }
 
     /**

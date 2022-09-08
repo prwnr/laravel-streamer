@@ -3,6 +3,7 @@
 namespace Prwnr\Streamer\Errors;
 
 use Illuminate\Support\Collection;
+use JsonException;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\Errors\Repository;
 
@@ -10,7 +11,7 @@ class MessagesRepository implements Repository
 {
     use ConnectsWithRedis;
 
-    public const ERRORS_SET = 'failed_stream';
+    final public const ERRORS_SET = 'failed_stream';
 
     /**
      * @inheritDoc
@@ -22,11 +23,11 @@ class MessagesRepository implements Repository
             return collect();
         }
 
-        $decode = static fn ($item) => array_values(json_decode($item, true, 512, JSON_THROW_ON_ERROR));
+        $decode = static fn($item) => array_values(json_decode((string) $item, true, 512, JSON_THROW_ON_ERROR));
 
         return collect($elements)
             ->map(static fn($item) => new FailedMessage(...$decode($item)))
-            ->sortBy(static fn(FailedMessage $message) => $message->getDate());
+            ->sortBy(static fn(FailedMessage $message) => $message->date);
     }
 
     /**
@@ -39,6 +40,7 @@ class MessagesRepository implements Repository
 
     /**
      * @inheritDoc
+     * @throws JsonException
      */
     public function add(FailedMessage $message): void
     {
@@ -47,6 +49,7 @@ class MessagesRepository implements Repository
 
     /**
      * @inheritDoc
+     * @throws JsonException
      */
     public function remove(FailedMessage $message): void
     {

@@ -8,10 +8,7 @@ namespace Prwnr\Streamer\Contracts;
 interface Emitter
 {
     /**
-     * @param  Event  $event
-     *
-     * @param  string  $id
-     * @return string
+     * Emits events onto the Stream
      */
     public function emit(Event $event, string $id = '*'): string;
 }

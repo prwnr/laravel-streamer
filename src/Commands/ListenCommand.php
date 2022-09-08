@@ -34,10 +34,7 @@ class ListenCommand extends Command
      */
     protected $description = 'RedisStream listen command that awaits for new messages on given Stream and fires local events based on streamer configuration';
 
-    private Streamer $streamer;
-    private MessagesFailer $failer;
-    private ?int $maxAttempts;
-    private Archiver $archiver;
+    private ?int $maxAttempts = null;
 
     /**
      * ListenCommand constructor.
@@ -46,12 +43,11 @@ class ListenCommand extends Command
      * @param  MessagesFailer  $failer
      * @param  Archiver  $archiver
      */
-    public function __construct(Streamer $streamer, MessagesFailer $failer, Archiver $archiver)
-    {
-        $this->streamer = $streamer;
-        $this->failer = $failer;
-        $this->archiver = $archiver;
-
+    public function __construct(
+        private readonly Streamer $streamer,
+        private readonly MessagesFailer $failer,
+        private readonly Archiver $archiver
+    ) {
         parent::__construct();
     }
 
@@ -69,8 +65,8 @@ class ListenCommand extends Command
                 continue;
             }
 
-            $this->warn("There are no local listeners associated with '$event' event in configuration.");
-            $missingListeners++;
+            $this->warn(sprintf("There are no local listeners associated with '%s' event in configuration.", $event));
+            ++$missingListeners;
         }
 
         if (count($events) === $missingListeners) {
@@ -81,6 +77,7 @@ class ListenCommand extends Command
             if (count($events) > 1) {
                 $this->info('The last_id value will be used for all listened events.');
             }
+
             $this->streamer->startFrom($this->option('last_id'));
         }
 
@@ -89,23 +86,23 @@ class ListenCommand extends Command
         }
 
         $this->maxAttempts = $this->option('max-attempts');
-        $this->listen($events, function (ReceivedMessage $message) {
+        $this->listen($events, function (ReceivedMessage $message): void {
             $failed = false;
             foreach (ListenersStack::getListenersFor($message->getEventName()) as $listener) {
                 $receiver = app()->make($listener);
                 if (!$receiver instanceof MessageReceiver) {
-                    $this->error("Listener class [$listener] needs to implement MessageReceiver");
+                    $this->error(sprintf('Listener class [%s] needs to implement MessageReceiver', $listener));
                     continue;
                 }
 
                 try {
                     $receiver->handle($message);
-                } catch (Throwable $e) {
+                } catch (Throwable $throwable) {
                     $failed = true;
-                    report($e);
+                    report($throwable);
 
-                    $this->printError($message, $listener, $e);
-                    $this->failer->store($message, $receiver, $e);
+                    $this->printError($message, $listener, $throwable);
+                    $this->failer->store($message, $receiver, $throwable);
 
                     continue;
                 }
@@ -130,22 +127,19 @@ class ListenCommand extends Command
     }
 
     /**
-     * @param  array  $events
-     * @param  callable  $handler
-     * @return void
      * @throws Throwable
      */
     private function listen(array $events, callable $handler): void
     {
         try {
             $this->streamer->listen($events, $handler);
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             if (!$this->option('keep-alive')) {
-                throw $e;
+                throw $throwable;
             }
 
-            $this->error($e->getMessage());
-            report($e);
+            $this->error($throwable->getMessage());
+            report($throwable);
 
             if ($this->maxAttempts === 0) {
                 return;
@@ -153,17 +147,14 @@ class ListenCommand extends Command
 
             $this->warn('Starting listener again due to unexpected error.');
             if ($this->maxAttempts !== null) {
-                $this->warn("Attempts left: $this->maxAttempts");
-                $this->maxAttempts--;
+                $this->warn(sprintf('Attempts left: %d', $this->maxAttempts));
+                --$this->maxAttempts;
             }
 
             $this->listen($events, $handler);
         }
     }
 
-    /**
-     * @return void
-     */
     private function setupGroupListening(): void
     {
         $multiStream = new Stream\MultiStream($this->getEventsToListen(), $this->option('group'));
@@ -176,23 +167,19 @@ class ListenCommand extends Command
             if ($multiStream->streams()->count() > 1) {
                 $this->info('Reclaiming will reclaim pending messages on all listened events.');
             }
+
             $this->reclaimMessages($multiStream, $consumer);
         }
 
         $this->streamer->asConsumer($consumer, $this->option('group'));
     }
 
-    /**
-     * @param  Stream\MultiStream  $multiStream
-     * @param  string  $consumerName
-     * @return void
-     */
     private function reclaimMessages(Stream\MultiStream $multiStream, string $consumerName): void
     {
         foreach ($multiStream->streams() as $stream) {
             $pendingMessages = $stream->pending($this->option('group'));
             $messages = array_map(static fn($message) => $message[0], $pendingMessages);
-            if (!$messages) {
+            if ($messages === []) {
                 continue;
             }
 
@@ -204,36 +191,35 @@ class ListenCommand extends Command
     /**
      * Removes message from the stream and stores message in DB.
      * No verification for other consumers is made in this archiving option.
-     *
-     * @param  ReceivedMessage  $message
      */
     private function archive(ReceivedMessage $message): void
     {
         try {
             $this->archiver->archive($message);
-            $this->info("Message [{$message->getId()}] has been archived from the '{$message->getEventName()}' stream.");
-        } catch (Exception $e) {
-            $this->warn("Message [{$message->getId()}] from the '{$message->getEventName()}' stream could not be archived. Error: ".$e->getMessage());
+            $this->info(sprintf("Message [%s] has been archived from the '%s' stream.", $message->getId(),
+                $message->getEventName()));
+        } catch (Exception $exception) {
+            $this->warn(sprintf("Message [%s] from the '%s' stream could not be archived. Error: ", $message->getId(),
+                    $message->getEventName()).$exception->getMessage());
         }
     }
 
     /**
      * Removes message from the stream.
      * No verification for other consumers is made in this purging option.
-     *
-     * @param  ReceivedMessage  $message
      */
     private function purge(ReceivedMessage $message): void
     {
         $stream = new Stream($message->getEventName());
         $result = $stream->delete($message->getId());
-        if ($result) {
-            $this->info("Message [{$message->getId()}] has been purged from the '{$message->getEventName()}' stream.");
+        if ($result !== 0) {
+            $this->info(sprintf("Message [%s] has been purged from the '%s' stream.", $message->getId(),
+                $message->getEventName()));
         }
     }
 
     /**
-     * @return array
+     * @return int[]|string[]
      */
     private function getEventsToListen(): array
     {
@@ -249,10 +235,6 @@ class ListenCommand extends Command
         return explode(',', $events);
     }
 
-    /**
-     * @param  ReceivedMessage  $message
-     * @param  string  $listener
-     */
     private function printInfo(ReceivedMessage $message, string $listener): void
     {
         $this->info(sprintf(
@@ -263,11 +245,6 @@ class ListenCommand extends Command
         ));
     }
 
-    /**
-     * @param  ReceivedMessage  $message
-     * @param  string  $listener
-     * @param  Exception  $e
-     */
     private function printError(ReceivedMessage $message, string $listener, Exception $e): void
     {
         $this->error(sprintf(

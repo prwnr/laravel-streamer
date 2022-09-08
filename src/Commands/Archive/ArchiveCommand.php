@@ -22,18 +22,14 @@ class ArchiveCommand extends ProcessMessagesCommand
      */
     protected $description = 'Streamer Archive command, to archive stream messages, by removing them from stream and storing in other database storage.';
 
-    private Archiver $archiver;
-
     /**
      * ArchiveCommand constructor.
      *
      * @param  Archiver  $archiver
      */
-    public function __construct(Archiver $archiver)
+    public function __construct(private readonly Archiver $archiver)
     {
         parent::__construct();
-
-        $this->archiver = $archiver;
     }
 
     /**
@@ -45,10 +41,11 @@ class ArchiveCommand extends ProcessMessagesCommand
             $received = new ReceivedMessage($id, $message);
 
             $this->archiver->archive($received);
-            $this->info("Message [$id] has been archived from the '$stream' stream.");
-        } catch (Exception $e) {
-            report($e);
-            $this->error("Message [$id] from the '$stream' stream could not be archived. Error: ".$e->getMessage());
+            $this->info(sprintf("Message [%s] has been archived from the '%s' stream.", $id, $stream));
+        } catch (Exception $exception) {
+            report($exception);
+            $this->error(sprintf("Message [%s] from the '%s' stream could not be archived. Error: ", $id,
+                    $stream).$exception->getMessage());
         }
     }
 }

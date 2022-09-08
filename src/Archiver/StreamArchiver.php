@@ -13,7 +13,7 @@ use Prwnr\Streamer\Stream;
 
 class StreamArchiver implements Archiver
 {
-    private ArchiveStorage $storage;
+    private readonly ArchiveStorage $storage;
 
     /**
      * StreamArchiver constructor.
@@ -41,7 +41,7 @@ class StreamArchiver implements Archiver
 
         $stream = new Stream($message->getEventName());
         $result = $stream->delete($message->getId());
-        if (!$result) {
+        if ($result === 0) {
             $this->storage->delete($message->getEventName(), $message->getId());
 
             throw new ArchivizationFailedException('Stream message could not be deleted, message will not be archived.');
@@ -56,7 +56,7 @@ class StreamArchiver implements Archiver
     public function restore(Message $message): string
     {
         $result = $this->storage->delete($message->getEventName(), $message->getId());
-        if (!$result) {
+        if ($result === 0) {
             throw new RestoringFailedException('Message was not deleted from the archive storage, message will not be restored.');
         }
 
@@ -71,7 +71,7 @@ class StreamArchiver implements Archiver
 
         $stream = new Stream($message->getEventName());
         $id = $stream->add($message);
-        if (!$id) {
+        if ($id === '' || $id === '0') {
             $this->storage->create($message);
 
             throw new RestoringFailedException('Message was not deleted from the archive storage, message will not be restored.');

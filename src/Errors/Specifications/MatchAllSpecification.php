@@ -14,8 +14,6 @@ class MatchAllSpecification implements Specification
 
     /**
      * MatchAllSpecification constructor.
-     *
-     * @param  Specification  ...$specifications
      */
     public function __construct(Specification ...$specifications)
     {

@@ -3,7 +3,6 @@
 namespace Tests;
 
 use Illuminate\Support\Arr;
-use Prwnr\Streamer\Concerns\HashableMessage;
 use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\EventDispatcher\Message;
@@ -81,27 +80,5 @@ class MessageTest extends TestCase
         $this->assertNotEmpty($actual);
         $this->assertArrayHasKey('hash', $actual);
         $this->assertEquals($hash, $actual['hash']);
-    }
-
-    public function test_message_without_content_is_not_hashed(): void
-    {
-        $message = new class() implements StreamableMessage {
-            use HashableMessage;
-
-            protected array $content = [];
-
-            public function __construct()
-            {
-                $this->hashIt();
-            }
-
-            public function getContent(): array
-            {
-                return $this->content;
-            }
-        };
-
-        $this->assertEmpty($message->getContent());
-        $this->assertArrayNotHasKey('hash', $message->getContent());
     }
 }

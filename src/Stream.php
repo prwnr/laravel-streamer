@@ -6,6 +6,7 @@ use BadMethodCallException;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\Stream\Range;
+use RedisException;
 
 /**
  * Class Stream.
@@ -14,26 +15,18 @@ class Stream
 {
     use ConnectsWithRedis;
 
-    public const STREAM = 'STREAM';
-    public const GROUPS = 'GROUPS';
-    public const CREATE = 'CREATE';
-    public const CONSUMERS = 'CONSUMERS';
-    public const NEW_ENTRIES = '$';
-    public const FROM_START = '0';
+    final public const STREAM = 'STREAM';
+    final public const GROUPS = 'GROUPS';
+    final public const CREATE = 'CREATE';
+    final public const CONSUMERS = 'CONSUMERS';
+    final public const NEW_ENTRIES = '$';
+    final public const FROM_START = '0';
 
-    private string $name;
-
-    /**
-     * @return string
-     */
     public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @return string
-     */
     public function getNewEntriesKey(): string
     {
         return self::NEW_ENTRIES;
@@ -41,81 +34,44 @@ class Stream
 
     /**
      * Stream constructor.
-     *
-     * @param string $name
      */
-    public function __construct(string $name)
+    public function __construct(public readonly string $name)
     {
-        $this->name = $name;
     }
 
-    /**
-     * @param  StreamableMessage  $message
-     * @param  string  $id
-     *
-     * @return string
-     */
     public function add(StreamableMessage $message, string $id = '*'): string
     {
         return $this->redis()->xAdd($this->name, $id, $message->getContent());
     }
 
-    /**
-     * @param  string  $id
-     *
-     * @return int
-     */
     public function delete(string $id): int
     {
         return $this->redis()->xDel($this->name, [$id]);
     }
 
-    /**
-     * @param  string  $from
-     * @param  int  $limit
-     *
-     * @return array
-     */
     public function read(string $from = self::FROM_START, int $limit = 0): array
     {
-        if ($limit) {
+        if ($limit !== 0) {
             return $this->redis()->xRead([$this->name => $from], $limit);
         }
 
         return $this->redis()->xRead([$this->name => $from]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function await(string $lastSeenId = self::FROM_START, int $timeout = 0): ?array
     {
         return $this->redis()->xRead([$this->name => $lastSeenId], 0, $timeout);
     }
 
-    /**
-     * @param string $id
-     */
-    public function acknowledge(string $id): void
-    {
-        // When listening on Stream without a group we are not acknowledging any messages
-    }
-
-    /**
-     * @param Range    $range
-     * @param int|null $limit
-     *
-     * @return array
-     */
     public function readRange(Range $range, ?int $limit = null): array
     {
         $method = 'xRANGE';
-        $start = $range->getStart();
-        $stop = $range->getStop();
-        if ($range->getDirection() === Range::BACKWARD) {
+        $start = $range->start;
+        $stop = $range->stop;
+        if ($range->direction === Range::BACKWARD) {
             $method = 'xREVRANGE';
-            $start = $range->getStop();
-            $stop = $range->getStart();
+            $start = $range->stop;
+            $stop = $range->start;
         }
 
         if ($limit) {
@@ -125,12 +81,6 @@ class Stream
         return $this->redis()->$method($this->name, $start, $stop);
     }
 
-    /**
-     * @param  string  $name
-     * @param  string  $from
-     * @param  bool  $createStreamIfNotExists
-     * @return bool
-     */
     public function createGroup(string $name, string $from = self::FROM_START, bool $createStreamIfNotExists = true): bool
     {
         if ($createStreamIfNotExists) {
@@ -143,11 +93,6 @@ class Stream
     /**
      * Return all pending messages from given group.
      * Optionally it can return pending message for single consumer.
-     *
-     * @param string      $group
-     * @param null|string $consumer
-     *
-     * @return array
      */
     public function pending(string $group, ?string $consumer = null): array
     {
@@ -166,7 +111,7 @@ class Stream
     }
 
     /**
-     * @return int
+     * @throws RedisException
      */
     public function len(): int
     {
@@ -174,15 +119,14 @@ class Stream
     }
 
     /**
+     * @throws RedisException
      * @throws StreamNotFoundException
-     *
-     * @return array
      */
     public function info(): array
     {
         $result = $this->redis()->xInfo(self::STREAM, $this->name);
         if (!$result) {
-            throw new StreamNotFoundException("No results for stream $this->name");
+            throw new StreamNotFoundException(sprintf('No results for stream %s', $this->name));
         }
 
         return $result;
@@ -192,7 +136,7 @@ class Stream
      * Returns XINFO for stream with FULL flag.
      * Available since Redis v6.0.0.
      *
-     * @return array
+     * @throws RedisException
      * @throws StreamNotFoundException
      */
     public function fullInfo(): array
@@ -204,54 +148,49 @@ class Stream
 
         $result = $this->redis()->xInfo(self::STREAM, $this->name, 'FULL');
         if (!$result) {
-            throw new StreamNotFoundException("No results for stream $this->name");
+            throw new StreamNotFoundException(sprintf('No results for stream %s', $this->name));
         }
 
         return $result;
     }
 
     /**
-     * @return array
+     * @throws RedisException
      * @throws StreamNotFoundException
-     *
      */
     public function groups(): array
     {
         $result = $this->redis()->xInfo(self::GROUPS, $this->name);
         if (!$result) {
-            throw new StreamNotFoundException("No results for stream $this->name");
+            throw new StreamNotFoundException(sprintf('No results for stream %s', $this->name));
         }
 
         return $result;
     }
 
     /**
-     * @param string $group
      *
+     * @throws RedisException
      * @throws StreamNotFoundException
-     *
-     * @return array
      */
     public function consumers(string $group): array
     {
         $result = $this->redis()->xInfo(self::CONSUMERS, $this->name, $group);
         if (!$result) {
-            throw new StreamNotFoundException("No results for stream $this->name");
+            throw new StreamNotFoundException(sprintf('No results for stream %s', $this->name));
         }
 
         return $result;
     }
 
     /**
-     * @param string $name
-     *
-     * @return bool
+     * @throws RedisException
      */
     public function groupExists(string $name): bool
     {
         try {
             $groups = $this->groups();
-        } catch (StreamNotFoundException $ex) {
+        } catch (StreamNotFoundException) {
             return false;
         }
 

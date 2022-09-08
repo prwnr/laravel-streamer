@@ -13,85 +13,40 @@ use Prwnr\Streamer\Stream\Range;
  */
 class FailedMessage implements JsonSerializable
 {
-    private string $id;
-    private string $stream;
-    private string $receiver;
-    private string $error;
-    private string $date;
+    public readonly string $date;
 
     /**
      * FailedMessage constructor.
-     *
-     * @param  string  $id
-     * @param  string  $stream
-     * @param  string  $receiver
-     * @param  string  $error
-     * @param  string|null  $date
      */
-    public function __construct(string $id, string $stream, string $receiver, string $error, ?string $date = null)
-    {
-        $this->id = $id;
-        $this->stream = $stream;
-        $this->receiver = $receiver;
-        $this->error = $error;
+    public function __construct(
+        public readonly string $id,
+        public readonly string $stream,
+        public readonly string $receiver,
+        public readonly string $error,
+        ?string $date = null
+    ) {
         $this->date = $date ?? Carbon::now()->toDateTimeString();
     }
 
-    /**
-     * @return string
-     */
-    public function getId(): string
-    {
-        return $this->id;
-    }
-
-    /**
-     * @return Stream
-     */
-    public function getStream(): Stream
+    public function getStreamInstance(): Stream
     {
         return new Stream($this->stream);
     }
 
     /**
-     * @return string
-     */
-    public function getReceiver(): string
-    {
-        return $this->receiver;
-    }
-
-    /**
-     * @return string
-     */
-    public function getError(): string
-    {
-        return $this->error;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDate(): string
-    {
-        return $this->date;
-    }
-
-    /**
      * Returns stream message for the given failed message.
      *
-     * @return array
      * @throws MessageRetryFailedException
      */
     public function getStreamMessage(): array
     {
-        $range = new Range($this->getId(), $this->getId());
-        $stream = $this->getStream();
+        $range = new Range($this->id, $this->id);
+        $stream = $this->getStreamInstance();
         $messages = $stream->readRange($range, 1);
 
         if (!$messages || count($messages) !== 1) {
             throw new MessageRetryFailedException($this,
-                "No matching messages found on a '{$stream->getName()}' stream for ID #{$this->getId()}.");
+                sprintf("No matching messages found on a '%s' stream for ID #%s.", $stream->getName(), $this->id));
         }
 
         return array_pop($messages);

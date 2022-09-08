@@ -50,10 +50,9 @@ class StreamerProvider extends ServiceProvider
 
         ListenersStack::boot(config('streamer.listen_and_fire', []));
     }
+
     /**
-     * Setup the configuration.
-     *
-     * @return void
+     * Set up the configuration.
      */
     private function configure(): void
     {
@@ -63,9 +62,7 @@ class StreamerProvider extends ServiceProvider
     }
 
     /**
-     * Setup the resource publishing groups.
-     *
-     * @return void
+     * Set up the resource publishing groups.
      */
     private function offerPublishing(): void
     {

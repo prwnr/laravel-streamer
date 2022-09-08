@@ -12,23 +12,17 @@ class Streams
 {
     use ConnectsWithRedis;
 
-    private array $streams;
-
     /**
      * Streams constructor.
      *
-     * @param array $streams
+     * @param  array<int, string>  $streams
      */
-    public function __construct(array $streams)
+    public function __construct(private readonly array $streams)
     {
-        $this->streams = $streams;
     }
 
     /**
-     * @param  StreamableMessage  $message
-     * @param  string  $id
-     *
-     * @return array
+     * @return array<int, string>
      */
     public function add(StreamableMessage $message, string $id = '*'): array
     {
@@ -41,10 +35,7 @@ class Streams
     }
 
     /**
-     * @param array    $from
-     * @param int|null $limit
-     *
-     * @return array
+     * @return array<int, string>
      */
     public function read(array $from = [], ?int $limit = null): array
     {

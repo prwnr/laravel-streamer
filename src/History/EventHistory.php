@@ -32,16 +32,16 @@ class EventHistory implements History
     {
         $key = $event.Snapshot::KEY_SEPARATOR.$identifier;
         $snapshots = $this->redis()->lRange($key, 0, $this->redis()->lLen($key));
-        $snapshotsCount = count($snapshots) - 1;
-        $last = json_decode($snapshots[0], true, 512, JSON_THROW_ON_ERROR)['id'];
-        $first = json_decode($snapshots[$snapshotsCount], true, 512, JSON_THROW_ON_ERROR)['id'];
+        $snapshotsCount = (is_countable($snapshots) ? count($snapshots) : 0) - 1;
+        $last = json_decode((string) $snapshots[0], true, 512, JSON_THROW_ON_ERROR)['id'];
+        $first = json_decode((string) $snapshots[$snapshotsCount], true, 512, JSON_THROW_ON_ERROR)['id'];
 
         $stream = new Stream($event);
         $range = $stream->readRange(new Stream\Range($first, $last));
 
         $result = [];
-        for ($i = $snapshotsCount; $i >= 0; $i--) {
-            $snapshot = json_decode($snapshots[$i], true, 512, JSON_THROW_ON_ERROR);
+        for ($i = $snapshotsCount; $i >= 0; --$i) {
+            $snapshot = json_decode((string) $snapshots[$i], true, 512, JSON_THROW_ON_ERROR);
             if ($until && $until <= Carbon::createFromFormat('Y-m-d H:i:s', $snapshot['date'])) {
                 return $result;
             }
@@ -51,7 +51,7 @@ class EventHistory implements History
                 continue;
             }
 
-            $record = json_decode($message['data'], true, 512, JSON_THROW_ON_ERROR);
+            $record = json_decode((string) $message['data'], true, 512, JSON_THROW_ON_ERROR);
             foreach ($record as $field => $value) {
                 $result[$field] = $value;
             }

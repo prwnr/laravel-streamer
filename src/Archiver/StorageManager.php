@@ -24,7 +24,6 @@ class StorageManager extends Manager
     /**
      * Create null driver
      *
-     * @return ArchiveStorage
      * @throws BindingResolutionException
      */
     public function createNullDriver(): ArchiveStorage
@@ -43,7 +42,7 @@ class StorageManager extends Manager
     /**
      * @inheritDoc
      */
-    protected function callCustomCreator($driver)
+    protected function callCustomCreator($driver): ArchiveStorage
     {
         $custom = $this->customCreators[$driver]($this->container);
         if (!$custom instanceof ArchiveStorage) {

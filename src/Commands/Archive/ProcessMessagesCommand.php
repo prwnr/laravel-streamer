@@ -33,7 +33,7 @@ abstract class ProcessMessagesCommand extends Command
                 }
 
                 $this->process($name, $id, $message);
-                $messageCount++;
+                ++$messageCount;
             }
         }
 

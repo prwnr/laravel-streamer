@@ -11,9 +11,9 @@ class MessageRetryFailedException extends Exception
     {
         $errorMessage = sprintf(
             'Failed to retry [%s] on %s stream by [%s] listener. Error: %s',
-            $message->getId(),
-            $message->getStream()->getName(),
-            $message->getReceiver(),
+            $message->id,
+            $message->getStreamInstance()->getName(),
+            $message->receiver,
             $additional
         );
 

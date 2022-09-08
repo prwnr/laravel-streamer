@@ -164,9 +164,9 @@ class FailedMessagesHandlerTest extends TestCase
         $handler = $this->app->make(FailedMessagesHandler::class);
         /** @var Repository $repository */
         $repository = $this->app->make(Repository::class);
-        foreach ($repository->all() as $message) {
+        foreach ($repository->all() as $m) {
             try {
-                $handler->retry($message);
+                $handler->retry($m);
             } catch (MessageRetryFailedException $e) {
                 $error = 'Failed to retry [123] on foo.bar stream by [Tests\Stubs\LocalListener] listener. Error: errored again';
                 $this->assertEquals($error, $e->getMessage());
@@ -174,6 +174,6 @@ class FailedMessagesHandlerTest extends TestCase
         }
 
         $this->assertEquals(1, $repository->count());
-        $this->assertEquals($message->getId(), $repository->all()->first()->getId());
+        $this->assertEquals($message->getId(), $repository->all()->first()->id);
     }
 }

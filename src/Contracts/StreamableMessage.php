@@ -8,7 +8,7 @@ namespace Prwnr\Streamer\Contracts;
 interface StreamableMessage
 {
     /**
-     * @return array
+     * Returns Message content.
      */
     public function getContent(): array;
 }

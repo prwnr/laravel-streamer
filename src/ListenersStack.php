@@ -11,7 +11,7 @@ final class ListenersStack
     private static array $events = [];
 
     /**
-     * @param  array  $events
+     * @param  array<int, string>  $events
      */
     public static function boot(array $events): void
     {
@@ -22,7 +22,7 @@ final class ListenersStack
      * Add many listeners to stack at once.
      * Uses ListenersStack::add underneath
      *
-     * @param  array  $listenersStack [event => [listeners]]
+     * @param  array<string, array<int, string>>  $listenersStack  [event => [listeners]]
      */
     public static function addMany(array $listenersStack): void
     {
@@ -39,9 +39,6 @@ final class ListenersStack
 
     /**
      * Add event listener to stack
-     *
-     * @param  string  $event
-     * @param  string  $listener
      */
     public static function add(string $event, string $listener): void
     {
@@ -54,10 +51,6 @@ final class ListenersStack
         }
     }
 
-    /**
-     * @param  string  $event
-     * @return bool
-     */
     public static function hasListener(string $event): bool
     {
         return isset(self::$events[$event]);
@@ -65,7 +58,7 @@ final class ListenersStack
 
     /**
      * @param  string  $event
-     * @return array
+     * @return array<int, string>
      */
     public static function getListenersFor(string $event): array
     {
@@ -77,7 +70,7 @@ final class ListenersStack
     }
 
     /**
-     * @return array
+     * @return array<string, array<int, string>
      */
     public static function all(): array
     {

@@ -15,16 +15,14 @@ class MultiStream
     use ConnectsWithRedis;
 
     /** @var Collection&Stream[] */
-    private Collection $streams;
-    private string $consumer;
-    private string $group;
+    private readonly Collection $streams;
+
+    private readonly string $consumer;
+
+    private readonly string $group;
 
     /**
      * MultiStream constructor.
-     *
-     * @param  array  $streams
-     * @param  string  $consumer
-     * @param  string  $group
      */
     public function __construct(array $streams, string $group = '', string $consumer = '')
     {
@@ -55,9 +53,6 @@ class MultiStream
         return $this->streams;
     }
 
-    /**
-     * @return string
-     */
     public function getNewEntriesKey(): string
     {
         if ($this->consumer && $this->group) {
@@ -70,9 +65,7 @@ class MultiStream
     /**
      * Adds new message to Streams (if such is in MultiStream collection).
      *
-     * @param  array  $streams  [stream => id] format. if ID is not a string, assuming "*"
-     * @param  StreamableMessage  $message
-     * @return array
+     * @param  array<string, string>  $streams  [stream => id] format. if ID is not a string, assuming "*"
      */
     public function add(array $streams, StreamableMessage $message): array
     {
@@ -95,10 +88,9 @@ class MultiStream
     /**
      * Deletes message from a Stream (if such is in MultiStream collection)
      *
-     * @param  array  $streams  [stream => [ids]] format
-     * @return int
+     * @param  array<string, string>  $streams  [stream => [ids]] format
      */
-    public function delete(array $streams): int
+    public function delete(array $streams): int|float
     {
         $deleted = 0;
         foreach ($streams as $stream => $ids) {
@@ -112,14 +104,9 @@ class MultiStream
         return $deleted;
     }
 
-    /**
-     * @param  string  $lastSeenId
-     * @param  int  $timeout
-     * @return array|null
-     */
-    public function await(string $lastSeenId = '', int $timeout = 0): ?array
+    public function await(string $lastSeenId = '', int $timeout = 0): array
     {
-        if (!$lastSeenId) {
+        if ($lastSeenId === '' || $lastSeenId === '0') {
             $lastSeenId = $this->getNewEntriesKey();
         }
 
@@ -142,13 +129,12 @@ class MultiStream
     /**
      * Acknowledges multiple messages if MultiStream has a group.
      *
-     * @param  array  $streams  [stream => [ids]] format
-     * @return void
+     * @param  array<string, array<int, string>>  $streams  [stream => [ids]] format
      * @throws Exception
      */
     public function acknowledge(array $streams): void
     {
-        if (!$this->group) {
+        if ($this->group === '' || $this->group === '0') {
             return;
         }
 
@@ -164,19 +150,13 @@ class MultiStream
             }
         }
 
-        if ($notAcknowledged) {
+        if ($notAcknowledged !== []) {
             throw new AcknowledgingFailedException(
                 "Not all messages were acknowledged. Streams affected: ".implode(', ', $notAcknowledged)
             );
         }
     }
 
-    /**
-     * @param  Stream  $stream
-     * @param  string  $lastSeenId
-     * @param  int  $timeout
-     * @return array|null
-     */
     private function awaitSingle(Stream $stream, string $lastSeenId, int $timeout): ?array
     {
         if (!$this->consumer && !$this->group) {
@@ -184,19 +164,14 @@ class MultiStream
         }
 
         $consumer = new Consumer($this->consumer, $stream, $this->group);
-        if (!$lastSeenId) {
+        if ($lastSeenId === '' || $lastSeenId === '0') {
             $lastSeenId = $consumer->getNewEntriesKey();
         }
 
         return $consumer->await($lastSeenId, $timeout);
     }
 
-    /**
-     * @param  string  $lastSeenId
-     * @param  int  $timeout
-     * @return array|\Redis
-     */
-    private function awaitMultiple(string $lastSeenId, int $timeout)
+    private function awaitMultiple(string $lastSeenId, int $timeout): array|\Redis
     {
         $streams = $this->streams->map(static fn(Stream $s) => $lastSeenId)->toArray();
 
@@ -209,7 +184,7 @@ class MultiStream
 
     /**
      * @param $result
-     * @return array
+     * @return array<int, array{stream: mixed, id: mixed, message: mixed}>
      */
     private function parseResult($result): array
     {
@@ -223,16 +198,13 @@ class MultiStream
                 ];
             }
         }
+
         return $list;
     }
 
-    /**
-     * @param  array  $list
-     * @return array
-     */
     private function sortByTimestamps(array $list): array
     {
-        usort($list, static function ($a, $b) {
+        usort($list, static function ($a, $b): int {
             $aID = $a['id'] ?? null;
             $bID = $b['id'] ?? null;
             if ($aID === $bID) {

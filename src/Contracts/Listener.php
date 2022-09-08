@@ -14,5 +14,5 @@ interface Listener
      * For multiple handler, the format should be: [stream => handler] - one handler for one stream.
      *
      */
-    public function listen($events, $handlers): void;
+    public function listen(string|array $events, callable|array $handlers): void;
 }

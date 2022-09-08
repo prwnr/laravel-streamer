@@ -7,16 +7,11 @@ use Prwnr\Streamer\Errors\FailedMessage;
 
 class ReceiverSpecification implements Specification
 {
-    private string $receiver;
-
     /**
      * IdentifierSpecification constructor.
-     *
-     * @param  string  $receiver
      */
-    public function __construct(string $receiver)
+    public function __construct(private readonly string $receiver)
     {
-        $this->receiver = $receiver;
     }
 
     /**
@@ -24,6 +19,6 @@ class ReceiverSpecification implements Specification
      */
     public function isSatisfiedBy(FailedMessage $message): bool
     {
-        return $message->getReceiver() === $this->receiver;
+        return $message->receiver === $this->receiver;
     }
 }

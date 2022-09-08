@@ -11,11 +11,11 @@ class RangeTest extends TestCase
         $defaultRange = new Range();
         $customRange = new Range('0', '100');
 
-        $this->assertEquals('-', $defaultRange->getStart());
-        $this->assertEquals('+', $defaultRange->getStop());
+        $this->assertEquals('-', $defaultRange->start);
+        $this->assertEquals('+', $defaultRange->stop);
 
-        $this->assertEquals('0', $customRange->getStart());
-        $this->assertEquals('100', $customRange->getStop());
+        $this->assertEquals('0', $customRange->start);
+        $this->assertEquals('100', $customRange->stop);
     }
 
     public function test_range_returns_direction(): void
@@ -23,7 +23,7 @@ class RangeTest extends TestCase
         $forwardRange = new Range();
         $backwardRange = new Range(Range::FIRST, Range::LAST, Range::BACKWARD);
 
-        $this->assertEquals(Range::FORWARD, $forwardRange->getDirection());
-        $this->assertEquals(Range::BACKWARD, $backwardRange->getDirection());
+        $this->assertEquals(Range::FORWARD, $forwardRange->direction);
+        $this->assertEquals(Range::BACKWARD, $backwardRange->direction);
     }
 }

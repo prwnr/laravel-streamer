@@ -3,7 +3,6 @@
 namespace Prwnr\Streamer\EventDispatcher;
 
 use JsonException;
-use Prwnr\Streamer\Concerns\HashableMessage;
 use Prwnr\Streamer\Contracts\Event;
 
 /**
@@ -11,22 +10,17 @@ use Prwnr\Streamer\Contracts\Event;
  */
 class Message extends StreamMessage
 {
-    use HashableMessage;
-
     /**
-     * @inheritDoc
      * @throws JsonException
      */
     public function getData(): array
     {
-        return json_decode($this->content['data'], true, 512, JSON_THROW_ON_ERROR);
+        return json_decode((string) $this->content['data'], true, 512, JSON_THROW_ON_ERROR);
     }
 
     /**
      * Message constructor.
      *
-     * @param  array  $meta
-     * @param  array  $data
      * @throws JsonException
      */
     public function __construct(array $meta, array $data)
@@ -40,11 +34,27 @@ class Message extends StreamMessage
             'domain' => $meta['domain'] ?? '',
             'created' => $meta['created'] ?? time(),
             'data' => json_encode($data, JSON_THROW_ON_ERROR),
-        ], static function ($v) {
-            return $v !== null;
-        });
+        ], static fn($v): bool => $v !== null);
 
-        $this->content = $payload;
-        $this->hashIt();
+        $payload = $this->makeHash($payload);
+        parent::__construct($payload);
+    }
+
+    /**
+     * Creates a key from payload: type, name, domain and data; and makes hash out of it.
+     * @throws JsonException
+     */
+    protected function makeHash(array $payload): array
+    {
+        $data = $payload['data'];
+        if (is_array($payload['data']) || is_object($payload['data'])) {
+            $data = json_encode($payload['data'], JSON_THROW_ON_ERROR);
+        }
+
+        $key = $payload['type'].$payload['name'].$payload['domain'].$data;
+        $hash = hash('SHA256', $key);
+        $payload['hash'] = $hash;
+
+        return $payload;
     }
 }

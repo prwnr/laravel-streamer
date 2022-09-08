@@ -16,18 +16,11 @@ interface ArchiveStorage
 
     /**
      * Finds message in storage by stream name and ID.
-     *
-     * @param  string  $event
-     * @param  string  $id
-     * @return Message|null
      */
     public function find(string $event, string $id): ?Message;
 
     /**
      * Finds messages in storage by stream name.
-     *
-     * @param  string  $event
-     * @return Collection&Message[]
      */
     public function findMany(string $event): Collection;
 

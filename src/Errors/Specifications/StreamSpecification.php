@@ -7,16 +7,11 @@ use Prwnr\Streamer\Errors\FailedMessage;
 
 class StreamSpecification implements Specification
 {
-    private string $stream;
-
     /**
      * StreamSpecification constructor.
-     *
-     * @param  string  $stream
      */
-    public function __construct(string $stream)
+    public function __construct(private readonly string $stream)
     {
-        $this->stream = $stream;
     }
 
     /**
@@ -24,6 +19,6 @@ class StreamSpecification implements Specification
      */
     public function isSatisfiedBy(FailedMessage $message): bool
     {
-        return $message->getStream()->getName() === $this->stream;
+        return $message->getStreamInstance()->getName() === $this->stream;
     }
 }

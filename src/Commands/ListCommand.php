@@ -3,6 +3,7 @@
 namespace Prwnr\Streamer\Commands;
 
 use Illuminate\Console\Command;
+use Prwnr\Streamer\Commands\Enums\ListCommandHeaders;
 use Prwnr\Streamer\ListenersStack;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -21,16 +22,13 @@ class ListCommand extends Command
      */
     protected $description = 'Lists all registered events with listeners that are attached to them.';
 
-    /**
-     * @return int
-     */
     public function handle(): int
     {
-        $headers = ['Event'];
+        $headers = [ListCommandHeaders::Event->name];
         $isCompact = $this->option('compact');
 
         if (!$isCompact) {
-            $headers[] = 'Listeners';
+            $headers[] = ListCommandHeaders::Listeners->name;
         }
 
         $this->table(
@@ -43,7 +41,7 @@ class ListCommand extends Command
     }
 
     /**
-     * @return array
+     * @return array<int, array<int|string>>
      */
     protected function makeRows(): array
     {
