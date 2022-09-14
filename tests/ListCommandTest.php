@@ -33,10 +33,10 @@ class ListCommandTest extends TestCase
         ListenersStack::add('other.foo.bar', AnotherLocalListener::class);
 
         $this->artisan('streamer:list', ['--compact' => true])
-            ->expectsOutput(' Event                  ')
-            ->expectsOutput(' example.streamer.event ')
-            ->expectsOutput(' foo.bar                ')
-            ->expectsOutput(' other.foo.bar          ')
+            ->expectsOutput('Event                  ')
+            ->expectsOutput('example.streamer.event ')
+            ->expectsOutput('foo.bar                ')
+            ->expectsOutput('other.foo.bar          ')
             ->assertExitCode(0);
     }
 }

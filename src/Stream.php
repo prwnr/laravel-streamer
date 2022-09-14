@@ -7,6 +7,7 @@ use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\Contracts\Waitable;
 use Prwnr\Streamer\Stream\Range;
+use RedisException;
 
 /**
  * Class Stream.
@@ -82,19 +83,26 @@ class Stream implements Waitable
      */
     public function read(string $from = self::FROM_START, ?int $limit = null): array
     {
-        if ($limit) {
-            return $this->redis()->xRead([$this->name => $from], $limit);
+        $result = $this->redis()->xRead([$this->name => $from], $limit);
+
+        if (!is_array($result)) {
+            return [];
         }
 
-        return $this->redis()->xRead([$this->name => $from]);
+        return $result;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function await(string $lastSeenId = self::FROM_START, int $timeout = 0): ?array
+    public function await(string $lastSeenId = self::FROM_START, int $timeout = 0): array
     {
-        return $this->redis()->xRead([$this->name => $lastSeenId], null, $timeout);
+        $result = $this->redis()->xRead([$this->name => $lastSeenId], null, $timeout);
+        if (!is_array($result)) {
+            return [];
+        }
+
+        return $result;
     }
 
     /**
@@ -122,11 +130,20 @@ class Stream implements Waitable
             $stop = $range->getStart();
         }
 
+        $result = [];
         if ($limit) {
-            return $this->redis()->$method($this->name, $start, $stop, $limit);
+            $result = $this->redis()->$method($this->name, $start, $stop, $limit);
         }
 
-        return $this->redis()->$method($this->name, $start, $stop);
+        if (!$limit) {
+            $result = $this->redis()->$method($this->name, $start, $stop);
+        }
+
+        if (!is_array($result)) {
+            return [];
+        }
+
+        return $result;
     }
 
     /**
@@ -134,6 +151,7 @@ class Stream implements Waitable
      * @param  string  $from
      * @param  bool  $createStreamIfNotExists
      * @return bool
+     * @throws RedisException
      */
     public function createGroup(string $name, string $from = self::FROM_START, bool $createStreamIfNotExists = true): bool
     {

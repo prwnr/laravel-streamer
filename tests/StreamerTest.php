@@ -154,6 +154,7 @@ class StreamerTest extends TestCase
 
         $id = $streamer->emit($event);
         Log::shouldReceive('error')
+            ->once()
             ->with("Listener error. Failed processing message with ID {$id} on '{$event->name()}' stream. Error: error");
 
         $callback = function ($message) {

@@ -33,7 +33,7 @@ class Streams
      *
      * @return mixed
      */
-    public function add(StreamableMessage $message, string $id = '*')
+    public function add(StreamableMessage $message, string $id = '*'): array
     {
         $ids = [];
         foreach ($this->streams as $stream) {
@@ -44,22 +44,23 @@ class Streams
     }
 
     /**
-     * @param array    $from
-     * @param int|null $limit
+     * @param  array  $from
+     * @param  int|null  $limit
      *
-     * @return mixed
+     * @return array
      */
-    public function read(array $from = [], ?int $limit = null)
+    public function read(array $from = [], ?int $limit = null): array
     {
         $read = [];
         foreach ($this->streams as $key => $stream) {
             $read[$stream] = $from[$key] ?? Stream::FROM_START;
         }
 
-        if ($limit) {
-            return $this->redis()->xRead($read, $limit);
+        $result = $this->redis()->xRead($read, $limit);
+        if (!is_array($result)) {
+            return [];
         }
 
-        return $this->redis()->xRead($read);
+        return $result;
     }
 }
