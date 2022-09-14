@@ -53,10 +53,19 @@ class Streams
             $read[$stream] = $from[$key] ?? Stream::FROM_START;
         }
 
+        $result = [];
         if ($limit) {
-            return $this->redis()->xRead($read, $limit);
+            $result = $this->redis()->xRead($read, $limit);
         }
 
-        return $this->redis()->xRead($read);
+        if (!$limit) {
+            $result = $this->redis()->xRead($read);
+        }
+
+        if (!is_array($result)) {
+            return [];
+        }
+
+        return $result;
     }
 }

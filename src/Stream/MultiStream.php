@@ -175,9 +175,9 @@ class MultiStream
      * @param  Stream  $stream
      * @param  string  $lastSeenId
      * @param  int  $timeout
-     * @return array|null
+     * @return array
      */
-    private function awaitSingle(Stream $stream, string $lastSeenId, int $timeout): ?array
+    private function awaitSingle(Stream $stream, string $lastSeenId, int $timeout): array
     {
         if (!$this->consumer && !$this->group) {
             return $stream->await($lastSeenId, $timeout);
@@ -194,17 +194,27 @@ class MultiStream
     /**
      * @param  string  $lastSeenId
      * @param  int  $timeout
-     * @return array|\Redis
+     * @return array
      */
-    private function awaitMultiple(string $lastSeenId, int $timeout)
+    private function awaitMultiple(string $lastSeenId, int $timeout): array
     {
         $streams = $this->streams->map(static fn(Stream $s) => $lastSeenId)->toArray();
 
         if (!$this->consumer || !$this->group) {
-            return $this->redis()->xRead($streams, null, $timeout);
+            $result = $this->redis()->xRead($streams, null, $timeout);
+            if (!is_array($result)) {
+                return [];
+            }
+
+            return $result;
         }
 
-        return $this->redis()->xReadGroup($this->group, $this->consumer, $streams, null, $timeout);
+        $result = $this->redis()->xReadGroup($this->group, $this->consumer, $streams, null, $timeout);
+        if (!is_array($result)) {
+            return [];
+        }
+
+        return $result;
     }
 
     /**

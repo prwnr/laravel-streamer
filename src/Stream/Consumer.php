@@ -2,7 +2,6 @@
 
 namespace Prwnr\Streamer\Stream;
 
-use Exception;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Exceptions\AcknowledgingFailedException;
 use Prwnr\Streamer\Stream;
@@ -51,19 +50,27 @@ class Consumer
     }
 
     /**
-     * {@inheritdoc}
+     * @param  string  $lastSeenId
+     * @param  int  $timeout
+     * @return array|null
      */
-    public function await(string $lastSeenId = self::NEW_ENTRIES, int $timeout = 0): ?array
+    public function await(string $lastSeenId = self::NEW_ENTRIES, int $timeout = 0): array
     {
-        return $this->redis()->xReadGroup(
+        $result = $this->redis()->xReadGroup(
             $this->group, $this->consumer, [$this->stream->getName() => $lastSeenId], 0, $timeout
         );
+
+        if (!is_array($result)) {
+            return [];
+        }
+
+        return $result;
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @throws Exception
+     * @param  string  $id
+     * @return void
+     * @throws AcknowledgingFailedException
      */
     public function acknowledge(string $id): void
     {
