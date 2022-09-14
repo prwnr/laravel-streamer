@@ -78,19 +78,35 @@ class Stream
      */
     public function read(string $from = self::FROM_START, int $limit = 0): array
     {
+        $result = [];
         if ($limit) {
-            return $this->redis()->xRead([$this->name => $from], $limit);
+            $result = $this->redis()->xRead([$this->name => $from], $limit);
         }
 
-        return $this->redis()->xRead([$this->name => $from]);
+        if (!$limit) {
+            $result = $this->redis()->xRead([$this->name => $from]);
+        }
+
+        if (!is_array($result)) {
+            return [];
+        }
+
+        return $result;
     }
 
     /**
-     * {@inheritdoc}
+     * @param  string  $lastSeenId
+     * @param  int  $timeout
+     * @return array
      */
-    public function await(string $lastSeenId = self::FROM_START, int $timeout = 0): ?array
+    public function await(string $lastSeenId = self::FROM_START, int $timeout = 0): array
     {
-        return $this->redis()->xRead([$this->name => $lastSeenId], 0, $timeout);
+        $result = $this->redis()->xRead([$this->name => $lastSeenId], 0, $timeout);
+        if (!is_array($result)) {
+            return [];
+        }
+
+        return $result;
     }
 
     /**
@@ -118,11 +134,20 @@ class Stream
             $stop = $range->getStart();
         }
 
+        $result = [];
         if ($limit) {
-            return $this->redis()->$method($this->name, $start, $stop, $limit);
+            $result = $this->redis()->$method($this->name, $start, $stop, $limit);
         }
 
-        return $this->redis()->$method($this->name, $start, $stop);
+        if (!$limit) {
+            $result = $this->redis()->$method($this->name, $start, $stop);
+        }
+
+        if (!is_array($result)) {
+            return [];
+        }
+
+        return $result;
     }
 
     /**
