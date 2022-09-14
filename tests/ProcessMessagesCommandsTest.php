@@ -232,7 +232,7 @@ class ProcessMessagesCommandsTest extends TestCase
         $mock = $this->mock(Connection::class);
         Redis::shouldReceive('connection')->andReturn($mock);
         $mock->shouldReceive('setOption')->withAnyArgs();
-        $mock->shouldReceive('xRead')->with(['foo.bar' => 0])->andReturn([
+        $mock->shouldReceive('xRead')->with(['foo.bar' => 0], null)->andReturn([
             'foo.bar' => [
                 '123-0' => [
                     'created' => $timestamp
