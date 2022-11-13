@@ -38,7 +38,7 @@ class StreamArchiverTest extends TestCase
         $stream = new Stream('foo.bar');
         $streamedMessage = new Message([
             'name' => 'foo.bar',
-            'domain' => 'foo'
+            'domain' => 'foo',
         ], ['foo']);
 
         $id = $stream->add($streamedMessage);
@@ -62,7 +62,7 @@ class StreamArchiverTest extends TestCase
         $streamedMessage = new Message([
             '_id' => '123',
             'name' => 'foo.bar',
-            'domain' => 'foo'
+            'domain' => 'foo',
         ], ['foo']);
 
         $received = new ReceivedMessage('123', $streamedMessage->getContent());
@@ -83,7 +83,7 @@ class StreamArchiverTest extends TestCase
         $message = new Message([
             '_id' => '123-0',
             'name' => 'foo.bar',
-            'domain' => 'foo'
+            'domain' => 'foo',
         ], ['foo']);
         $this->manager->driver('memory')->create($message);
 
@@ -111,7 +111,7 @@ class StreamArchiverTest extends TestCase
         $message = new Message([
             '_id' => '123-0',
             'name' => 'foo.bar',
-            'domain' => 'foo'
+            'domain' => 'foo',
         ], ['foo']);
 
         /** @var StreamArchiver $archiver */

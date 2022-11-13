@@ -29,16 +29,22 @@ class PurgeCommand extends ProcessMessagesCommand
         try {
             $result = (new Stream($stream))->delete($id);
             if ($result === 0) {
-                $this->warn(sprintf("Message [%s] from the '%s' stream could not be purged or is already deleted.", $id,
-                    $stream));
+                $this->warn(sprintf(
+                    "Message [%s] from the '%s' stream could not be purged or is already deleted.",
+                    $id,
+                    $stream
+                ));
                 return;
             }
 
             $this->info(sprintf("Message [%s] has been purged from the '%s' stream.", $id, $stream));
         } catch (Exception $exception) {
             report($exception);
-            $this->warn(sprintf("Message [%s] from the '%s' stream could not be purged. Error: ", $id,
-                    $stream).$exception->getMessage());
+            $this->warn(sprintf(
+                "Message [%s] from the '%s' stream could not be purged. Error: ",
+                $id,
+                $stream
+            ).$exception->getMessage());
         }
     }
 }

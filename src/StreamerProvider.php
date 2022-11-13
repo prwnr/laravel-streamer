@@ -39,10 +39,10 @@ class StreamerProvider extends ServiceProvider
 
         $this->app->when(StorageManager::class)
             ->needs('$container')
-            ->give($this->app);
+            ->give(fn () => $this->app);
         $this->app->singleton(StorageManager::class);
 
-        $this->app->bind('Streamer', fn() => $this->app->make(Streamer::class));
+        $this->app->bind('Streamer', fn () => $this->app->make(Streamer::class));
 
         $this->offerPublishing();
         $this->configure();
@@ -57,7 +57,8 @@ class StreamerProvider extends ServiceProvider
     private function configure(): void
     {
         $this->mergeConfigFrom(
-            __DIR__.'/../config/streamer.php', 'streamer'
+            __DIR__.'/../config/streamer.php',
+            'streamer'
         );
     }
 

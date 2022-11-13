@@ -125,12 +125,18 @@ class RetryFailedCommand extends Command
         try {
             $receivedMessage = new ReceivedMessage($message->id, $message->getStreamMessage());
             $this->archiver->archive($receivedMessage);
-            $this->info(sprintf("Message [%s] has been archived from the '%s' stream.", $message->id,
-                $message->getStreamInstance()->getName()));
+            $this->info(sprintf(
+                "Message [%s] has been archived from the '%s' stream.",
+                $message->id,
+                $message->getStreamInstance()->getName()
+            ));
         } catch (Exception $exception) {
             report($exception);
-            $this->warn(sprintf("Message [%s] from the '%s' stream could not be archived. Error: ", $message->id,
-                    $message->getStreamInstance()->getName()).$exception->getMessage());
+            $this->warn(sprintf(
+                "Message [%s] from the '%s' stream could not be archived. Error: ",
+                $message->id,
+                $message->getStreamInstance()->getName()
+            ).$exception->getMessage());
         }
     }
 
@@ -142,8 +148,11 @@ class RetryFailedCommand extends Command
 
         $result = $message->getStreamInstance()->delete($message->id);
         if ($result !== 0) {
-            $this->info(sprintf("Message [%s] has been purged from the '%s' stream.", $message->id,
-                $message->getStreamInstance()->getName()));
+            $this->info(sprintf(
+                "Message [%s] has been purged from the '%s' stream.",
+                $message->id,
+                $message->getStreamInstance()->getName()
+            ));
         }
     }
 
@@ -164,7 +173,7 @@ class RetryFailedCommand extends Command
         $specification = $this->prepareSpecification(array_filter($filters));
 
         return $this->repository->all()
-            ->filter(static fn(FailedMessage $message) => $specification->isSatisfiedBy($message));
+            ->filter(static fn (FailedMessage $message) => $specification->isSatisfiedBy($message));
     }
 
     private function prepareSpecification(array $filters): MatchAllSpecification

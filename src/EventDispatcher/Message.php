@@ -34,7 +34,7 @@ class Message extends StreamMessage
             'domain' => $meta['domain'] ?? '',
             'created' => $meta['created'] ?? time(),
             'data' => json_encode($data, JSON_THROW_ON_ERROR),
-        ], static fn($v): bool => $v !== null);
+        ], static fn ($v): bool => $v !== null);
 
         $payload = $this->makeHash($payload);
         parent::__construct($payload);

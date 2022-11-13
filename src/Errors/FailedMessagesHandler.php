@@ -69,8 +69,10 @@ class FailedMessagesHandler implements MessagesFailer
 
         $listener = app($message->receiver);
         if (!$listener instanceof MessageReceiver) {
-            throw new MessageRetryFailedException($message,
-                'Receiver class is not an instance of MessageReceiver contract');
+            throw new MessageRetryFailedException(
+                $message,
+                'Receiver class is not an instance of MessageReceiver contract'
+            );
         }
 
         return $listener;

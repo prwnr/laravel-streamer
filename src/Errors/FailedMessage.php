@@ -45,8 +45,10 @@ class FailedMessage implements JsonSerializable
         $messages = $stream->readRange($range, 1);
 
         if (!$messages || count($messages) !== 1) {
-            throw new MessageRetryFailedException($this,
-                sprintf("No matching messages found on a '%s' stream for ID #%s.", $stream->getName(), $this->id));
+            throw new MessageRetryFailedException(
+                $this,
+                sprintf("No matching messages found on a '%s' stream for ID #%s.", $stream->getName(), $this->id)
+            );
         }
 
         return array_pop($messages);

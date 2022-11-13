@@ -52,7 +52,7 @@ class ReplayStreamTest extends TestCase
         $this->assertEquals([
             'foo' => 'changed again',
             'bar' => 'different value',
-            'new bar' => true
+            'new bar' => true,
         ], $payload);
     }
 
@@ -84,7 +84,7 @@ class ReplayStreamTest extends TestCase
         $this->assertEquals([
             'foo' => 'changed',
             'bar' => 'bar initial',
-            'new bar' => true
+            'new bar' => true,
         ], $payload);
     }
 
@@ -105,11 +105,11 @@ class ReplayStreamTest extends TestCase
 
         for ($i = 0; $i < 10; $i++) {
             $streamer->emit(new ReplayableFooBarEvent('123', [
-                'foo' => 'foo' . $i,
+                'foo' => 'foo'.$i,
             ]));
 
             $streamer->emit(new ReplayableOtherFooBarEvent('123', [
-                'other_bar' => 'bar' . $i,
+                'other_bar' => 'bar'.$i,
             ]));
         }
 
@@ -132,19 +132,19 @@ class ReplayStreamTest extends TestCase
         $streamer->emit(new ReplayableFooBarEvent('123', [
             'foo' => 'foo',
             'bar' => 'bar',
-            'foobar' => 'foobar'
+            'foobar' => 'foobar',
         ]));
 
         $modChange = 0;
         for ($i = 1; $i <= 1000; $i++) {
             $streamer->emit(new ReplayableFooBarEvent('123', [
-                'foo' => 'foo-' . $i,
+                'foo' => 'foo-'.$i,
             ]));
 
             if (($i % 100) === 0) {
                 $modChange++;
                 $streamer->emit(new ReplayableFooBarEvent('123', [
-                    'foobar' => 'foobar-' . $modChange,
+                    'foobar' => 'foobar-'.$modChange,
                 ]));
             }
         }
@@ -152,7 +152,7 @@ class ReplayStreamTest extends TestCase
         $this->assertEquals([
             'foo' => 'foo-1000',
             'bar' => 'bar',
-            'foobar' => 'foobar-10'
+            'foobar' => 'foobar-10',
         ], $recorder->replay('foo.bar', '123'));
     }
 

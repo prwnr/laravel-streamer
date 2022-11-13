@@ -178,7 +178,7 @@ class ListenCommand extends Command
     {
         foreach ($multiStream->streams() as $stream) {
             $pendingMessages = $stream->pending($this->option('group'));
-            $messages = array_map(static fn($message) => $message[0], $pendingMessages);
+            $messages = array_map(static fn ($message) => $message[0], $pendingMessages);
             if ($messages === []) {
                 continue;
             }
@@ -196,11 +196,17 @@ class ListenCommand extends Command
     {
         try {
             $this->archiver->archive($message);
-            $this->info(sprintf("Message [%s] has been archived from the '%s' stream.", $message->getId(),
-                $message->getEventName()));
+            $this->info(sprintf(
+                "Message [%s] has been archived from the '%s' stream.",
+                $message->getId(),
+                $message->getEventName()
+            ));
         } catch (Exception $exception) {
-            $this->warn(sprintf("Message [%s] from the '%s' stream could not be archived. Error: ", $message->getId(),
-                    $message->getEventName()).$exception->getMessage());
+            $this->warn(sprintf(
+                "Message [%s] from the '%s' stream could not be archived. Error: ",
+                $message->getId(),
+                $message->getEventName()
+            ).$exception->getMessage());
         }
     }
 
@@ -213,8 +219,11 @@ class ListenCommand extends Command
         $stream = new Stream($message->getEventName());
         $result = $stream->delete($message->getId());
         if ($result !== 0) {
-            $this->info(sprintf("Message [%s] has been purged from the '%s' stream.", $message->getId(),
-                $message->getEventName()));
+            $this->info(sprintf(
+                "Message [%s] has been purged from the '%s' stream.",
+                $message->getId(),
+                $message->getEventName()
+            ));
         }
     }
 

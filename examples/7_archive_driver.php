@@ -87,4 +87,3 @@ $manager->extend('memory_example', static function () {
 
 // Defining your custom driver as default one for Archiver is important, because otherwise it will use the Null driver
 // which will result in message being only purged, without being passed to any storage.
-

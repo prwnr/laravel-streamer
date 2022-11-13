@@ -2,6 +2,7 @@
 
 namespace Prwnr\Streamer\EventDispatcher;
 
+use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use JsonException;
@@ -172,7 +173,7 @@ class Streamer implements Emitter, Listener
      * @param $events
      * @param $handlers
      * @return array<int, array>
-     * @throws \Exception
+     * @throws Exception
      */
     private function parseArgs($events, $handlers): array
     {
@@ -226,8 +227,12 @@ class Streamer implements Emitter, Listener
 
     private function report(string $id, Stream $on, Throwable $ex): void
     {
-        $error = sprintf("Listener error. Failed processing message with ID %s on '%s' stream. Error: %s", $id,
-            $on->getName(), $ex->getMessage());
+        $error = sprintf(
+            "Listener error. Failed processing message with ID %s on '%s' stream. Error: %s",
+            $id,
+            $on->getName(),
+            $ex->getMessage()
+        );
         Log::error($error);
     }
 }

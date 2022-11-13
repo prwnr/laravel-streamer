@@ -299,7 +299,7 @@ class StreamTest extends TestCase
         foreach (
             [
                 'length', 'radix-tree-keys', 'radix-tree-nodes', 'groups', 'last-generated-id', 'first-entry',
-                'last-entry'
+                'last-entry',
             ] as $key
         ) {
             $this->assertArrayHasKey($key, $actual);
@@ -316,11 +316,12 @@ class StreamTest extends TestCase
         $stream = new Stream('foo');
 
         $info = $this->redis['phpredis']->connection()->info();
-        if (!version_compare($info['redis_version'], '6.0.0', '>=')) {
+        if (! version_compare($info['redis_version'], '6.0.0', '>=')) {
             $this->expectException(BadMethodCallException::class);
             $this->expectExceptionMessage('fullInfo only available for Redis 6.0 or above.');
 
             $stream->fullInfo();
+
             return;
         }
 
@@ -339,7 +340,7 @@ class StreamTest extends TestCase
         foreach (
             [
                 'length', 'radix-tree-keys', 'radix-tree-nodes', 'last-generated-id', 'last-generated-id', 'entries',
-                'groups'
+                'groups',
             ] as $key
         ) {
             $this->assertArrayHasKey($key, $actual);

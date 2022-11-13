@@ -13,9 +13,9 @@ class MessageTest extends TestCase
     public function test_message_is_created_with_content(): void
     {
         $meta = [
-            'type'    => Event::TYPE_EVENT,
-            'domain'  => config('streamer.domain'),
-            'name'    => 'foo.bar',
+            'type' => Event::TYPE_EVENT,
+            'domain' => config('streamer.domain'),
+            'name' => 'foo.bar',
             'created' => time(),
         ];
         $data = ['foo' => 'bar'];
@@ -36,7 +36,7 @@ class MessageTest extends TestCase
     {
         $data = [
             'foo' => 'bar',
-            'bar' => 'foo bar foo'
+            'bar' => 'foo bar foo',
         ];
         $expectedId = '1-0';
         $expected = [
@@ -65,9 +65,9 @@ class MessageTest extends TestCase
     public function test_message_is_created_with_matching_hash(): void
     {
         $meta = [
-            'type'    => Event::TYPE_EVENT,
-            'domain'  => config('streamer.domain'),
-            'name'    => 'foo.bar',
+            'type' => Event::TYPE_EVENT,
+            'domain' => config('streamer.domain'),
+            'name' => 'foo.bar',
             'created' => time(),
         ];
         $data = ['foo' => 'bar'];

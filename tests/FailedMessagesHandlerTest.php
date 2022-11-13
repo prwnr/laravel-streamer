@@ -40,7 +40,7 @@ class FailedMessagesHandlerTest extends TestCase
         $handler = $this->app->make(FailedMessagesHandler::class);
         $message = new ReceivedMessage('123', [
             'name' => 'foo.bar',
-            'data' => json_encode('payload', JSON_THROW_ON_ERROR)
+            'data' => json_encode('payload', JSON_THROW_ON_ERROR),
         ]);
         $listener = new LocalListener();
         $e = new Exception('error');
@@ -56,7 +56,7 @@ class FailedMessagesHandlerTest extends TestCase
             'stream' => 'foo.bar',
             'receiver' => LocalListener::class,
             'error' => 'error',
-            'date' => '2021-12-12 12:12:12'
+            'date' => '2021-12-12 12:12:12',
         ], $actual);
 
         Carbon::setTestNow();

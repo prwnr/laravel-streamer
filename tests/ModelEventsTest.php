@@ -126,7 +126,7 @@ class ModelEventsTest extends TestCase
 
     public function test_model_with_changed_base_name_emits_different_name_of_event_to_stream(): void
     {
-        $model = new class extends EmittingEventsModel {
+        $model = new class () extends EmittingEventsModel {
             public function __construct(array $attributes = [])
             {
                 parent::__construct($attributes);

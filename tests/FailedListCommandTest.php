@@ -4,7 +4,6 @@ namespace Tests;
 
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
-use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 
 class FailedListCommandTest extends TestCase
 {

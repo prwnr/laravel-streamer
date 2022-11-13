@@ -12,7 +12,7 @@ class EmittingEventsWithAdditionalModel extends Model
     protected array $additional;
 
     protected $fillable = [
-        'foo', 'id'
+        'foo', 'id',
     ];
 
     public function __construct(array $attributes = [])

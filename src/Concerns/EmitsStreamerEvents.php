@@ -126,5 +126,4 @@ trait EmitsStreamerEvents
             'additional' => $this->getAdditionalPayloadData()
         ]);
     }
-
 }

@@ -12,7 +12,6 @@ use RuntimeException;
 
 class ArchiveStorageManagerTest extends TestCase
 {
-
     public function test_default_driver(): void
     {
         $manager = new StorageManager($this->app);
@@ -28,7 +27,7 @@ class ArchiveStorageManagerTest extends TestCase
     {
         $manager = new StorageManager($this->app);
         $manager->extend('custom', static function () {
-            return new class implements ArchiveStorage {
+            return new class () implements ArchiveStorage {
                 public function create(Message $message): void
                 {
                 }
@@ -59,7 +58,7 @@ class ArchiveStorageManagerTest extends TestCase
                             'type' => Event::TYPE_EVENT,
                             'name' => 'foo.bar',
                             'created' => time(),
-                        ], ['foo'])
+                        ], ['foo']),
                     ]);
                 }
 
@@ -71,7 +70,7 @@ class ArchiveStorageManagerTest extends TestCase
                             'type' => Event::TYPE_EVENT,
                             'name' => 'foo.bar',
                             'created' => time(),
-                        ], ['foo'])
+                        ], ['foo']),
                     ]);
                 }
 
@@ -83,6 +82,7 @@ class ArchiveStorageManagerTest extends TestCase
                     if ($event === 'foo.bar') {
                         return 2;
                     }
+
                     return 0;
                 }
             };
@@ -110,11 +110,14 @@ class ArchiveStorageManagerTest extends TestCase
     public function testCustomDriverNeedsToImplementStorageContract(): void
     {
         $manager = new StorageManager($this->app);
-        $manager->extend('custom', static fn() => new class {});
+        $manager->extend('custom', static fn () => new class () {
+        });
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage(sprintf('Custom driver needs to implement [%s] interface.',
-            ArchiveStorage::class));
+        $this->expectExceptionMessage(sprintf(
+            'Custom driver needs to implement [%s] interface.',
+            ArchiveStorage::class
+        ));
         $manager->driver('custom')->find('123', 'resource');
     }
 }

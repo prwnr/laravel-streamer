@@ -23,11 +23,11 @@ class MessagesRepository implements Repository
             return collect();
         }
 
-        $decode = static fn($item) => array_values(json_decode((string) $item, true, 512, JSON_THROW_ON_ERROR));
+        $decode = static fn ($item) => array_values(json_decode((string) $item, true, 512, JSON_THROW_ON_ERROR));
 
         return collect($elements)
-            ->map(static fn($item) => new FailedMessage(...$decode($item)))
-            ->sortBy(static fn(FailedMessage $message) => $message->date);
+            ->map(static fn ($item) => new FailedMessage(...$decode($item)))
+            ->sortBy(static fn (FailedMessage $message) => $message->date);
     }
 
     /**

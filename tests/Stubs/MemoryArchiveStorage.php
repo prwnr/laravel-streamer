@@ -11,7 +11,7 @@ class MemoryArchiveStorage implements ArchiveStorage
     private array $items = [];
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function create(Message $message): void
     {
@@ -19,7 +19,7 @@ class MemoryArchiveStorage implements ArchiveStorage
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function find(string $event, string $id): ?Message
     {
@@ -27,7 +27,7 @@ class MemoryArchiveStorage implements ArchiveStorage
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function findMany(string $event): Collection
     {
@@ -35,7 +35,7 @@ class MemoryArchiveStorage implements ArchiveStorage
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function all(): Collection
     {
@@ -48,18 +48,20 @@ class MemoryArchiveStorage implements ArchiveStorage
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function delete(string $event, string $id = null): int
     {
         if ($id === null && isset($this->items[$event])) {
             $count = count($this->items[$event]);
             unset($this->items[$event]);
+
             return $count;
         }
 
         if (isset($this->items[$event][$id])) {
             unset($this->items[$event][$id]);
+
             return 1;
         }
 

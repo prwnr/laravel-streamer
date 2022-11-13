@@ -22,7 +22,6 @@ class ArchiveTestCase extends TestCase
         $this->manager = null;
     }
 
-
     protected function addArchiveMessage(string $stream, string $id, array $data): Message
     {
         $message = new Message([

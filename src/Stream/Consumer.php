@@ -38,7 +38,11 @@ class Consumer
     public function await(string $lastSeenId = self::NEW_ENTRIES, int $timeout = 0): ?array
     {
         return $this->redis()->xReadGroup(
-            $this->group, $this->consumer, [$this->stream->getName() => $lastSeenId], 0, $timeout
+            $this->group,
+            $this->consumer,
+            [$this->stream->getName() => $lastSeenId],
+            0,
+            $timeout
         );
     }
 
@@ -67,8 +71,14 @@ class Consumer
     public function claim(array $ids, int $idleTime, bool $justId = true): array
     {
         if ($justId) {
-            return $this->redis()->xClaim($this->stream->getName(), $this->group, $this->consumer, $idleTime, $ids,
-                ['JUSTID']);
+            return $this->redis()->xClaim(
+                $this->stream->getName(),
+                $this->group,
+                $this->consumer,
+                $idleTime,
+                $ids,
+                ['JUSTID']
+            );
         }
 
         return $this->redis()->xClaim($this->stream->getName(), $this->group, $this->consumer, $idleTime, $ids);

@@ -13,7 +13,7 @@ use Prwnr\Streamer\Streams;
 $stream = new Stream('stream_name');
 
 // Message implementation, used to add it to stream
-$message = new class() implements StreamableMessage {
+$message = new class () implements StreamableMessage {
     /**
      * @return array
      */
@@ -42,7 +42,7 @@ $stream->delete('0');
 $streams = new Streams(['first_stream', 'second_stream']);
 
 // Message implementation, used to add it to stream
-$message = new class() implements StreamableMessage {
+$message = new class () implements StreamableMessage {
     /**
      * @return array
      */

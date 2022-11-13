@@ -9,6 +9,7 @@ use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\Exceptions\AcknowledgingFailedException;
 use Prwnr\Streamer\Stream;
+use Redis;
 
 class MultiStream
 {
@@ -88,7 +89,7 @@ class MultiStream
     /**
      * Deletes message from a Stream (if such is in MultiStream collection)
      *
-     * @param  array<string, string>  $streams  [stream => [ids]] format
+     * @param  array<string, array>  $streams  [stream => [ids]] format
      */
     public function delete(array $streams): int|float
     {
@@ -171,9 +172,9 @@ class MultiStream
         return $consumer->await($lastSeenId, $timeout);
     }
 
-    private function awaitMultiple(string $lastSeenId, int $timeout): array|\Redis
+    private function awaitMultiple(string $lastSeenId, int $timeout): array|Redis
     {
-        $streams = $this->streams->map(static fn(Stream $s) => $lastSeenId)->toArray();
+        $streams = $this->streams->map(static fn (Stream $s) => $lastSeenId)->toArray();
 
         if (!$this->consumer || !$this->group) {
             return $this->redis()->xRead($streams, null, $timeout);
