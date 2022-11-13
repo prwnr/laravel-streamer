@@ -2,7 +2,6 @@
 
 namespace Prwnr\Streamer\EventDispatcher;
 
-use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use JsonException;
@@ -170,12 +169,12 @@ class Streamer implements Emitter, Listener
     }
 
     /**
-     * @param $events
-     * @param $handlers
+     * @param  string|array<string>  $events
+     * @param  callable|array<callable>  $handlers
      * @return array<int, array>
-     * @throws Exception
+     * @throws InvalidListeningArgumentsException
      */
-    private function parseArgs($events, $handlers): array
+    private function parseArgs(string|array $events, callable|array $handlers): array
     {
         $eventsList = Arr::wrap($events);
         if (is_array($handlers) && count($eventsList) === 1 && count($handlers) > 1) {

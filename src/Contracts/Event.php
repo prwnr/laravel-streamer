@@ -24,8 +24,6 @@ interface Event
 
     /**
      * Event payload that will be sent as message to Stream.
-     *
-     * @return array
      */
     public function payload(): array;
 }
