@@ -56,7 +56,6 @@ final class ListenersStack
     }
 
     /**
-     * @param  string  $event
      * @return array<int, string>
      */
     public static function getListenersFor(string $event): array

@@ -164,16 +164,12 @@ class RetryFailedCommand extends Command
         ])->isNotEmpty();
     }
 
-    /**
-     * @param  array  $filters
-     * @return Collection
-     */
     private function getMessages(array $filters): Collection
     {
         $specification = $this->prepareSpecification(array_filter($filters));
 
         return $this->repository->all()
-            ->filter(static fn (FailedMessage $message) => $specification->isSatisfiedBy($message));
+            ->filter(static fn (FailedMessage $message): bool => $specification->isSatisfiedBy($message));
     }
 
     private function prepareSpecification(array $filters): MatchAllSpecification

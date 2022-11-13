@@ -87,8 +87,6 @@ trait EmitsStreamerEvents
      * Method that can be overridden to add additional data to each event payload.
      * It will be added as 'top' level array. If method returns empty array,
      * then the 'additional' data won't be added to payload.
-     *
-     * @return array
      */
     protected function getAdditionalPayloadData(): array
     {

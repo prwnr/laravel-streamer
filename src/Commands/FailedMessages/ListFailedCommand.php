@@ -58,9 +58,6 @@ class ListFailedCommand extends Command
         return 0;
     }
 
-    /**
-     * @return array
-     */
     protected function getMessages(): array
     {
         $isCompact = $this->option('compact');

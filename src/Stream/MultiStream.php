@@ -174,7 +174,7 @@ class MultiStream
 
     private function awaitMultiple(string $lastSeenId, int $timeout): array|Redis
     {
-        $streams = $this->streams->map(static fn (Stream $s) => $lastSeenId)->toArray();
+        $streams = $this->streams->map(static fn (Stream $s): string => $lastSeenId)->toArray();
 
         if (!$this->consumer || !$this->group) {
             return $this->redis()->xRead($streams, null, $timeout);

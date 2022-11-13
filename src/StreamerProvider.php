@@ -2,6 +2,7 @@
 
 namespace Prwnr\Streamer;
 
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Prwnr\Streamer\Archiver\StorageManager;
 use Prwnr\Streamer\Archiver\StreamArchiver;
@@ -39,7 +40,7 @@ class StreamerProvider extends ServiceProvider
 
         $this->app->when(StorageManager::class)
             ->needs('$container')
-            ->give(fn () => $this->app);
+            ->give(fn (): Application => $this->app);
         $this->app->singleton(StorageManager::class);
 
         $this->app->bind('Streamer', fn () => $this->app->make(Streamer::class));

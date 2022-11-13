@@ -38,6 +38,7 @@ class Snapshot implements Arrayable
 
     /**
      * @inheritDoc
+     * @return array{id: string, name: string, identifier: string, date: string}
      */
     public function toArray(): array
     {
