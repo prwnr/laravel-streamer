@@ -10,14 +10,6 @@ class Message extends StreamMessage
     /**
      * @throws JsonException
      */
-    public function getData(): array
-    {
-        return json_decode((string) $this->content['data'], true, 512, JSON_THROW_ON_ERROR);
-    }
-
-    /**
-     * @throws JsonException
-     */
     public function __construct(array $meta, array $data)
     {
         $payload = array_filter([
@@ -33,6 +25,13 @@ class Message extends StreamMessage
 
         $payload = $this->makeHash($payload);
         parent::__construct($payload);
+    }
+    /**
+     * @throws JsonException
+     */
+    public function getData(): array
+    {
+        return json_decode((string) $this->content['data'], true, 512, JSON_THROW_ON_ERROR);
     }
 
     /**

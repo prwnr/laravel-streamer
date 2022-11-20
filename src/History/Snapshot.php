@@ -43,7 +43,7 @@ class Snapshot implements Arrayable
             'id' => $this->id,
             'name' => $this->name,
             'identifier' => $this->identifier,
-            'date' => $this->date->format('Y-m-d H:i:s')
+            'date' => $this->date->format('Y-m-d H:i:s'),
         ];
     }
 }

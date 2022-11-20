@@ -82,7 +82,40 @@ class RetryFailedCommand extends Command
     }
 
     /**
-     * Retries set of messages
+     * @inheritDoc
+     */
+    protected function getOptions(): array
+    {
+        return [
+            [
+                'all', null, InputOption::VALUE_NONE,
+                'Retries all failed messages.',
+            ],
+            [
+                'id', null, InputOption::VALUE_REQUIRED,
+                'Retries messages with given ID (messages from different streams may have same IDs and some messages may fail for multiple listeners).',
+            ],
+            [
+                'stream', null, InputOption::VALUE_REQUIRED,
+                'Retries messages from given Stream name.',
+            ],
+            [
+                'receiver', null, InputOption::VALUE_REQUIRED,
+                'Retries messages with given receiver associated with them.',
+            ],
+            [
+                'purge', null, InputOption::VALUE_NONE,
+                'Will remove message from the stream if it will be retried successfully and there will be no other failures saved.',
+            ],
+            [
+                'archive', null, InputOption::VALUE_NONE,
+                'Will remove message from the stream and store it in database if it will be retried successfully and there will be no other failures saved.',
+            ],
+        ];
+    }
+
+    /**
+     * Retries set of messages.
      *
      * @param  Collection&FailedMessage[]  $messages
      */
@@ -187,38 +220,5 @@ class RetryFailedCommand extends Command
             $message->getStreamInstance()->getName(),
             $message->receiver
         ));
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function getOptions(): array
-    {
-        return [
-            [
-                'all', null, InputOption::VALUE_NONE,
-                'Retries all failed messages.'
-            ],
-            [
-                'id', null, InputOption::VALUE_REQUIRED,
-                'Retries messages with given ID (messages from different streams may have same IDs and some messages may fail for multiple listeners).'
-            ],
-            [
-                'stream', null, InputOption::VALUE_REQUIRED,
-                'Retries messages from given Stream name.'
-            ],
-            [
-                'receiver', null, InputOption::VALUE_REQUIRED,
-                'Retries messages with given receiver associated with them.'
-            ],
-            [
-                'purge', null, InputOption::VALUE_NONE,
-                'Will remove message from the stream if it will be retried successfully and there will be no other failures saved.'
-            ],
-            [
-                'archive', null, InputOption::VALUE_NONE,
-                'Will remove message from the stream and store it in database if it will be retried successfully and there will be no other failures saved.'
-            ],
-        ];
     }
 }

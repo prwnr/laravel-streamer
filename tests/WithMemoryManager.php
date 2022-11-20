@@ -13,7 +13,7 @@ trait WithMemoryManager
     {
         /** @var StorageManager $manager */
         $this->manager = app(StorageManager::class);
-        $this->manager->extend('memory', static fn(): MemoryArchiveStorage => new MemoryArchiveStorage());
+        $this->manager->extend('memory', static fn (): MemoryArchiveStorage => new MemoryArchiveStorage());
 
         config()->set('streamer.archive.storage_driver', 'memory');
     }

@@ -71,7 +71,7 @@ class ErrorsMessagesRepositoryTest extends TestCase
                 'error' => 'error',
                 'date' => '2021-12-12 12:20:12',
             ],
-        ], $actual->map(static fn(FailedMessage $message): array => $message->jsonSerialize())->values()->toArray());
+        ], $actual->map(static fn (FailedMessage $message): array => $message->jsonSerialize())->values()->toArray());
     }
 
     public function test_adds_new_failed_message(): void

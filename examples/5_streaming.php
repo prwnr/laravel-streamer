@@ -15,7 +15,6 @@ class ExampleStreamerEvent implements Event
      * Require name method, must return a string.
      * Event name can be anything, but remember that it will be used for listening.
      *
-     * @return string
      */
     public function name(): string
     {

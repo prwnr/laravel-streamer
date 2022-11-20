@@ -18,7 +18,7 @@ interface Archiver
     /**
      * Restores message back to the stream and removes it from storage.
      *
-     * @return string ID of new stream message restored from the given one.
+     * @return string ID of new stream message restored from the given one
      */
     public function restore(Message $message): string;
 }

@@ -143,8 +143,7 @@ class ModelEventsTest extends TestCase
     }
 
     public function test_creating_model_with_additional_payload_data_emits_created_event_to_stream_with_that_data(
-    ): void
-    {
+    ): void {
         $model = new EmittingEventsWithAdditionalModel(['id' => 123, 'foo' => 'bar']);
         $model->setAdditionalPayloadData(['foo' => 'bar']);
         $model->postCreate();
@@ -175,8 +174,7 @@ class ModelEventsTest extends TestCase
     }
 
     public function test_creating_model_with_empty_additional_payload_data_emits_created_event_to_stream_without_that_data(
-    ): void
-    {
+    ): void {
         $model = new EmittingEventsWithAdditionalModel(['id' => 123, 'foo' => 'bar']);
         $model->setAdditionalPayloadData([]);
         $model->postCreate();

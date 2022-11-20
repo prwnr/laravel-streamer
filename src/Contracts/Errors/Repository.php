@@ -8,7 +8,7 @@ use Prwnr\Streamer\Errors\FailedMessage;
 interface Repository
 {
     /**
-     * Returns all failed stream messages
+     * Returns all failed stream messages.
      *
      * @return Collection&FailedMessage[]
      */

@@ -16,7 +16,7 @@ final class ListenersStack
 
     /**
      * Add many listeners to stack at once.
-     * Uses ListenersStack::add underneath
+     * Uses ListenersStack::add underneath.
      *
      * @param  array<string, array<int, string>>  $listenersStack  [event => [listeners]]
      */
@@ -34,7 +34,7 @@ final class ListenersStack
     }
 
     /**
-     * Add event listener to stack
+     * Add event listener to stack.
      */
     public static function add(string $event, string $listener): void
     {

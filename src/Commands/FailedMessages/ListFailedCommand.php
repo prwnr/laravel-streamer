@@ -77,8 +77,8 @@ class ListFailedCommand extends Command
         return [
             [
                 'compact', null, InputOption::VALUE_NONE,
-                'Returns only IDs, Stream names and Errors of failed messages.'
-            ]
+                'Returns only IDs, Stream names and Errors of failed messages.',
+            ],
         ];
     }
 }

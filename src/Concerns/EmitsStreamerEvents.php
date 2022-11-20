@@ -115,7 +115,7 @@ trait EmitsStreamerEvents
     {
         return array_filter([
             $this->getKeyName() => $this->getKey(),
-            'additional' => $this->getAdditionalPayloadData()
+            'additional' => $this->getAdditionalPayloadData(),
         ]);
     }
 }

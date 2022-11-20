@@ -58,7 +58,7 @@ class ListCommand extends Command
 
             $rows[] = [
                 $event,
-                $eventListeners ?: 'none'
+                $eventListeners ?: 'none',
             ];
         }
 
@@ -73,8 +73,8 @@ class ListCommand extends Command
         return [
             [
                 'compact', null, InputOption::VALUE_NONE,
-                'Returns only names of events that are registered in streamer.'
-            ]
+                'Returns only names of events that are registered in streamer.',
+            ],
         ];
     }
 }

@@ -15,7 +15,9 @@ class MultiStream
 {
     use ConnectsWithRedis;
 
-    /** @var Collection&Stream[] */
+    /**
+     * @var Collection&Stream[]
+     */
     private readonly Collection $streams;
     private readonly string $consumer;
     private readonly string $group;
@@ -82,7 +84,7 @@ class MultiStream
     }
 
     /**
-     * Deletes message from a Stream (if such is in MultiStream collection)
+     * Deletes message from a Stream (if such is in MultiStream collection).
      *
      * @param  array<string, array>  $streams  [stream => [ids]] format
      */
@@ -190,7 +192,7 @@ class MultiStream
                 $list[] = [
                     'stream' => $stream,
                     'id' => $id,
-                    'message' => $message
+                    'message' => $message,
                 ];
             }
         }

@@ -1,3 +1,26 @@
 {
-  "preset": "psr12"
+  "preset": "psr12",
+  "rules": {
+    "is_null": true,
+    "no_blank_lines_after_class_opening": true,
+    "method_chaining_indentation": true,
+    "no_superfluous_phpdoc_tags": true,
+    "no_empty_phpdoc": true,
+    "ordered_class_elements": true,
+    "ordered_imports": true,
+    "phpdoc_line_span": true,
+    "phpdoc_annotation_without_dot":  true,
+    "phpdoc_no_useless_inheritdoc": true,
+    "phpdoc_summary": true,
+    "protected_to_private": true,
+    "standardize_increment": true,
+    "strict_comparison": true,
+    "trailing_comma_in_multiline": true,
+    "use_arrow_functions": true,
+    "ternary_to_null_coalescing": true,
+    "statement_indentation": true,
+    "array_indentation": true,
+    "assign_null_coalescing_to_coalesce_equal": true,
+    "align_multiline_comment": true
+  }
 }

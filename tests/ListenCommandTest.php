@@ -180,8 +180,7 @@ class ListenCommandTest extends TestCase
     }
 
     public function test_command_called_with_events_while_one_of_them_throws_exception_and_stores_failed_messages_info(
-    ): void
-    {
+    ): void {
         $listeners = [
             ExceptionalListener::class,
             LocalListener::class,
@@ -384,8 +383,7 @@ class ListenCommandTest extends TestCase
     }
 
     public function test_command_is_kept_alive_when_unexpected_non_listener_exception_occurs_with_maximum_attempts_limit(
-    ): void
-    {
+    ): void {
         $this->withLocalListenersConfigured([LocalListener::class]);
 
         $mock = $this->mock(\Prwnr\Streamer\EventDispatcher\Streamer::class);
@@ -470,8 +468,7 @@ class ListenCommandTest extends TestCase
     }
 
     public function test_command_called_with_archive_will_delete_messages_from_stream_and_store_in_different_storage(
-    ): void
-    {
+    ): void {
         $listeners = [
             LocalListener::class,
             AnotherLocalListener::class,

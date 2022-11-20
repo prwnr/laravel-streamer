@@ -85,6 +85,27 @@ class ArchiveRestoreCommand extends Command
         return 1;
     }
 
+    /**
+     * @inheritDoc
+     */
+    protected function getOptions(): array
+    {
+        return [
+            [
+                'all', null, InputOption::VALUE_NONE,
+                'Restores all archived messages back to the stream.',
+            ],
+            [
+                'id', null, InputOption::VALUE_REQUIRED,
+                'Restores archived message back to the stream by ID. Requires --stream option to be used as well.',
+            ],
+            [
+                'stream', null, InputOption::VALUE_REQUIRED,
+                'Restores all archived messages from a selected stream.',
+            ],
+        ];
+    }
+
     private function restore(Message $message): void
     {
         try {
@@ -104,26 +125,5 @@ class ArchiveRestoreCommand extends Command
                 $exception->getMessage()
             ));
         }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function getOptions(): array
-    {
-        return [
-            [
-                'all', null, InputOption::VALUE_NONE,
-                'Restores all archived messages back to the stream.'
-            ],
-            [
-                'id', null, InputOption::VALUE_REQUIRED,
-                'Restores archived message back to the stream by ID. Requires --stream option to be used as well.'
-            ],
-            [
-                'stream', null, InputOption::VALUE_REQUIRED,
-                'Restores all archived messages from a selected stream.'
-            ],
-        ];
     }
 }

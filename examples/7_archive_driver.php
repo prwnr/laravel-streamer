@@ -6,7 +6,7 @@ use Prwnr\Streamer\Contracts\ArchiveStorage;
 use Prwnr\Streamer\EventDispatcher\Message;
 
 /**
- * Creation of Archive storage driver
+ * Creation of Archive storage driver.
  */
 // The driver class should implement ArchiveStorage contract and all its methods like in this example:
 class MemoryStorageExample implements ArchiveStorage
@@ -14,7 +14,7 @@ class MemoryStorageExample implements ArchiveStorage
     private $items = [];
 
     /**
-     * Creation of the message in storage (database or else)
+     * Creation of the message in storage (database or else).
      */
     public function create(Message $message): void
     {
@@ -23,7 +23,7 @@ class MemoryStorageExample implements ArchiveStorage
 
     /**
      * Finding message in storage by event and ID
-     * Both values are required, as different events may have same IDs
+     * Both values are required, as different events may have same IDs.
      */
     public function find(string $event, string $id): ?Message
     {
@@ -78,9 +78,7 @@ class MemoryStorageExample implements ArchiveStorage
 
 // Then, the new driver needs to be added to StorageManager with some unique name
 $manager = $this->app->make(StorageManager::class);
-$manager->extend('memory_example', static function () {
-    return new MemoryStorageExample();
-});
+$manager->extend('memory_example', static fn () => new MemoryStorageExample());
 
 // The last step is to define your custom driver as default for the Archiver. You will find the field to change
 // in streamer.php config file. Use your custom name there as archive.storage_driver

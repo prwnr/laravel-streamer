@@ -33,18 +33,18 @@ class Streamer implements Emitter, Listener
 
     private bool $inLoop = false;
 
-    public function startFrom(string $startFrom): self
-    {
-        $this->startFrom = $startFrom;
-
-        return $this;
-    }
-
     public function __construct(private readonly History $history)
     {
         $this->readTimeout = config('streamer.stream_read_timeout', 1) * 1000;
         $this->listenTimeout = config('streamer.listen_timeout', 1) * 1000;
         $this->readSleep = config('streamer.read_sleep', 1);
+    }
+
+    public function startFrom(string $startFrom): self
+    {
+        $this->startFrom = $startFrom;
+
+        return $this;
     }
 
     public function asConsumer(string $consumer, string $group): self
@@ -82,7 +82,7 @@ class Streamer implements Emitter, Listener
 
     /**
      * Handler is invoked with \Prwnr\Streamer\EventDispatcher\ReceivedMessage instance as first argument
-     * and with \Prwnr\Streamer\EventDispatcher\Streamer as second argument
+     * and with \Prwnr\Streamer\EventDispatcher\Streamer as second argument.
      *
      * @inheritdoc
      *

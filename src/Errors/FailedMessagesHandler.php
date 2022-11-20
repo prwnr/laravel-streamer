@@ -23,7 +23,7 @@ class FailedMessagesHandler implements MessagesFailer
     {
         $this->repository->add(new FailedMessage(...[
             $message->getId(),
-                $message->getContent()['name'] ?? '',
+            $message->getContent()['name'] ?? '',
             $receiver::class,
             $e->getMessage(),
         ]));

@@ -68,7 +68,7 @@ class FailedMessagesHandlerTest extends TestCase
 
         $listener = $this->mock(LocalListener::class);
         $listener->shouldReceive('handle')
-            ->withArgs(static fn($arg): bool => $arg instanceof ReceivedMessage
+            ->withArgs(static fn ($arg): bool => $arg instanceof ReceivedMessage
                 && $arg->getId() && $message->getId()
                 && $arg->getContent() && $message->getContent())
             ->once()
@@ -88,14 +88,14 @@ class FailedMessagesHandlerTest extends TestCase
 
         $listener = $this->mock(LocalListener::class);
         $listener->shouldReceive('handle')
-            ->withArgs(static fn($arg): bool => $arg instanceof ReceivedMessage
+            ->withArgs(static fn ($arg): bool => $arg instanceof ReceivedMessage
                 && $arg->getId() && $firstMessage->getId()
                 && $arg->getContent() && $firstMessage->getContent())
             ->once()
             ->andReturn();
 
         $listener->shouldReceive('handle')
-            ->withArgs(static fn($arg): bool => $arg instanceof ReceivedMessage
+            ->withArgs(static fn ($arg): bool => $arg instanceof ReceivedMessage
                 && $arg->getId() && $secondMessage->getId()
                 && $arg->getContent() && $secondMessage->getContent())
             ->once()
@@ -146,7 +146,7 @@ class FailedMessagesHandlerTest extends TestCase
 
         $listener = $this->mock(LocalListener::class);
         $listener->shouldReceive('handle')
-            ->withArgs(static fn($arg): bool => $arg instanceof ReceivedMessage
+            ->withArgs(static fn ($arg): bool => $arg instanceof ReceivedMessage
                 && $arg->getId() && $message->getId()
                 && $arg->getContent() && $message->getContent())
             ->once()

@@ -19,6 +19,13 @@ class Stream
     final public const NEW_ENTRIES = '$';
     final public const FROM_START = '0';
 
+    /**
+     * Stream constructor.
+     */
+    public function __construct(public readonly string $name)
+    {
+    }
+
     public function getName(): string
     {
         return $this->name;
@@ -27,13 +34,6 @@ class Stream
     public function getNewEntriesKey(): string
     {
         return self::NEW_ENTRIES;
-    }
-
-    /**
-     * Stream constructor.
-     */
-    public function __construct(public readonly string $name)
-    {
     }
 
     public function add(StreamableMessage $message, string $id = '*'): string

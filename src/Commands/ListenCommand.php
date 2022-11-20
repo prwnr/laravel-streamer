@@ -117,6 +117,65 @@ class ListenCommand extends Command
     }
 
     /**
+     * @inheritDoc
+     */
+    protected function getArguments(): array
+    {
+        return [
+            [
+                'events',
+                InputArgument::OPTIONAL,
+                'Name (or names separated by comma) of an event(s) that should be listened to',
+            ],
+        ];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getOptions(): array
+    {
+        return [
+            [
+                'all', null, InputOption::VALUE_NONE,
+                'Will start listening to all events that are registered in Listeners Stack. Will override usage of "events" argument',
+            ],
+            [
+                'group', null, InputOption::VALUE_REQUIRED,
+                'Name of your streaming group. Only when group is provided listener will listen on group as consumer',
+            ],
+            [
+                'consumer', null, InputOption::VALUE_REQUIRED,
+                'Name of your group consumer. If not provided a name will be created as groupname-timestamp',
+            ],
+            [
+                'reclaim', null, InputOption::VALUE_REQUIRED,
+                'Milliseconds of pending messages idle time, that should be reclaimed for current consumer in this group. Can be only used with group listening',
+            ],
+            [
+                'last_id', null, InputOption::VALUE_REQUIRED,
+                'ID from which listener should start reading messages',
+            ],
+            [
+                'keep-alive', null, InputOption::VALUE_NONE,
+                'Will keep listener alive when any unexpected non-listener related error will occur by simply restarting listening.',
+            ],
+            [
+                'max-attempts', null, InputOption::VALUE_REQUIRED,
+                'Number of maximum attempts to restart a listener on an unexpected non-listener related error',
+            ],
+            [
+                'purge', null, InputOption::VALUE_NONE,
+                'Will remove message from the stream if it will be processed successfully by all listeners in the current stack.',
+            ],
+            [
+                'archive', null, InputOption::VALUE_NONE,
+                'Will remove message from the stream and store it in database if it will be processed successfully by all listeners in the current stack.',
+            ],
+        ];
+    }
+
+    /**
      * @throws Throwable
      */
     private function listen(array $events, callable $handler): void
@@ -253,64 +312,5 @@ class ListenCommand extends Command
             $listener,
             $e->getMessage()
         ));
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function getArguments(): array
-    {
-        return [
-            [
-                'events',
-                InputArgument::OPTIONAL,
-                'Name (or names separated by comma) of an event(s) that should be listened to'
-            ],
-        ];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function getOptions(): array
-    {
-        return [
-            [
-                'all', null, InputOption::VALUE_NONE,
-                'Will start listening to all events that are registered in Listeners Stack. Will override usage of "events" argument'
-            ],
-            [
-                'group', null, InputOption::VALUE_REQUIRED,
-                'Name of your streaming group. Only when group is provided listener will listen on group as consumer'
-            ],
-            [
-                'consumer', null, InputOption::VALUE_REQUIRED,
-                'Name of your group consumer. If not provided a name will be created as groupname-timestamp'
-            ],
-            [
-                'reclaim', null, InputOption::VALUE_REQUIRED,
-                'Milliseconds of pending messages idle time, that should be reclaimed for current consumer in this group. Can be only used with group listening'
-            ],
-            [
-                'last_id', null, InputOption::VALUE_REQUIRED,
-                'ID from which listener should start reading messages'
-            ],
-            [
-                'keep-alive', null, InputOption::VALUE_NONE,
-                'Will keep listener alive when any unexpected non-listener related error will occur by simply restarting listening.'
-            ],
-            [
-                'max-attempts', null, InputOption::VALUE_REQUIRED,
-                'Number of maximum attempts to restart a listener on an unexpected non-listener related error'
-            ],
-            [
-                'purge', null, InputOption::VALUE_NONE,
-                'Will remove message from the stream if it will be processed successfully by all listeners in the current stack.'
-            ],
-            [
-                'archive', null, InputOption::VALUE_NONE,
-                'Will remove message from the stream and store it in database if it will be processed successfully by all listeners in the current stack.'
-            ],
-        ];
     }
 }
