@@ -16,6 +16,9 @@ class OtherBarStreamerEventStub implements Event
         return Event::TYPE_EVENT;
     }
 
+    /**
+     * @return array{other: string}
+     */
     public function payload(): array
     {
         return ['other' => 'bar'];

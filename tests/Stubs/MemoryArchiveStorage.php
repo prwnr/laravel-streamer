@@ -53,7 +53,7 @@ class MemoryArchiveStorage implements ArchiveStorage
     public function delete(string $event, string $id = null): int
     {
         if ($id === null && isset($this->items[$event])) {
-            $count = count($this->items[$event]);
+            $count = is_countable($this->items[$event]) ? count($this->items[$event]) : 0;
             unset($this->items[$event]);
 
             return $count;

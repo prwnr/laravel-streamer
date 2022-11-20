@@ -17,14 +17,9 @@ class MultiStream
 
     /** @var Collection&Stream[] */
     private readonly Collection $streams;
-
     private readonly string $consumer;
-
     private readonly string $group;
 
-    /**
-     * MultiStream constructor.
-     */
     public function __construct(array $streams, string $group = '', string $consumer = '')
     {
         $this->streams = new Collection();

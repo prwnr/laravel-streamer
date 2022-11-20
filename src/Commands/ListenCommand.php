@@ -15,9 +15,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Throwable;
 
-/**
- * Class ListenCommand.
- */
 class ListenCommand extends Command
 {
     /**
@@ -36,13 +33,6 @@ class ListenCommand extends Command
 
     private ?int $maxAttempts = null;
 
-    /**
-     * ListenCommand constructor.
-     *
-     * @param  Streamer  $streamer
-     * @param  MessagesFailer  $failer
-     * @param  Archiver  $archiver
-     */
     public function __construct(
         private readonly Streamer $streamer,
         private readonly MessagesFailer $failer,

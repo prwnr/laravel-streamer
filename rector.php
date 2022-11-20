@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
+use Rector\DeadCode\Rector\ClassMethod\RemoveUselessParamTagRector;
+use Rector\DeadCode\Rector\ClassMethod\RemoveUselessReturnTagRector;
 use Rector\Php80\Rector\FunctionLike\MixedTypeRector;
 use Rector\Php80\Rector\FunctionLike\UnionTypesRector;
 use Rector\Set\ValueObject\LevelSetList;
@@ -13,6 +15,7 @@ use Rector\TypeDeclaration\Rector\Property\PropertyTypeDeclarationRector;
 return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->paths([
         __DIR__.'/src',
+        __DIR__.'/tests',
     ]);
 
     $rectorConfig->sets([
@@ -28,6 +31,8 @@ return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->rules([
         MixedTypeRector::class,
         UnionTypesRector::class,
+        RemoveUselessReturnTagRector::class,
+        RemoveUselessParamTagRector::class,
     ]);
 
     $rectorConfig->skip([

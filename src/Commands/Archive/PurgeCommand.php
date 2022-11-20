@@ -21,9 +21,6 @@ class PurgeCommand extends ProcessMessagesCommand
      */
     protected $description = 'Streamer Purge command, to purge stream messages.';
 
-    /**
-     * @inheritDoc
-     */
     protected function process(string $stream, string $id, array $message): void
     {
         try {

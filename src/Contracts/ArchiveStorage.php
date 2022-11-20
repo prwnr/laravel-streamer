@@ -9,8 +9,6 @@ interface ArchiveStorage
 {
     /**
      * Stores message in storage.
-     *
-     * @param  Message  $message
      */
     public function create(Message $message): void;
 
@@ -35,7 +33,6 @@ interface ArchiveStorage
     /**
      * Deletes message from the storage.
      *
-     * @param  string  $event
      * @param  string|null  $id  without ID being passed, all messages of a given event should be deleted.
      * @return int count of deleted messages
      */

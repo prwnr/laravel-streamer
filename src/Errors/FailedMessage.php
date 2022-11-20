@@ -8,16 +8,10 @@ use Prwnr\Streamer\Exceptions\MessageRetryFailedException;
 use Prwnr\Streamer\Stream;
 use Prwnr\Streamer\Stream\Range;
 
-/**
- * Class FailedMessage
- */
 class FailedMessage implements JsonSerializable
 {
     public readonly string $date;
 
-    /**
-     * FailedMessage constructor.
-     */
     public function __construct(
         public readonly string $id,
         public readonly string $stream,

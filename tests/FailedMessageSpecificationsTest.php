@@ -34,7 +34,9 @@ class FailedMessageSpecificationsTest extends \PHPUnit\Framework\TestCase
         $specification = new ReceiverSpecification(LocalListener::class);
 
         $this->assertTrue($specification->isSatisfiedBy($this->makeMessage(['receiver' => LocalListener::class])));
-        $this->assertFalse($specification->isSatisfiedBy($this->makeMessage(['receiver' => AnotherLocalListener::class])));
+        $this->assertFalse(
+            $specification->isSatisfiedBy($this->makeMessage(['receiver' => AnotherLocalListener::class]))
+        );
     }
 
     public function test_match_all_specification_combined(): void

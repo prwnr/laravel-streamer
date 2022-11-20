@@ -8,9 +8,6 @@ use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\Stream\Range;
 use RedisException;
 
-/**
- * Class Stream.
- */
 class Stream
 {
     use ConnectsWithRedis;

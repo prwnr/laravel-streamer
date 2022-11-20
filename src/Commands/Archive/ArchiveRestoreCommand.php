@@ -30,9 +30,6 @@ class ArchiveRestoreCommand extends Command
 
     /**
      * ArchiveRestoreCommand constructor.
-     *
-     * @param  Archiver  $archiver
-     * @param  StorageManager  $manager
      */
     public function __construct(private readonly Archiver $archiver, StorageManager $manager)
     {

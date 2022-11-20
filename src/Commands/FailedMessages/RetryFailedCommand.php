@@ -36,13 +36,6 @@ class RetryFailedCommand extends Command
         'stream' => StreamSpecification::class,
     ];
 
-    /**
-     * RetryFailedCommand constructor.
-     *
-     * @param  Repository  $repository
-     * @param  MessagesFailer  $failer
-     * @param  Archiver  $archiver
-     */
     public function __construct(
         private readonly Repository $repository,
         private readonly MessagesFailer $failer,

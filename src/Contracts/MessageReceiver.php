@@ -4,9 +4,6 @@ namespace Prwnr\Streamer\Contracts;
 
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 
-/**
- * Interface MessageReceiver
- */
 interface MessageReceiver
 {
     /**

@@ -6,9 +6,6 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Carbon;
 use Prwnr\Streamer\Contracts\Replayable;
 
-/**
- * Class Snapshot
- */
 class Snapshot implements Arrayable
 {
     final public const KEY_SEPARATOR = '-';

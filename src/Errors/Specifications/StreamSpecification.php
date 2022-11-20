@@ -7,9 +7,6 @@ use Prwnr\Streamer\Errors\FailedMessage;
 
 class StreamSpecification implements Specification
 {
-    /**
-     * StreamSpecification constructor.
-     */
     public function __construct(private readonly string $stream)
     {
     }

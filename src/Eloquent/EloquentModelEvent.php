@@ -4,14 +4,8 @@ namespace Prwnr\Streamer\Eloquent;
 
 use Prwnr\Streamer\Contracts\Event;
 
-/**
- * Class EloquentModelEvent.
- */
 class EloquentModelEvent implements Event
 {
-    /**
-     * EloquentModelEvent constructor.
-     */
     public function __construct(private readonly string $name, private readonly array $payload)
     {
     }

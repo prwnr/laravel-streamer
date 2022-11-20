@@ -70,7 +70,9 @@ class ListenCommandTest extends TestCase
         Streamer::emit($this->makeEvent());
 
         $this->artisan('streamer:listen', ['events' => 'foo.bar', '--last_id' => '0-0'])
-            ->expectsOutput(sprintf('Listener class [%s] needs to implement MessageReceiver', NotReceiverListener::class))
+            ->expectsOutput(
+                sprintf('Listener class [%s] needs to implement MessageReceiver', NotReceiverListener::class)
+            )
             ->assertExitCode(0);
     }
 
@@ -120,14 +122,18 @@ class ListenCommandTest extends TestCase
 
         $this->expectsListenersToBeCalled($listeners);
         $this->artisan('streamer:listen', ['events' => 'foo.bar', '--last_id' => '0-0'])
-            ->expectsOutput(sprintf(
-                "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
-                LocalListener::class
-            ))
-            ->expectsOutput(sprintf(
-                "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
-                AnotherLocalListener::class
-            ))
+            ->expectsOutput(
+                sprintf(
+                    "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                    LocalListener::class
+                )
+            )
+            ->expectsOutput(
+                sprintf(
+                    "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                    AnotherLocalListener::class
+                )
+            )
             ->assertExitCode(0);
     }
 
@@ -152,23 +158,30 @@ class ListenCommandTest extends TestCase
         ]);
 
         $this->artisan('streamer:listen', ['--all' => true, '--last_id' => '0-0'])
-            ->expectsOutput(sprintf(
-                "Processed message [$fooId] on 'foo.bar' stream by [%s] listener.",
-                LocalListener::class
-            ))
-            ->expectsOutput(sprintf(
-                "Processed message [$fooId] on 'foo.bar' stream by [%s] listener.",
-                AnotherLocalListener::class
-            ))
-            ->expectsOutput(sprintf(
-                "Processed message [$otherId] on 'other.bar' stream by [%s] listener.",
-                LocalListener::class
-            ))
+            ->expectsOutput(
+                sprintf(
+                    "Processed message [$fooId] on 'foo.bar' stream by [%s] listener.",
+                    LocalListener::class
+                )
+            )
+            ->expectsOutput(
+                sprintf(
+                    "Processed message [$fooId] on 'foo.bar' stream by [%s] listener.",
+                    AnotherLocalListener::class
+                )
+            )
+            ->expectsOutput(
+                sprintf(
+                    "Processed message [$otherId] on 'other.bar' stream by [%s] listener.",
+                    LocalListener::class
+                )
+            )
             ->assertExitCode(0);
     }
 
     public function test_command_called_with_events_while_one_of_them_throws_exception_and_stores_failed_messages_info(
-    ): void {
+    ): void
+    {
         $listeners = [
             ExceptionalListener::class,
             LocalListener::class,
@@ -187,10 +200,12 @@ class ListenCommandTest extends TestCase
 
         $this->artisan('streamer:listen', ['events' => 'foo.bar', '--last_id' => '0-0'])
             ->expectsOutput($printError)
-            ->expectsOutput(sprintf(
-                "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
-                LocalListener::class
-            ))
+            ->expectsOutput(
+                sprintf(
+                    "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                    LocalListener::class
+                )
+            )
             ->assertExitCode(0);
 
         $repository = new MessagesRepository();
@@ -369,7 +384,8 @@ class ListenCommandTest extends TestCase
     }
 
     public function test_command_is_kept_alive_when_unexpected_non_listener_exception_occurs_with_maximum_attempts_limit(
-    ): void {
+    ): void
+    {
         $this->withLocalListenersConfigured([LocalListener::class]);
 
         $mock = $this->mock(\Prwnr\Streamer\EventDispatcher\Streamer::class);
@@ -399,14 +415,18 @@ class ListenCommandTest extends TestCase
 
         $this->expectsListenersToBeCalled($listeners);
         $this->artisan('streamer:listen', ['events' => 'foo.bar', '--last_id' => '0-0', '--purge' => true])
-            ->expectsOutput(sprintf(
-                "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
-                LocalListener::class
-            ))
-            ->expectsOutput(sprintf(
-                "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
-                AnotherLocalListener::class
-            ))
+            ->expectsOutput(
+                sprintf(
+                    "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                    LocalListener::class
+                )
+            )
+            ->expectsOutput(
+                sprintf(
+                    "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                    AnotherLocalListener::class
+                )
+            )
             ->expectsOutput("Message [$id] has been purged from the 'foo.bar' stream.")
             ->assertExitCode(0);
 
@@ -434,10 +454,12 @@ class ListenCommandTest extends TestCase
 
         $this->artisan('streamer:listen', ['events' => 'foo.bar', '--last_id' => '0-0', '--purge' => true])
             ->expectsOutput($printError)
-            ->expectsOutput(sprintf(
-                "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
-                LocalListener::class
-            ))
+            ->expectsOutput(
+                sprintf(
+                    "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                    LocalListener::class
+                )
+            )
             ->assertExitCode(0);
 
         $repository = new MessagesRepository();
@@ -448,7 +470,8 @@ class ListenCommandTest extends TestCase
     }
 
     public function test_command_called_with_archive_will_delete_messages_from_stream_and_store_in_different_storage(
-    ): void {
+    ): void
+    {
         $listeners = [
             LocalListener::class,
             AnotherLocalListener::class,
@@ -459,14 +482,18 @@ class ListenCommandTest extends TestCase
 
         $this->expectsListenersToBeCalled($listeners);
         $this->artisan('streamer:listen', ['events' => 'foo.bar', '--last_id' => '0-0', '--archive' => true])
-            ->expectsOutput(sprintf(
-                "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
-                LocalListener::class
-            ))
-            ->expectsOutput(sprintf(
-                "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
-                AnotherLocalListener::class
-            ))
+            ->expectsOutput(
+                sprintf(
+                    "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                    LocalListener::class
+                )
+            )
+            ->expectsOutput(
+                sprintf(
+                    "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                    AnotherLocalListener::class
+                )
+            )
             ->expectsOutput("Message [$id] has been archived from the 'foo.bar' stream.")
             ->assertExitCode(0);
 
@@ -494,15 +521,21 @@ class ListenCommandTest extends TestCase
 
         $this->expectsListenersToBeCalled($listeners);
         $this->artisan('streamer:listen', ['events' => 'foo.bar', '--last_id' => '0-0', '--archive' => true])
-            ->expectsOutput(sprintf(
-                "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
-                LocalListener::class
-            ))
-            ->expectsOutput(sprintf(
-                "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
-                AnotherLocalListener::class
-            ))
-            ->expectsOutput("Message [$id] from the 'foo.bar' stream could not be archived. Error: Something went wrong")
+            ->expectsOutput(
+                sprintf(
+                    "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                    LocalListener::class
+                )
+            )
+            ->expectsOutput(
+                sprintf(
+                    "Processed message [$id] on 'foo.bar' stream by [%s] listener.",
+                    AnotherLocalListener::class
+                )
+            )
+            ->expectsOutput(
+                "Message [$id] from the 'foo.bar' stream could not be archived. Error: Something went wrong"
+            )
             ->assertExitCode(0);
 
         $stream = new Stream('foo.bar');

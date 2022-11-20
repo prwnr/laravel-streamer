@@ -5,9 +5,6 @@ namespace Prwnr\Streamer\EventDispatcher;
 use JsonException;
 use Prwnr\Streamer\Contracts\Event;
 
-/**
- * Class Message.
- */
 class Message extends StreamMessage
 {
     /**
@@ -19,8 +16,6 @@ class Message extends StreamMessage
     }
 
     /**
-     * Message constructor.
-     *
      * @throws JsonException
      */
     public function __construct(array $meta, array $data)

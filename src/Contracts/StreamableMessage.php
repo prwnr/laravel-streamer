@@ -2,9 +2,6 @@
 
 namespace Prwnr\Streamer\Contracts;
 
-/**
- * Interface StreamableMessage.
- */
 interface StreamableMessage
 {
     /**

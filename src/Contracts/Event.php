@@ -2,9 +2,6 @@
 
 namespace Prwnr\Streamer\Contracts;
 
-/**
- * Interface Event.
- */
 interface Event
 {
     final public const TYPE_EVENT = 'event';

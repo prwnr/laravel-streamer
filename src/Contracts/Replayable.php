@@ -2,9 +2,6 @@
 
 namespace Prwnr\Streamer\Contracts;
 
-/**
- * Interface Replayable
- */
 interface Replayable
 {
     /**

@@ -5,9 +5,6 @@ namespace Prwnr\Streamer\Contracts;
 use Carbon\Carbon;
 use Prwnr\Streamer\History\Snapshot;
 
-/**
- * Interface History
- */
 interface History
 {
     /**

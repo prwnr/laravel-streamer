@@ -26,7 +26,7 @@ class MessagesRepository implements Repository
         $decode = static fn ($item): array => array_values(json_decode((string) $item, true, 512, JSON_THROW_ON_ERROR));
 
         return collect($elements)
-            ->map(static fn ($item): \Prwnr\Streamer\Errors\FailedMessage => new FailedMessage(...$decode($item)))
+            ->map(static fn ($item): FailedMessage => new FailedMessage(...$decode($item)))
             ->sortBy(static fn (FailedMessage $message): string => $message->date);
     }
 

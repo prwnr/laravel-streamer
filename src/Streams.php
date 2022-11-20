@@ -5,16 +5,11 @@ namespace Prwnr\Streamer;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\StreamableMessage;
 
-/**
- * Class Streams.
- */
 class Streams
 {
     use ConnectsWithRedis;
 
     /**
-     * Streams constructor.
-     *
      * @param  array<int, string>  $streams
      */
     public function __construct(private readonly array $streams)

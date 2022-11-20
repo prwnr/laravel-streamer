@@ -22,11 +22,6 @@ class ArchiveCommand extends ProcessMessagesCommand
      */
     protected $description = 'Streamer Archive command, to archive stream messages, by removing them from stream and storing in other database storage.';
 
-    /**
-     * ArchiveCommand constructor.
-     *
-     * @param  Archiver  $archiver
-     */
     public function __construct(private readonly Archiver $archiver)
     {
         parent::__construct();

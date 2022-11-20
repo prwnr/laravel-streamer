@@ -6,18 +6,12 @@ use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Exceptions\AcknowledgingFailedException;
 use Prwnr\Streamer\Stream;
 
-/**
- * Class Consumer.
- */
 class Consumer
 {
     use ConnectsWithRedis;
 
     final public const NEW_ENTRIES = '>';
 
-    /**
-     * Consumer constructor.
-     */
     public function __construct(
         private readonly string $consumer,
         private readonly Stream $stream,

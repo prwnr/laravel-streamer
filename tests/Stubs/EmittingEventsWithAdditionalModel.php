@@ -12,7 +12,8 @@ class EmittingEventsWithAdditionalModel extends Model
     protected array $additional;
 
     protected $fillable = [
-        'foo', 'id',
+        'foo',
+        'id',
     ];
 
     public function __construct(array $attributes = [])
@@ -21,6 +22,9 @@ class EmittingEventsWithAdditionalModel extends Model
         parent::__construct($attributes);
     }
 
+    /**
+     * @param  mixed[]  $data
+     */
     public function setAdditionalPayloadData(array $data): void
     {
         $this->additional = $data;

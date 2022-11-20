@@ -18,11 +18,6 @@ class FlushFailedCommand extends Command
      */
     protected $description = 'Deletes all failed stream messages.';
 
-    /**
-     * FailedListCommand constructor.
-     *
-     * @param  Repository  $repository
-     */
     public function __construct(private readonly Repository $repository)
     {
         parent::__construct();

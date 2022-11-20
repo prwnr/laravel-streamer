@@ -8,9 +8,6 @@ use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Contracts\History;
 use Prwnr\Streamer\Stream;
 
-/**
- * Class EventHistory
- */
 class EventHistory implements History
 {
     use ConnectsWithRedis;

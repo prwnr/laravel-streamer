@@ -7,9 +7,6 @@ use Prwnr\Streamer\Commands\Enums\ListCommandHeaders;
 use Prwnr\Streamer\ListenersStack;
 use Symfony\Component\Console\Input\InputOption;
 
-/**
- * Class ListCommand
- */
 class ListCommand extends Command
 {
     /**

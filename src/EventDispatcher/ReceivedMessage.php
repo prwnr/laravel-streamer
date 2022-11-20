@@ -4,14 +4,9 @@ namespace Prwnr\Streamer\EventDispatcher;
 
 use JsonException;
 
-/**
- * Class ReceivedMessage.
- */
 class ReceivedMessage extends StreamMessage
 {
     /**
-     * ReceivedMessage constructor.
-     *
      * @throws JsonException
      */
     public function __construct(string $id, array $content)

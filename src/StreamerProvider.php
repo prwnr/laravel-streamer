@@ -23,9 +23,6 @@ use Prwnr\Streamer\Errors\MessagesRepository;
 use Prwnr\Streamer\EventDispatcher\Streamer;
 use Prwnr\Streamer\History\EventHistory;
 
-/**
- * Class StreamerProvider.
- */
 class StreamerProvider extends ServiceProvider
 {
     /**

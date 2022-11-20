@@ -12,9 +12,6 @@ class Range
     final public const FORWARD = 1;
     final public const BACKWARD = 2;
 
-    /**
-     * Range constructor.
-     */
     public function __construct(
         public readonly string $start = self::FIRST,
         public readonly string $stop = self::LAST,

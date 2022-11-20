@@ -15,9 +15,6 @@ use Prwnr\Streamer\History\Snapshot;
 use Prwnr\Streamer\Stream;
 use Throwable;
 
-/**
- * Class Streamer.
- */
 class Streamer implements Emitter, Listener
 {
     protected string $startFrom;

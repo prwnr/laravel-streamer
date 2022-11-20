@@ -16,6 +16,9 @@ class FooBarStreamerEventStub implements Event
         return Event::TYPE_EVENT;
     }
 
+    /**
+     * @return array{foo: string}
+     */
     public function payload(): array
     {
         return ['foo' => 'bar'];

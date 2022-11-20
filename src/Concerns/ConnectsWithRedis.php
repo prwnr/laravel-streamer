@@ -5,9 +5,6 @@ namespace Prwnr\Streamer\Concerns;
 use Illuminate\Redis\Connections\Connection;
 use Illuminate\Support\Facades\Redis;
 
-/**
- * Trait ConnectsWithRedis.
- */
 trait ConnectsWithRedis
 {
     /**

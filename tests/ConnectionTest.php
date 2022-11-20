@@ -29,13 +29,12 @@ class ConnectionTest extends TestCase
         $foo = new class () {
             use ConnectsWithRedis;
 
-            public function bar()
+            public function bar(): Connection
             {
                 return $this->redis();
             }
         };
 
-        $this->assertInstanceOf(Connection::class, $foo->bar());
         $this->assertInstanceOf(Redis::class, $foo->bar()->client());
         $this->assertEquals('default', $foo->bar()->getName());
     }
@@ -47,13 +46,12 @@ class ConnectionTest extends TestCase
         $foo = new class () {
             use ConnectsWithRedis;
 
-            public function bar()
+            public function bar(): Connection
             {
                 return $this->redis();
             }
         };
 
-        $this->assertInstanceOf(Connection::class, $foo->bar());
         $this->assertInstanceOf(Redis::class, $foo->bar()->client());
         $this->assertEquals('custom', $foo->bar()->getName());
     }
@@ -65,13 +63,12 @@ class ConnectionTest extends TestCase
         $foo = new class () {
             use ConnectsWithRedis;
 
-            public function bar()
+            public function bar(): Connection
             {
                 return $this->redis();
             }
         };
 
-        $this->assertInstanceOf(Connection::class, $foo->bar());
         $this->assertInstanceOf(Redis::class, $foo->bar()->client());
         $this->assertIsString($foo->bar()->XADD('foobar', '*', ['key' => 'value']));
         $this->assertEquals(1, $foo->bar()->XLEN('foobar'));

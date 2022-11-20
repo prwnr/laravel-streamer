@@ -49,21 +49,34 @@ class ProcessMessagesCommandsTest extends TestCase
     public function test_archives_messages_from_one_stream(): void
     {
         $stream = new Stream('foo.bar');
-        $stream->add(new Message(
-            ['name' => 'foo.bar', 'created' => Carbon::create('-10 days')->timestamp],
-            ['foo' => 'first']
-        ), '123');
-        $stream->add(new Message(
-            ['name' => 'foo.bar', 'created' => Carbon::create('-5 days')->timestamp],
-            ['foo' => 'second']
-        ), '234');
-        $stream->add(new Message([
-            'name' => 'foo.bar', 'created' => Carbon::create('-3 days')->addSeconds(10)->timestamp,
-        ], ['foo' => 'third']), '345');
-        $stream->add(new Message(
-            ['name' => 'foo.bar', 'created' => Carbon::create('-1 days')->timestamp],
-            ['foo' => 'fourth']
-        ), '456');
+        $stream->add(
+            new Message(
+                ['name' => 'foo.bar', 'created' => Carbon::create('-10 days')->timestamp],
+                ['foo' => 'first']
+            ),
+            '123'
+        );
+        $stream->add(
+            new Message(
+                ['name' => 'foo.bar', 'created' => Carbon::create('-5 days')->timestamp],
+                ['foo' => 'second']
+            ),
+            '234'
+        );
+        $stream->add(
+            new Message([
+                'name' => 'foo.bar',
+                'created' => Carbon::create('-3 days')->addSeconds(10)->getTimestamp(),
+            ], ['foo' => 'third']),
+            '345'
+        );
+        $stream->add(
+            new Message(
+                ['name' => 'foo.bar', 'created' => Carbon::create('-1 days')->timestamp],
+                ['foo' => 'fourth']
+            ),
+            '456'
+        );
 
         $this->assertCount(4, $stream->read()['foo.bar']);
 
@@ -92,24 +105,36 @@ class ProcessMessagesCommandsTest extends TestCase
     public function test_archives_messages_from_multiple_streams(): void
     {
         $streamA = new Stream('foo.barA');
-        $streamA->add(new Message(
-            ['name' => 'foo.barA', 'created' => Carbon::create('-5 days')->timestamp],
-            ['foo' => 'first']
-        ), '123');
-        $streamA->add(new Message(
-            ['name' => 'foo.barA', 'created' => Carbon::create('-1 days')->timestamp],
-            ['foo' => 'second']
-        ), '234');
+        $streamA->add(
+            new Message(
+                ['name' => 'foo.barA', 'created' => Carbon::create('-5 days')->timestamp],
+                ['foo' => 'first']
+            ),
+            '123'
+        );
+        $streamA->add(
+            new Message(
+                ['name' => 'foo.barA', 'created' => Carbon::create('-1 days')->timestamp],
+                ['foo' => 'second']
+            ),
+            '234'
+        );
 
         $streamB = new Stream('foo.barB');
-        $streamB->add(new Message(
-            ['name' => 'foo.barB', 'created' => Carbon::create('-5 days')->timestamp],
-            ['foo' => 'first']
-        ), '123');
-        $streamB->add(new Message(
-            ['name' => 'foo.barB', 'created' => Carbon::create('-1 days')->timestamp],
-            ['foo' => 'second']
-        ), '234');
+        $streamB->add(
+            new Message(
+                ['name' => 'foo.barB', 'created' => Carbon::create('-5 days')->timestamp],
+                ['foo' => 'first']
+            ),
+            '123'
+        );
+        $streamB->add(
+            new Message(
+                ['name' => 'foo.barB', 'created' => Carbon::create('-1 days')->timestamp],
+                ['foo' => 'second']
+            ),
+            '234'
+        );
 
         $this->assertCount(2, $streamA->read()['foo.barA']);
         $this->assertCount(2, $streamB->read()['foo.barB']);
@@ -140,10 +165,13 @@ class ProcessMessagesCommandsTest extends TestCase
     public function test_fails_to_archive_message(): void
     {
         $stream = new Stream('foo.bar');
-        $stream->add(new Message(
-            ['name' => 'foo.bar', 'created' => Carbon::create('-10 days')->timestamp],
-            ['foo' => 'first']
-        ), '123');
+        $stream->add(
+            new Message(
+                ['name' => 'foo.bar', 'created' => Carbon::create('-10 days')->timestamp],
+                ['foo' => 'first']
+            ),
+            '123'
+        );
 
         $this->assertCount(1, $stream->read()['foo.bar']);
 
@@ -171,21 +199,34 @@ class ProcessMessagesCommandsTest extends TestCase
     public function test_purges_messages_from_one_stream(): void
     {
         $stream = new Stream('foo.bar');
-        $stream->add(new Message(
-            ['name' => 'foo.bar', 'created' => Carbon::create('-10 days')->timestamp],
-            ['foo' => 'first']
-        ), '123');
-        $stream->add(new Message(
-            ['name' => 'foo.bar', 'created' => Carbon::create('-5 days')->timestamp],
-            ['foo' => 'second']
-        ), '234');
-        $stream->add(new Message([
-            'name' => 'foo.bar', 'created' => Carbon::create('-3 days')->addSeconds(10)->timestamp,
-        ], ['foo' => 'third']), '345');
-        $stream->add(new Message(
-            ['name' => 'foo.bar', 'created' => Carbon::create('-1 days')->timestamp],
-            ['foo' => 'fourth']
-        ), '456');
+        $stream->add(
+            new Message(
+                ['name' => 'foo.bar', 'created' => Carbon::create('-10 days')->timestamp],
+                ['foo' => 'first']
+            ),
+            '123'
+        );
+        $stream->add(
+            new Message(
+                ['name' => 'foo.bar', 'created' => Carbon::create('-5 days')->timestamp],
+                ['foo' => 'second']
+            ),
+            '234'
+        );
+        $stream->add(
+            new Message([
+                'name' => 'foo.bar',
+                'created' => Carbon::create('-3 days')->addSeconds(10)->getTimestamp(),
+            ], ['foo' => 'third']),
+            '345'
+        );
+        $stream->add(
+            new Message(
+                ['name' => 'foo.bar', 'created' => Carbon::create('-1 days')->timestamp],
+                ['foo' => 'fourth']
+            ),
+            '456'
+        );
 
         $this->assertCount(4, $stream->read()['foo.bar']);
 
@@ -212,24 +253,36 @@ class ProcessMessagesCommandsTest extends TestCase
     public function test_purges_messages_from_multiple_streams(): void
     {
         $streamA = new Stream('foo.barA');
-        $streamA->add(new Message(
-            ['name' => 'foo.barA', 'created' => Carbon::create('-5 days')->timestamp],
-            ['foo' => 'first']
-        ), '123');
-        $streamA->add(new Message(
-            ['name' => 'foo.barA', 'created' => Carbon::create('-1 days')->timestamp],
-            ['foo' => 'second']
-        ), '234');
+        $streamA->add(
+            new Message(
+                ['name' => 'foo.barA', 'created' => Carbon::create('-5 days')->timestamp],
+                ['foo' => 'first']
+            ),
+            '123'
+        );
+        $streamA->add(
+            new Message(
+                ['name' => 'foo.barA', 'created' => Carbon::create('-1 days')->timestamp],
+                ['foo' => 'second']
+            ),
+            '234'
+        );
 
         $streamB = new Stream('foo.barB');
-        $streamB->add(new Message(
-            ['name' => 'foo.barB', 'created' => Carbon::create('-5 days')->timestamp],
-            ['foo' => 'first']
-        ), '123');
-        $streamB->add(new Message(
-            ['name' => 'foo.barB', 'created' => Carbon::create('-1 days')->timestamp],
-            ['foo' => 'second']
-        ), '234');
+        $streamB->add(
+            new Message(
+                ['name' => 'foo.barB', 'created' => Carbon::create('-5 days')->timestamp],
+                ['foo' => 'first']
+            ),
+            '123'
+        );
+        $streamB->add(
+            new Message(
+                ['name' => 'foo.barB', 'created' => Carbon::create('-1 days')->timestamp],
+                ['foo' => 'second']
+            ),
+            '234'
+        );
 
         $this->assertCount(2, $streamA->read()['foo.barA']);
         $this->assertCount(2, $streamB->read()['foo.barB']);

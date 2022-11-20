@@ -32,20 +32,26 @@ class ReplayStreamTest extends TestCase
         $recorder = new EventHistory();
         $streamer = new Streamer($recorder);
 
-        $streamer->emit(new ReplayableFooBarEvent('123', [
-            'foo' => 'foo initial',
-            'bar' => 'bar initial',
-        ]));
+        $streamer->emit(
+            new ReplayableFooBarEvent('123', [
+                'foo' => 'foo initial',
+                'bar' => 'bar initial',
+            ])
+        );
 
-        $streamer->emit(new ReplayableFooBarEvent('123', [
-            'foo' => 'changed',
-            'new bar' => true,
-        ]));
+        $streamer->emit(
+            new ReplayableFooBarEvent('123', [
+                'foo' => 'changed',
+                'new bar' => true,
+            ])
+        );
 
-        $streamer->emit(new ReplayableFooBarEvent('123', [
-            'foo' => 'changed again',
-            'bar' => 'different value',
-        ]));
+        $streamer->emit(
+            new ReplayableFooBarEvent('123', [
+                'foo' => 'changed again',
+                'bar' => 'different value',
+            ])
+        );
 
         $payload = $recorder->replay('foo.bar', '123');
 
@@ -61,23 +67,29 @@ class ReplayStreamTest extends TestCase
         $recorder = new EventHistory();
         $streamer = new Streamer($recorder);
 
-        $streamer->emit(new ReplayableFooBarEvent('123', [
-            'foo' => 'foo initial',
-            'bar' => 'bar initial',
-        ]));
+        $streamer->emit(
+            new ReplayableFooBarEvent('123', [
+                'foo' => 'foo initial',
+                'bar' => 'bar initial',
+            ])
+        );
 
-        $streamer->emit(new ReplayableFooBarEvent('123', [
-            'foo' => 'changed',
-            'new bar' => true,
-        ]));
+        $streamer->emit(
+            new ReplayableFooBarEvent('123', [
+                'foo' => 'changed',
+                'new bar' => true,
+            ])
+        );
 
         $until = Carbon::now();
         sleep(2);
 
-        $streamer->emit(new ReplayableFooBarEvent('123', [
-            'foo' => 'changed again',
-            'bar' => 'different value',
-        ]));
+        $streamer->emit(
+            new ReplayableFooBarEvent('123', [
+                'foo' => 'changed again',
+                'bar' => 'different value',
+            ])
+        );
 
         $payload = $recorder->replay('foo.bar', '123', $until);
 
@@ -93,24 +105,32 @@ class ReplayStreamTest extends TestCase
         $recorder = new EventHistory();
         $streamer = new Streamer($recorder);
 
-        $streamer->emit(new ReplayableFooBarEvent('123', [
-            'foo' => 'foo',
-            'bar' => 'bar',
-        ]));
+        $streamer->emit(
+            new ReplayableFooBarEvent('123', [
+                'foo' => 'foo',
+                'bar' => 'bar',
+            ])
+        );
 
-        $streamer->emit(new ReplayableOtherFooBarEvent('123', [
-            'other_foo' => 'foo',
-            'other_bar' => 'bar',
-        ]));
+        $streamer->emit(
+            new ReplayableOtherFooBarEvent('123', [
+                'other_foo' => 'foo',
+                'other_bar' => 'bar',
+            ])
+        );
 
         for ($i = 0; $i < 10; $i++) {
-            $streamer->emit(new ReplayableFooBarEvent('123', [
-                'foo' => 'foo'.$i,
-            ]));
+            $streamer->emit(
+                new ReplayableFooBarEvent('123', [
+                    'foo' => 'foo'.$i,
+                ])
+            );
 
-            $streamer->emit(new ReplayableOtherFooBarEvent('123', [
-                'other_bar' => 'bar'.$i,
-            ]));
+            $streamer->emit(
+                new ReplayableOtherFooBarEvent('123', [
+                    'other_bar' => 'bar'.$i,
+                ])
+            );
         }
 
         $this->assertEquals([
@@ -129,23 +149,29 @@ class ReplayStreamTest extends TestCase
         $recorder = new EventHistory();
         $streamer = new Streamer($recorder);
 
-        $streamer->emit(new ReplayableFooBarEvent('123', [
-            'foo' => 'foo',
-            'bar' => 'bar',
-            'foobar' => 'foobar',
-        ]));
+        $streamer->emit(
+            new ReplayableFooBarEvent('123', [
+                'foo' => 'foo',
+                'bar' => 'bar',
+                'foobar' => 'foobar',
+            ])
+        );
 
         $modChange = 0;
         for ($i = 1; $i <= 1000; $i++) {
-            $streamer->emit(new ReplayableFooBarEvent('123', [
-                'foo' => 'foo-'.$i,
-            ]));
+            $streamer->emit(
+                new ReplayableFooBarEvent('123', [
+                    'foo' => 'foo-'.$i,
+                ])
+            );
 
             if (($i % 100) === 0) {
                 $modChange++;
-                $streamer->emit(new ReplayableFooBarEvent('123', [
-                    'foobar' => 'foobar-'.$modChange,
-                ]));
+                $streamer->emit(
+                    new ReplayableFooBarEvent('123', [
+                        'foobar' => 'foobar-'.$modChange,
+                    ])
+                );
             }
         }
 
@@ -161,21 +187,27 @@ class ReplayStreamTest extends TestCase
         $recorder = new EventHistory();
         $streamer = new Streamer($recorder);
 
-        $streamer->emit(new ReplayableFooBarEvent('123', [
-            'foo' => 'foo initial',
-            'bar' => 'bar initial',
-            'new bar' => false,
-        ]));
+        $streamer->emit(
+            new ReplayableFooBarEvent('123', [
+                'foo' => 'foo initial',
+                'bar' => 'bar initial',
+                'new bar' => false,
+            ])
+        );
 
-        $deleted = $streamer->emit(new ReplayableFooBarEvent('123', [
-            'foo' => 'changed',
-            'new bar' => true,
-        ]));
+        $deleted = $streamer->emit(
+            new ReplayableFooBarEvent('123', [
+                'foo' => 'changed',
+                'new bar' => true,
+            ])
+        );
 
-        $streamer->emit(new ReplayableFooBarEvent('123', [
-            'foo' => 'changed again',
-            'bar' => 'different value',
-        ]));
+        $streamer->emit(
+            new ReplayableFooBarEvent('123', [
+                'foo' => 'changed again',
+                'bar' => 'different value',
+            ])
+        );
 
         $stream = new Stream('foo.bar');
         $stream->delete($deleted);
@@ -192,14 +224,8 @@ class ReplayStreamTest extends TestCase
 
 abstract class StreamerReplayableEvent implements Event, Replayable
 {
-    protected $payload;
-
-    protected $id;
-
-    public function __construct(string $id, array $payload)
+    public function __construct(protected string $id, protected array $payload)
     {
-        $this->id = $id;
-        $this->payload = $payload;
     }
 
     public function name(): string

@@ -50,7 +50,7 @@ class FailedMessagesHandlerTest extends TestCase
         $this->assertNotEmpty($failed);
         $this->assertCount(1, $failed);
 
-        $actual = json_decode($failed[0], true, 512, JSON_THROW_ON_ERROR);
+        $actual = json_decode((string)$failed[0], true, 512, JSON_THROW_ON_ERROR);
         $this->assertEquals([
             'id' => $message->getId(),
             'stream' => 'foo.bar',
@@ -68,11 +68,9 @@ class FailedMessagesHandlerTest extends TestCase
 
         $listener = $this->mock(LocalListener::class);
         $listener->shouldReceive('handle')
-            ->withArgs(static function ($arg) use ($message) {
-                return $arg instanceof ReceivedMessage
-                    && $arg->getId() && $message->getId()
-                    && $arg->getContent() && $message->getContent();
-            })
+            ->withArgs(static fn($arg): bool => $arg instanceof ReceivedMessage
+                && $arg->getId() && $message->getId()
+                && $arg->getContent() && $message->getContent())
             ->once()
             ->andReturn();
 
@@ -90,20 +88,16 @@ class FailedMessagesHandlerTest extends TestCase
 
         $listener = $this->mock(LocalListener::class);
         $listener->shouldReceive('handle')
-            ->withArgs(static function ($arg) use ($firstMessage) {
-                return $arg instanceof ReceivedMessage
-                    && $arg->getId() && $firstMessage->getId()
-                    && $arg->getContent() && $firstMessage->getContent();
-            })
+            ->withArgs(static fn($arg): bool => $arg instanceof ReceivedMessage
+                && $arg->getId() && $firstMessage->getId()
+                && $arg->getContent() && $firstMessage->getContent())
             ->once()
             ->andReturn();
 
         $listener->shouldReceive('handle')
-            ->withArgs(static function ($arg) use ($secondMessage) {
-                return $arg instanceof ReceivedMessage
-                    && $arg->getId() && $secondMessage->getId()
-                    && $arg->getContent() && $secondMessage->getContent();
-            })
+            ->withArgs(static fn($arg): bool => $arg instanceof ReceivedMessage
+                && $arg->getId() && $secondMessage->getId()
+                && $arg->getContent() && $secondMessage->getContent())
             ->once()
             ->andReturn();
 
@@ -152,11 +146,9 @@ class FailedMessagesHandlerTest extends TestCase
 
         $listener = $this->mock(LocalListener::class);
         $listener->shouldReceive('handle')
-            ->withArgs(static function ($arg) use ($message) {
-                return $arg instanceof ReceivedMessage
-                    && $arg->getId() && $message->getId()
-                    && $arg->getContent() && $message->getContent();
-            })
+            ->withArgs(static fn($arg): bool => $arg instanceof ReceivedMessage
+                && $arg->getId() && $message->getId()
+                && $arg->getContent() && $message->getContent())
             ->once()
             ->andThrow(Exception::class, 'errored again');
 

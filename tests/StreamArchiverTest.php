@@ -118,7 +118,9 @@ class StreamArchiverTest extends TestCase
         $archiver = $this->app->make(StreamArchiver::class);
 
         $this->expectException(RestoringFailedException::class);
-        $this->expectExceptionMessage('Message was not deleted from the archive storage, message will not be restored.');
+        $this->expectExceptionMessage(
+            'Message was not deleted from the archive storage, message will not be restored.'
+        );
 
         $archiver->restore($message);
 

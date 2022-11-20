@@ -4,9 +4,7 @@ namespace Tests;
 
 use Exception;
 use Mockery;
-use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\MessageReceiver;
-use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\Errors\FailedMessagesHandler;
 use Prwnr\Streamer\EventDispatcher\Message;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
@@ -34,12 +32,12 @@ class TestCase extends \Orchestra\Testbench\TestCase
         ];
     }
 
-    protected function makeMessage(): StreamableMessage
+    protected function makeMessage(): MessageStub
     {
         return new MessageStub();
     }
 
-    protected function makeEvent(): Event
+    protected function makeEvent(): FooBarStreamerEventStub
     {
         return new FooBarStreamerEventStub();
     }
@@ -81,7 +79,7 @@ class TestCase extends \Orchestra\Testbench\TestCase
             'name' => $stream,
             'data' => json_encode($data, JSON_THROW_ON_ERROR),
         ]);
-        $listener = $listener ?? new LocalListener();
+        $listener ??= new LocalListener();
         $e = new Exception('error');
         $handler->store($message, $listener, $e);
 

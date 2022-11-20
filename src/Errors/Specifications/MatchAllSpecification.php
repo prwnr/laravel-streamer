@@ -12,9 +12,6 @@ class MatchAllSpecification implements Specification
      */
     private readonly array $specifications;
 
-    /**
-     * MatchAllSpecification constructor.
-     */
     public function __construct(Specification ...$specifications)
     {
         $this->specifications = $specifications;

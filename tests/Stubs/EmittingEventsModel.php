@@ -10,7 +10,8 @@ class EmittingEventsModel extends Model
     use EmitsStreamerEvents;
 
     protected $fillable = [
-        'foo', 'id',
+        'foo',
+        'id',
     ];
 
     private bool $shouldStream = true;

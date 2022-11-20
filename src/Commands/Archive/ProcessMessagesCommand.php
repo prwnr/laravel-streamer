@@ -10,9 +10,6 @@ use Symfony\Component\Console\Input\InputOption;
 
 abstract class ProcessMessagesCommand extends Command
 {
-    /**
-     * @return int
-     */
     public function handle(): int
     {
         if (!$this->option('streams')) {
@@ -46,11 +43,6 @@ abstract class ProcessMessagesCommand extends Command
         return 0;
     }
 
-    /**
-     * @param  string  $stream
-     * @param  string  $id
-     * @param  array  $message
-     */
     abstract protected function process(string $stream, string $id, array $message): void;
 
     /**

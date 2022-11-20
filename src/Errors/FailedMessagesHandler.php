@@ -12,9 +12,6 @@ use Throwable;
 
 class FailedMessagesHandler implements MessagesFailer
 {
-    /**
-     * MessagesErrorHandler constructor.
-     */
     public function __construct(private readonly Repository $repository)
     {
     }

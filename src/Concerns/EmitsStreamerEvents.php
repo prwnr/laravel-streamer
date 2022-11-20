@@ -6,16 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 use Prwnr\Streamer\Eloquent\EloquentModelEvent;
 use Prwnr\Streamer\Facades\Streamer;
 
-/**
- * Trait EmitsStreamerEvents.
- */
 trait EmitsStreamerEvents
 {
     protected string $baseEventName;
 
-    /**
-     * Boot event listeners.
-     */
     public static function bootEmitsStreamerEvents(): void
     {
         static::saved(static function (Model $model): void {

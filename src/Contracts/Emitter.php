@@ -2,9 +2,6 @@
 
 namespace Prwnr\Streamer\Contracts;
 
-/**
- * Interface Emitter.
- */
 interface Emitter
 {
     /**

@@ -15,9 +15,6 @@ class StreamArchiver implements Archiver
 {
     private readonly ArchiveStorage $storage;
 
-    /**
-     * StreamArchiver constructor.
-     */
     public function __construct(StorageManager $manager)
     {
         $this->storage = $manager->driver(config('streamer.archive.storage_driver'));

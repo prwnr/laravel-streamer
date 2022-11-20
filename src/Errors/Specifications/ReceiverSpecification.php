@@ -7,9 +7,6 @@ use Prwnr\Streamer\Errors\FailedMessage;
 
 class ReceiverSpecification implements Specification
 {
-    /**
-     * IdentifierSpecification constructor.
-     */
     public function __construct(private readonly string $receiver)
     {
     }
