@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
 use Illuminate\Support\Str;
@@ -17,8 +19,8 @@ class FailedMessageSpecificationsTest extends \PHPUnit\Framework\TestCase
     {
         $specification = new IdentifierSpecification('123');
 
-        $this->assertTrue($specification->isSatisfiedBy($this->makeMessage(['id' => 123])));
-        $this->assertFalse($specification->isSatisfiedBy($this->makeMessage(['id' => 321])));
+        $this->assertTrue($specification->isSatisfiedBy($this->makeMessage(['id' => '123'])));
+        $this->assertFalse($specification->isSatisfiedBy($this->makeMessage(['id' => '321'])));
     }
 
     public function test_stream_specification(): void

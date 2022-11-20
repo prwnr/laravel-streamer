@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Prwnr\Streamer\Stream;
 
 use Exception;
@@ -102,22 +104,26 @@ class MultiStream
         return $deleted;
     }
 
-    public function await(string $lastSeenId = '', int $timeout = 0): array
+    public function await(string $lastSeenId = '', int|float $timeout = 0): array
     {
-        if ($lastSeenId === '' || $lastSeenId === '0') {
+        if ($lastSeenId === '') {
             $lastSeenId = $this->getNewEntriesKey();
         }
 
         $result = null;
         if ($this->streams->count() === 1) {
-            return $this->parseResult($this->awaitSingle($this->streams->first(), $lastSeenId, $timeout));
+            $awaitResult = $this->awaitSingle($this->streams->first(), $lastSeenId, $timeout);
+            if ($awaitResult === [] || $awaitResult === null) {
+                return [];
+            }
+            return $this->parseResult($awaitResult);
         }
 
         if (!$result) {
             $result = $this->awaitMultiple($lastSeenId, $timeout);
         }
 
-        if (!is_array($result) || empty($result)) {
+        if ($result === null || $result === []) {
             return [];
         }
 
@@ -155,21 +161,21 @@ class MultiStream
         }
     }
 
-    private function awaitSingle(Stream $stream, string $lastSeenId, int $timeout): ?array
+    private function awaitSingle(Stream $stream, string $lastSeenId, int|float $timeout): ?array
     {
         if (!$this->consumer && !$this->group) {
             return $stream->await($lastSeenId, $timeout);
         }
 
         $consumer = new Consumer($this->consumer, $stream, $this->group);
-        if ($lastSeenId === '' || $lastSeenId === '0') {
+        if ($lastSeenId === '') {
             $lastSeenId = $consumer->getNewEntriesKey();
         }
 
         return $consumer->await($lastSeenId, $timeout);
     }
 
-    private function awaitMultiple(string $lastSeenId, int $timeout): array|Redis
+    private function awaitMultiple(string $lastSeenId, int|float $timeout): array|Redis
     {
         $streams = $this->streams->map(static fn (Stream $s): string => $lastSeenId)->toArray();
 
@@ -181,10 +187,9 @@ class MultiStream
     }
 
     /**
-     * @param $result
      * @return array<int, array{stream: mixed, id: mixed, message: mixed}>
      */
-    private function parseResult($result): array
+    private function parseResult(array $result): array
     {
         $list = [];
         foreach ($result as $stream => $messages) {

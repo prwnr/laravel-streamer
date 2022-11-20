@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Prwnr\Streamer\EventDispatcher;
 
 use Illuminate\Support\Arr;
@@ -23,7 +25,7 @@ class Streamer implements Emitter, Listener
 
     protected readonly float $listenTimeout;
 
-    protected readonly float $readSleep;
+    protected readonly int $readSleep;
 
     private string $group = '';
 
@@ -37,7 +39,7 @@ class Streamer implements Emitter, Listener
     {
         $this->readTimeout = config('streamer.stream_read_timeout', 1) * 1000;
         $this->listenTimeout = config('streamer.listen_timeout', 1) * 1000;
-        $this->readSleep = config('streamer.read_sleep', 1);
+        $this->readSleep = (int) config('streamer.read_sleep', 1);
     }
 
     public function startFrom(string $startFrom): self

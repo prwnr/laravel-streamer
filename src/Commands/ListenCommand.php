@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Prwnr\Streamer\Commands;
 
 use Exception;
@@ -233,7 +235,7 @@ class ListenCommand extends Command
             }
 
             $consumer = new Stream\Consumer($consumerName, $stream, $this->option('group'));
-            $consumer->claim($messages, $this->option('reclaim'));
+            $consumer->claim($messages, (int) $this->option('reclaim'));
         }
     }
 

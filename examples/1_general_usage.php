@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Prwnr\Streamer\Stream;
 
 /**
@@ -60,4 +62,4 @@ $consumerPending = $consumer->pending();
 // from other consumers to current consumer. Messages stays are pending till acknowledged
 // this method accepts array of messages IDs to claim and idle time in milliseconds
 // idletime determines how old messages should be to reclaim them
-$consumer->claim(['0', '1'], '1');
+$consumer->claim(['0', '1'], 1);

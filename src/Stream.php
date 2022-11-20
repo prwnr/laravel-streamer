@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Prwnr\Streamer;
 
 use BadMethodCallException;
@@ -38,12 +40,17 @@ class Stream
 
     public function add(StreamableMessage $message, string $id = '*'): string
     {
-        return $this->redis()->xAdd($this->name, $id, $message->getContent());
+        return (string) $this->redis()->xAdd($this->name, $id, $message->getContent());
     }
 
     public function delete(string $id): int
     {
-        return $this->redis()->xDel($this->name, [$id]);
+        $result = $this->redis()->xDel($this->name, [$id]);
+        if ($result === false) {
+            return 0;
+        }
+
+        return $result;
     }
 
     public function read(string $from = self::FROM_START, int $limit = 0): array
@@ -55,7 +62,7 @@ class Stream
         return $this->redis()->xRead([$this->name => $from]);
     }
 
-    public function await(string $lastSeenId = self::FROM_START, int $timeout = 0): ?array
+    public function await(string $lastSeenId = self::FROM_START, int|float $timeout = 0): ?array
     {
         return $this->redis()->xRead([$this->name => $lastSeenId], 0, $timeout);
     }

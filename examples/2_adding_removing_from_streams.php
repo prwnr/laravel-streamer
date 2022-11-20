@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\Stream;
 use Prwnr\Streamer\Streams;

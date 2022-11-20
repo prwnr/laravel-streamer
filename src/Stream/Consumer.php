@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Prwnr\Streamer\Stream;
 
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
@@ -29,7 +31,7 @@ class Consumer
         return self::NEW_ENTRIES;
     }
 
-    public function await(string $lastSeenId = self::NEW_ENTRIES, int $timeout = 0): ?array
+    public function await(string $lastSeenId = self::NEW_ENTRIES, int|float $timeout = 0): ?array
     {
         return $this->redis()->xReadGroup(
             $this->group,

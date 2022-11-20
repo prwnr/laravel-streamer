@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Prwnr\Streamer\Eloquent;
 
 use Prwnr\Streamer\Contracts\Event;

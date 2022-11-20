@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 use Prwnr\Streamer\EventDispatcher\Streamer;
