@@ -15,13 +15,13 @@ class FailedFlushCommandTest extends TestCase
     {
         parent::setUp();
         $this->setUpRedis();
-        $this->redis['phpredis']->connection()->flushall();
+        $this->redis['predis']->connection()->flushall();
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
-        $this->redis['phpredis']->connection()->flushall();
+        $this->redis['predis']->connection()->flushall();
         $this->tearDownRedis();
     }
 

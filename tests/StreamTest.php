@@ -16,13 +16,13 @@ class StreamTest extends TestCase
     {
         parent::setUp();
         $this->setUpRedis();
-        $this->redis['phpredis']->connection()->flushall();
+        $this->redis['predis']->connection()->flushall();
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
-        $this->redis['phpredis']->connection()->flushall();
+        $this->redis['predis']->connection()->flushall();
         $this->tearDownRedis();
     }
 
@@ -315,8 +315,8 @@ class StreamTest extends TestCase
     {
         $stream = new Stream('foo');
 
-        $info = $this->redis['phpredis']->connection()->info();
-        if (!version_compare($info['redis_version'], '6.0.0', '>=')) {
+        $info = $this->redis['predis']->connection()->info();
+        if (!version_compare($info['Server']['redis_version'], '6.0.0', '>=')) {
             $this->expectException(BadMethodCallException::class);
             $this->expectExceptionMessage('fullInfo only available for Redis 6.0 or above.');
 

@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Exception;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
 use Prwnr\Streamer\Stream;
 use Prwnr\Streamer\Stream\MultiStream;
@@ -14,13 +15,13 @@ class MultiStreamTest extends TestCase
     {
         parent::setUp();
         $this->setUpRedis();
-        $this->redis['phpredis']->connection()->flushall();
+        $this->redis['predis']->connection()->flushall();
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
-        $this->redis['phpredis']->connection()->flushall();
+        $this->redis['predis']->connection()->flushall();
         $this->tearDownRedis();
     }
 
@@ -232,7 +233,7 @@ class MultiStreamTest extends TestCase
         $this->assertNotEmpty($result);
         $this->assertCount(2, $result);
 
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
         $this->expectExceptionMessage('Not all messages were acknowledged. Streams affected: bar');
 
         $multi->acknowledge(['foo' => ['1-0'], 'bar' => ['1-0', '2-0']]);

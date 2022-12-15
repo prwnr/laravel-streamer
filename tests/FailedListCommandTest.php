@@ -4,7 +4,6 @@ namespace Tests;
 
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
-use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 
 class FailedListCommandTest extends TestCase
 {
@@ -14,13 +13,13 @@ class FailedListCommandTest extends TestCase
     {
         parent::setUp();
         $this->setUpRedis();
-        $this->redis['phpredis']->connection()->flushall();
+        $this->redis['predis']->connection()->flushall();
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
-        $this->redis['phpredis']->connection()->flushall();
+        $this->redis['predis']->connection()->flushall();
         $this->tearDownRedis();
     }
 

@@ -19,14 +19,14 @@ class StreamArchiverTest extends TestCase
     {
         parent::setUp();
         $this->setUpRedis();
-        $this->redis['phpredis']->connection()->flushall();
+        $this->redis['predis']->connection()->flushall();
 
         $this->setUpMemoryManager();
     }
 
     protected function tearDown(): void
     {
-        $this->redis['phpredis']->connection()->flushall();
+        $this->redis['predis']->connection()->flushall();
 
         parent::tearDown();
 

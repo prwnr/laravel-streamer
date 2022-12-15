@@ -26,7 +26,7 @@ class ListenCommandTest extends TestCase
     {
         parent::setUp();
         $this->setUpRedis();
-        $this->redis['phpredis']->connection()->flushall();
+        $this->redis['predis']->connection()->flushall();
         $this->app['config']->set('streamer.listen_timeout', 0.01);
         $this->app['config']->set('streamer.stream_read_timeout', 0.01);
 
@@ -35,7 +35,7 @@ class ListenCommandTest extends TestCase
 
     protected function tearDown(): void
     {
-        $this->redis['phpredis']->connection()->flushall();
+        $this->redis['predis']->connection()->flushall();
         $this->tearDownRedis();
         parent::tearDown();
 

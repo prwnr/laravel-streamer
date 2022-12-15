@@ -18,7 +18,7 @@ class StreamsTest extends TestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        $this->redis['phpredis']->connection()->flushall();
+        $this->redis['predis']->connection()->flushall();
         $this->tearDownRedis();
     }
 

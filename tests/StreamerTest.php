@@ -21,13 +21,13 @@ class StreamerTest extends TestCase
     {
         parent::setUp();
         $this->setUpRedis();
-        $this->redis['phpredis']->connection()->flushall();
+        $this->redis['predis']->connection()->flushall();
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
-        $this->redis['phpredis']->connection()->flushall();
+        $this->redis['predis']->connection()->flushall();
         $this->tearDownRedis();
     }
 
@@ -158,6 +158,7 @@ class StreamerTest extends TestCase
 
         $id = $streamer->emit($event);
         Log::shouldReceive('error')
+            ->once()
             ->with("Listener error. Failed processing message with ID $id on '{$event->name()}' stream. Error: error");
 
         $callback = function () {
