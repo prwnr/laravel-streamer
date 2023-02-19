@@ -26,7 +26,7 @@ There are two main ends of this package usage - emiting new event and listening 
 | 7.2^&#124;8.0^           | 6.x&#124;7.x&#124;8.x           | ^2.3     | PhpRedis     |
 | 7.4^&#124;8.0^&#124;8.1^ | 6.x&#124;7.x&#124;8.x           | ^3.0     | PhpRedis     |
 | 7.4^&#124;8.0^&#124;8.1^ | 6.x&#124;7.x&#124;8.x&#124;9.x  | ^3.3     | PhpRedis     |
-| 7.4^&#124;8.0^&#124;8.1^ | 7.x&#124;8.x&#124;9.x&#124;10.x | ^3.4     | PhpRedis     |
+| 7.4^&#124;8.0^&#124;8.1^ | 7.x&#124;8.x&#124;9.x&#124;10.x | ^3.5     | PhpRedis     |
   
 ### Emiting new events
 
