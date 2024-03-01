@@ -13,15 +13,15 @@
         "ext-json": "*",
         "ext-redis": "*",
         "php": "^7.4|^8.0|^8.1",
-        "illuminate/console": "^7.0|^8.0|^9.0|^10.0",
-        "illuminate/support": "^7.0|^8.0|^9.0|^10.0",
-        "illuminate/redis": "^7.0|^8.0|^9.0|^10.0",
-        "illuminate/container": "^7.0|^8.0|^9.0|^10.0"
+        "illuminate/console": "^7.0|^8.0|^9.0|^10.0|^11.0",
+        "illuminate/support": "^7.0|^8.0|^9.0|^10.0|^11.0",
+        "illuminate/redis": "^7.0|^8.0|^9.0|^10.0|^11.0",
+        "illuminate/container": "^7.0|^8.0|^9.0|^10.0|^11.0"
     },
     "require-dev": {
-        "orchestra/testbench": "^5.0|^6.0|^7.0|^8.0",
-        "phpunit/phpunit": "^8.0|^9.0",
-        "predis/predis": "^1.1"
+        "orchestra/testbench": "^5.0|^6.0|^7.0|^8.0|^9.0",
+        "phpunit/phpunit": "^8.0|^9.0|^10.5",
+        "predis/predis": "^1.1|^2.2"
     },
     "autoload": {
         "psr-4": {
