@@ -266,9 +266,9 @@ class ListenCommand extends Command
     /**
      * @param  ReceivedMessage  $message
      * @param  string  $listener
-     * @param  Exception  $e
+     * @param  Throwable  $e
      */
-    private function printError(ReceivedMessage $message, string $listener, Exception $e): void
+    private function printError(ReceivedMessage $message, string $listener, Throwable $e): void
     {
         $this->error(sprintf(
             "Listener error. Failed processing message with ID %s on '%s' stream by %s. Error: %s",
