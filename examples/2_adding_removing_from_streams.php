@@ -1,6 +1,6 @@
 <?php
 
-use Prwnr\Streamer\Contracts\StreamableMessage;
+use Prwnr\Streamer\Contracts\Errors\StreamableMessage;
 use Prwnr\Streamer\Stream;
 use Prwnr\Streamer\Streams;
 
@@ -13,10 +13,7 @@ use Prwnr\Streamer\Streams;
 $stream = new Stream('stream_name');
 
 // Message implementation, used to add it to stream
-$message = new class() implements StreamableMessage {
-    /**
-     * @return array
-     */
+$message = new class () implements StreamableMessage {
     public function getContent(): array
     {
         return [
@@ -42,10 +39,7 @@ $stream->delete('0');
 $streams = new Streams(['first_stream', 'second_stream']);
 
 // Message implementation, used to add it to stream
-$message = new class() implements StreamableMessage {
-    /**
-     * @return array
-     */
+$message = new class () implements StreamableMessage {
     public function getContent(): array
     {
         return [

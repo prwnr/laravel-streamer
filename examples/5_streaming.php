@@ -2,6 +2,7 @@
 
 use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\EventDispatcher\Streamer;
+use Prwnr\Streamer\History\EventHistory;
 
 /**
  * Usage of Streaming class
@@ -45,7 +46,7 @@ class ExampleStreamerEvent implements Event
 $event = new ExampleStreamerEvent();
 
 // Streamer instance
-$streamer = new Streamer();
+$streamer = new Streamer(new EventHistory());
 
 // emit method requires one argument that must be implementation of Event
 // in response in returns ID of newly created message

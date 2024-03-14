@@ -6,27 +6,13 @@ use JsonException;
 use Prwnr\Streamer\Concerns\HashableMessage;
 use Prwnr\Streamer\Contracts\Event;
 
-/**
- * Class Message.
- */
 class Message extends StreamMessage
 {
     use HashableMessage;
 
     /**
-     * @inheritDoc
-     * @throws JsonException
-     */
-    public function getData(): array
-    {
-        return json_decode($this->content['data'], true, 512, JSON_THROW_ON_ERROR);
-    }
-
-    /**
      * Message constructor.
      *
-     * @param  array  $meta
-     * @param  array  $data
      * @throws JsonException
      */
     public function __construct(array $meta, array $data)
@@ -40,11 +26,17 @@ class Message extends StreamMessage
             'domain' => $meta['domain'] ?? '',
             'created' => $meta['created'] ?? time(),
             'data' => json_encode($data, JSON_THROW_ON_ERROR),
-        ], static function ($v) {
-            return $v !== null;
-        });
+        ], static fn ($v): bool => $v !== null);
 
         $this->content = $payload;
         $this->hashIt();
+    }
+
+    /**
+     * @throws JsonException
+     */
+    public function getData(): array
+    {
+        return json_decode((string) $this->content['data'], true, 512, JSON_THROW_ON_ERROR);
     }
 }

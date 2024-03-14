@@ -2,7 +2,7 @@
 
 namespace Tests\Stubs;
 
-use Prwnr\Streamer\Contracts\StreamableMessage;
+use Prwnr\Streamer\Contracts\Errors\StreamableMessage;
 
 class MessageStub implements StreamableMessage
 {

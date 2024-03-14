@@ -298,8 +298,13 @@ class StreamTest extends TestCase
         $this->assertCount(7, $actual);
         foreach (
             [
-                'length', 'radix-tree-keys', 'radix-tree-nodes', 'groups', 'last-generated-id', 'first-entry',
-                'last-entry'
+                'length',
+                'radix-tree-keys',
+                'radix-tree-nodes',
+                'groups',
+                'last-generated-id',
+                'first-entry',
+                'last-entry',
             ] as $key
         ) {
             $this->assertArrayHasKey($key, $actual);
@@ -338,8 +343,13 @@ class StreamTest extends TestCase
         $this->assertCount(6, $actual);
         foreach (
             [
-                'length', 'radix-tree-keys', 'radix-tree-nodes', 'last-generated-id', 'last-generated-id', 'entries',
-                'groups'
+                'length',
+                'radix-tree-keys',
+                'radix-tree-nodes',
+                'last-generated-id',
+                'last-generated-id',
+                'entries',
+                'groups',
             ] as $key
         ) {
             $this->assertArrayHasKey($key, $actual);

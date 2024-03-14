@@ -31,34 +31,23 @@ class RetryFailedCommand extends Command
      */
     protected $description = 'Retries failed messages by passing them to their original Listeners.';
 
-    private MessagesFailer $failer;
-    private Repository $repository;
-    private Archiver $archiver;
     private array $specifications = [
         'id' => IdentifierSpecification::class,
         'receiver' => ReceiverSpecification::class,
         'stream' => StreamSpecification::class,
     ];
 
-    /**
-     * RetryFailedCommand constructor.
-     *
-     * @param  Repository  $repository
-     * @param  MessagesFailer  $failer
-     * @param  Archiver  $archiver
-     */
-    public function __construct(Repository $repository, MessagesFailer $failer, Archiver $archiver)
-    {
+    public function __construct(
+        private readonly Repository $repository,
+        private readonly MessagesFailer $failer,
+        private readonly Archiver $archiver
+    ) {
         parent::__construct();
-
-        $this->failer = $failer;
-        $this->repository = $repository;
-        $this->archiver = $archiver;
     }
 
     public function handle(): int
     {
-        if (!$this->repository->count()) {
+        if ($this->repository->count() === 0) {
             $this->info('There are no failed messages to retry.');
             return 0;
         }
@@ -80,10 +69,6 @@ class RetryFailedCommand extends Command
         return 0;
     }
 
-    /**
-     * @param  array  $filters
-     * @return int
-     */
     protected function retryBy(array $filters): int
     {
         $messages = $this->getMessages($filters);
@@ -98,9 +83,54 @@ class RetryFailedCommand extends Command
     }
 
     /**
-     * Retries set of messages
+     * @inheritDoc
+     */
+    protected function getOptions(): array
+    {
+        return [
+            [
+                'all',
+                null,
+                InputOption::VALUE_NONE,
+                'Retries all failed messages.',
+            ],
+            [
+                'id',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Retries messages with given ID (messages from different streams may have same IDs and some messages may fail for multiple listeners).',
+            ],
+            [
+                'stream',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Retries messages from given Stream name.',
+            ],
+            [
+                'receiver',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Retries messages with given receiver associated with them.',
+            ],
+            [
+                'purge',
+                null,
+                InputOption::VALUE_NONE,
+                'Will remove message from the stream if it will be retried successfully and there will be no other failures saved.',
+            ],
+            [
+                'archive',
+                null,
+                InputOption::VALUE_NONE,
+                'Will remove message from the stream and store it in database if it will be retried successfully and there will be no other failures saved.',
+            ],
+        ];
+    }
+
+    /**
+     * Retries set of messages.
      *
-     * @param  Collection&FailedMessage[]  $messages
+     * @param Collection&FailedMessage[] $messages
      */
     private function retry(Collection $messages): void
     {
@@ -125,9 +155,18 @@ class RetryFailedCommand extends Command
         }
     }
 
-    /**
-     * @param  FailedMessage  $message
-     */
+    private function printSuccess(FailedMessage $message): void
+    {
+        $this->info(
+            sprintf(
+                'Successfully retried [%s] on %s stream by [%s] listener',
+                $message->getId(),
+                $message->getStream()->getName(),
+                $message->getReceiver()
+            )
+        );
+    }
+
     private function archive(FailedMessage $message): void
     {
         if ($this->hasOtherFailures($message)) {
@@ -137,32 +176,18 @@ class RetryFailedCommand extends Command
         try {
             $receivedMessage = new ReceivedMessage($message->getId(), $message->getStreamMessage());
             $this->archiver->archive($receivedMessage);
-            $this->info("Message [{$message->getId()}] has been archived from the '{$message->getStream()->getName()}' stream.");
+            $this->info(
+                "Message [{$message->getId()}] has been archived from the '{$message->getStream()->getName()}' stream."
+            );
         } catch (Exception $e) {
             report($e);
-            $this->warn("Message [{$message->getId()}] from the '{$message->getStream()->getName()}' stream could not be archived. Error: ".$e->getMessage());
+            $this->warn(
+                "Message [{$message->getId()}] from the '{$message->getStream()->getName()}' stream could not be archived. Error: " . $e->getMessage(
+                )
+            );
         }
     }
 
-    /**
-     * @param  FailedMessage  $message
-     */
-    private function purge(FailedMessage $message): void
-    {
-        if ($this->hasOtherFailures($message)) {
-            return;
-        }
-
-        $result = $message->getStream()->delete($message->getId());
-        if ($result) {
-            $this->info("Message [{$message->getId()}] has been purged from the '{$message->getStream()->getName()}' stream.");
-        }
-    }
-
-    /**
-     * @param  FailedMessage  $message
-     * @return bool
-     */
     private function hasOtherFailures(FailedMessage $message): bool
     {
         return $this->getMessages([
@@ -172,21 +197,16 @@ class RetryFailedCommand extends Command
     }
 
     /**
-     * @param  array  $filters
-     * @return Collection|FailedMessage[]
+     * @return Collection<FailedMessage>
      */
-    private function getMessages(array $filters)
+    private function getMessages(array $filters): Collection
     {
         $specification = $this->prepareSpecification(array_filter($filters));
 
         return $this->repository->all()
-            ->filter(static fn(FailedMessage $message) => $specification->isSatisfiedBy($message));
+            ->filter(static fn (FailedMessage $message): bool => $specification->isSatisfiedBy($message));
     }
 
-    /**
-     * @param  array  $filters
-     * @return Specification
-     */
     private function prepareSpecification(array $filters): Specification
     {
         $specifications = [];
@@ -201,49 +221,17 @@ class RetryFailedCommand extends Command
         return new MatchAllSpecification(...$specifications);
     }
 
-    /**
-     * @param  FailedMessage  $message
-     */
-    private function printSuccess(FailedMessage $message): void
+    private function purge(FailedMessage $message): void
     {
-        $this->info(sprintf(
-            'Successfully retried [%s] on %s stream by [%s] listener',
-            $message->getId(),
-            $message->getStream()->getName(),
-            $message->getReceiver()
-        ));
-    }
+        if ($this->hasOtherFailures($message)) {
+            return;
+        }
 
-    /**
-     * @inheritDoc
-     */
-    protected function getOptions(): array
-    {
-        return [
-            [
-                'all', null, InputOption::VALUE_NONE,
-                'Retries all failed messages.'
-            ],
-            [
-                'id', null, InputOption::VALUE_REQUIRED,
-                'Retries messages with given ID (messages from different streams may have same IDs and some messages may fail for multiple listeners).'
-            ],
-            [
-                'stream', null, InputOption::VALUE_REQUIRED,
-                'Retries messages from given Stream name.'
-            ],
-            [
-                'receiver', null, InputOption::VALUE_REQUIRED,
-                'Retries messages with given receiver associated with them.'
-            ],
-            [
-                'purge', null, InputOption::VALUE_NONE,
-                'Will remove message from the stream if it will be retried successfully and there will be no other failures saved.'
-            ],
-            [
-                'archive', null, InputOption::VALUE_NONE,
-                'Will remove message from the stream and store it in database if it will be retried successfully and there will be no other failures saved.'
-            ],
-        ];
+        $result = $message->getStream()->delete($message->getId());
+        if ($result !== 0) {
+            $this->info(
+                "Message [{$message->getId()}] has been purged from the '{$message->getStream()->getName()}' stream."
+            );
+        }
     }
 }

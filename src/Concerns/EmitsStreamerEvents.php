@@ -6,9 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use Prwnr\Streamer\Eloquent\EloquentModelEvent;
 use Prwnr\Streamer\Facades\Streamer;
 
-/**
- * Trait EmitsStreamerEvents.
- */
 trait EmitsStreamerEvents
 {
     protected string $baseEventName;
@@ -18,15 +15,15 @@ trait EmitsStreamerEvents
      */
     public static function bootEmitsStreamerEvents(): void
     {
-        static::saved(static function (Model $model) {
+        static::saved(static function (Model $model): void {
             $model->postSave();
         });
 
-        static::created(static function (Model $model) {
+        static::created(static function (Model $model): void {
             $model->postCreate();
         });
 
-        static::deleted(static function (Model $model) {
+        static::deleted(static function (Model $model): void {
             $model->postDelete();
         });
     }
@@ -83,23 +80,9 @@ trait EmitsStreamerEvents
     }
 
     /**
-     * Method that can be overridden to add additional data to each event payload.
-     * It will be added as 'top' level array. If method returns empty array,
-     * then the 'additional' data won't be added to payload.
-     *
-     * @return array
-     */
-    protected function getAdditionalPayloadData(): array
-    {
-        return [];
-    }
-
-    /**
      * Method that can be overridden to add custom logic which will determine
      * whether the given model should have events emitted or not.
      * Returns true by default, emitting events for any case.
-     *
-     * @return bool
      */
     protected function canStream(): bool
     {
@@ -107,29 +90,31 @@ trait EmitsStreamerEvents
     }
 
     /**
-     * @param  string  $action
-     * @return string
+     * Method that can be overridden to add additional data to each event payload.
+     * It will be added as 'top' level array. If method returns empty array,
+     * then the 'additional' data won't be added to payload.
      */
-    private function getEventName(string $action): string
+    protected function getAdditionalPayloadData(): array
     {
-        $suffix = '.'.$action;
-        $name = class_basename($this).$suffix;
-        if ($this->baseEventName) {
-            $name = $this->baseEventName.$suffix;
-        }
-
-        return strtolower($name);
+        return [];
     }
 
-    /**
-     * @return array
-     */
     private function makeBasePayload(): array
     {
         return array_filter([
             $this->getKeyName() => $this->getKey(),
-            'additional' => $this->getAdditionalPayloadData()
+            'additional' => $this->getAdditionalPayloadData(),
         ]);
     }
 
+    private function getEventName(string $action): string
+    {
+        $suffix = '.' . $action;
+        $name = class_basename($this) . $suffix;
+        if ($this->baseEventName) {
+            $name = $this->baseEventName . $suffix;
+        }
+
+        return strtolower($name);
+    }
 }

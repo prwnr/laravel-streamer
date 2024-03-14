@@ -6,9 +6,6 @@ use Illuminate\Console\Command;
 use Prwnr\Streamer\ListenersStack;
 use Symfony\Component\Console\Input\InputOption;
 
-/**
- * Class ListCommand
- */
 class ListCommand extends Command
 {
     /**
@@ -21,9 +18,6 @@ class ListCommand extends Command
      */
     protected $description = 'Lists all registered events with listeners that are attached to them.';
 
-    /**
-     * @return int
-     */
     public function handle(): int
     {
         $headers = ['Event'];
@@ -42,9 +36,6 @@ class ListCommand extends Command
         return 0;
     }
 
-    /**
-     * @return array
-     */
     protected function makeRows(): array
     {
         $listeners = ListenersStack::all();
@@ -63,7 +54,7 @@ class ListCommand extends Command
 
             $rows[] = [
                 $event,
-                $eventListeners ?: 'none'
+                $eventListeners ?: 'none',
             ];
         }
 
@@ -77,9 +68,11 @@ class ListCommand extends Command
     {
         return [
             [
-                'compact', null, InputOption::VALUE_NONE,
-                'Returns only names of events that are registered in streamer.'
-            ]
+                'compact',
+                null,
+                InputOption::VALUE_NONE,
+                'Returns only names of events that are registered in streamer.',
+            ],
         ];
     }
 }

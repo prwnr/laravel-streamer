@@ -21,14 +21,11 @@ class PurgeCommand extends ProcessMessagesCommand
      */
     protected $description = 'Streamer Purge command, to purge stream messages.';
 
-    /**
-     * @inheritDoc
-     */
     protected function process(string $stream, string $id, array $message): void
     {
         try {
             $result = (new Stream($stream))->delete($id);
-            if (!$result) {
+            if ($result === 0) {
                 $this->warn("Message [$id] from the '$stream' stream could not be purged or is already deleted.");
                 return;
             }
@@ -36,7 +33,7 @@ class PurgeCommand extends ProcessMessagesCommand
             $this->info("Message [$id] has been purged from the '$stream' stream.");
         } catch (Exception $e) {
             report($e);
-            $this->warn("Message [$id] from the '$stream' stream could not be purged. Error: ".$e->getMessage());
+            $this->warn("Message [$id] from the '$stream' stream could not be purged. Error: " . $e->getMessage());
         }
     }
 }

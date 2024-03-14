@@ -22,19 +22,11 @@ class MessagesRepository implements Repository
             return collect();
         }
 
-        $decode = static fn ($item) => array_values(json_decode($item, true, 512, JSON_THROW_ON_ERROR));
+        $decode = static fn ($item): array => array_values(json_decode((string) $item, true, 512, JSON_THROW_ON_ERROR));
 
         return collect($elements)
-            ->map(static fn($item) => new FailedMessage(...$decode($item)))
-            ->sortBy(static fn(FailedMessage $message) => $message->getDate());
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function count(): int
-    {
-        return $this->redis()->sCard(self::ERRORS_SET);
+            ->map(static fn ($item): FailedMessage => new FailedMessage(...$decode($item)))
+            ->sortBy(static fn (FailedMessage $message): string => $message->getDate());
     }
 
     /**
@@ -59,5 +51,13 @@ class MessagesRepository implements Repository
     public function flush(): void
     {
         $this->redis()->spop(self::ERRORS_SET, $this->count());
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function count(): int
+    {
+        return $this->redis()->sCard(self::ERRORS_SET);
     }
 }

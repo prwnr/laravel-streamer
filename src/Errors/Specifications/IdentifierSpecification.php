@@ -7,21 +7,10 @@ use Prwnr\Streamer\Errors\FailedMessage;
 
 class IdentifierSpecification implements Specification
 {
-    private string $id;
-
-    /**
-     * IdentifierSpecification constructor.
-     *
-     * @param  string  $id
-     */
-    public function __construct(string $id)
+    public function __construct(private readonly string $id)
     {
-        $this->id = $id;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function isSatisfiedBy(FailedMessage $message): bool
     {
         return $message->getId() === $this->id;

@@ -46,7 +46,8 @@ class ModelEventsTest extends TestCase
         $expected = [
             'id' => 123,
             'fields' => [
-                'id', 'foo',
+                'id',
+                'foo',
             ],
             'before' => [
                 'id' => null,
@@ -126,7 +127,7 @@ class ModelEventsTest extends TestCase
 
     public function test_model_with_changed_base_name_emits_different_name_of_event_to_stream(): void
     {
-        $model = new class extends EmittingEventsModel {
+        $model = new class () extends EmittingEventsModel {
             public function __construct(array $attributes = [])
             {
                 parent::__construct($attributes);
@@ -141,8 +142,8 @@ class ModelEventsTest extends TestCase
         $this->assertArrayHasKey('child.model.created', $actual);
     }
 
-    public function test_creating_model_with_additional_payload_data_emits_created_event_to_stream_with_that_data(): void
-    {
+    public function test_creating_model_with_additional_payload_data_emits_created_event_to_stream_with_that_data(
+    ): void {
         $model = new EmittingEventsWithAdditionalModel(['id' => 123, 'foo' => 'bar']);
         $model->setAdditionalPayloadData(['foo' => 'bar']);
         $model->postCreate();
@@ -151,7 +152,8 @@ class ModelEventsTest extends TestCase
             'id' => 123,
             'additional' => ['foo' => 'bar'],
             'fields' => [
-                'id', 'foo',
+                'id',
+                'foo',
             ],
             'before' => [
                 'id' => null,
@@ -171,8 +173,8 @@ class ModelEventsTest extends TestCase
         $this->assertEquals(json_encode($expected, JSON_THROW_ON_ERROR), $message['data']);
     }
 
-    public function test_creating_model_with_empty_additional_payload_data_emits_created_event_to_stream_without_that_data(): void
-    {
+    public function test_creating_model_with_empty_additional_payload_data_emits_created_event_to_stream_without_that_data(
+    ): void {
         $model = new EmittingEventsWithAdditionalModel(['id' => 123, 'foo' => 'bar']);
         $model->setAdditionalPayloadData([]);
         $model->postCreate();
@@ -180,7 +182,8 @@ class ModelEventsTest extends TestCase
         $expected = [
             'id' => 123,
             'fields' => [
-                'id', 'foo',
+                'id',
+                'foo',
             ],
             'before' => [
                 'id' => null,

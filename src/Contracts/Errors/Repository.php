@@ -8,7 +8,7 @@ use Prwnr\Streamer\Errors\FailedMessage;
 interface Repository
 {
     /**
-     * Returns all failed stream messages
+     * Returns all failed stream messages.
      *
      * @return Collection&FailedMessage[]
      */
@@ -16,22 +16,16 @@ interface Repository
 
     /**
      * Returns how many failed messages is there.
-     *
-     * @return int
      */
     public function count(): int;
 
     /**
      * Adds new failed message.
-     *
-     * @param  FailedMessage  $message
      */
     public function add(FailedMessage $message): void;
 
     /**
      * Removes existing message.
-     *
-     * @param  FailedMessage  $message
      */
     public function remove(FailedMessage $message): void;
 

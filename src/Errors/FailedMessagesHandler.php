@@ -12,29 +12,8 @@ use Throwable;
 
 class FailedMessagesHandler implements MessagesFailer
 {
-    private Repository $repository;
-
-    /**
-     * MessagesErrorHandler constructor.
-     *
-     * @param  Repository  $repository
-     */
-    public function __construct(Repository $repository)
+    public function __construct(private readonly Repository $repository)
     {
-        $this->repository = $repository;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function store(ReceivedMessage $message, MessageReceiver $receiver, Exception $e): void
-    {
-        $this->repository->add(new FailedMessage(...[
-            $message->getId(),
-            $message->getContent()['name'] ?? '',
-            get_class($receiver),
-            $e->getMessage(),
-        ]));
     }
 
     /**
@@ -51,7 +30,7 @@ class FailedMessagesHandler implements MessagesFailer
             $receivedMessage = new ReceivedMessage($message->getId(), $message->getStreamMessage());
             $listener->handle($receivedMessage);
         } catch (Throwable $e) {
-            if (!$receivedMessage) {
+            if ($receivedMessage === null) {
                 throw $e;
             }
 
@@ -64,8 +43,19 @@ class FailedMessagesHandler implements MessagesFailer
     }
 
     /**
-     * @param  FailedMessage  $message
-     * @return MessageReceiver
+     * @inheritDoc
+     */
+    public function store(ReceivedMessage $message, MessageReceiver $receiver, Exception $e): void
+    {
+        $this->repository->add(new FailedMessage(...[
+            $message->getId(),
+            $message->getContent()['name'] ?? '',
+            $receiver::class,
+            $e->getMessage(),
+        ]));
+    }
+
+    /**
      * @throws MessageRetryFailedException
      */
     private function makeReceiver(FailedMessage $message): MessageReceiver
@@ -76,8 +66,10 @@ class FailedMessagesHandler implements MessagesFailer
 
         $listener = app($message->getReceiver());
         if (!$listener instanceof MessageReceiver) {
-            throw new MessageRetryFailedException($message,
-                'Receiver class is not an instance of MessageReceiver contract');
+            throw new MessageRetryFailedException(
+                $message,
+                'Receiver class is not an instance of MessageReceiver contract'
+            );
         }
 
         return $listener;

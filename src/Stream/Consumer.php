@@ -15,49 +15,26 @@ class Consumer
 
     public const NEW_ENTRIES = '>';
 
-    private string $consumer;
-    private Stream $stream;
-    private string $group;
-
-    /**
-     * Consumer constructor.
-     *
-     * @param string $consumer
-     * @param Stream $stream
-     * @param string $group
-     */
-    public function __construct(string $consumer, Stream $stream, string $group)
-    {
-        $this->stream = $stream;
-        $this->group = $group;
-        $this->consumer = $consumer;
+    public function __construct(
+        private readonly string $consumer,
+        private readonly Stream $stream,
+        private readonly string $group
+    ) {
     }
 
-    /**
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->stream->getName();
-    }
-
-    /**
-     * @return string
-     */
     public function getNewEntriesKey(): string
     {
         return self::NEW_ENTRIES;
     }
 
-    /**
-     * @param  string  $lastSeenId
-     * @param  int  $timeout
-     * @return array|null
-     */
     public function await(string $lastSeenId = self::NEW_ENTRIES, int $timeout = 0): array
     {
         $result = $this->redis()->xReadGroup(
-            $this->group, $this->consumer, [$this->stream->getName() => $lastSeenId], 0, $timeout
+            $this->group,
+            $this->consumer,
+            [$this->stream->getName() => $lastSeenId],
+            0,
+            $timeout
         );
 
         if (!is_array($result)) {
@@ -67,9 +44,12 @@ class Consumer
         return $result;
     }
 
+    public function getName(): string
+    {
+        return $this->stream->getName();
+    }
+
     /**
-     * @param  string  $id
-     * @return void
      * @throws AcknowledgingFailedException
      */
     public function acknowledge(string $id): void
@@ -82,8 +62,6 @@ class Consumer
 
     /**
      * Return pending message only for this particular consumer.
-     *
-     * @return array
      */
     public function pending(): array
     {
@@ -93,17 +71,19 @@ class Consumer
     /**
      * Claim all given messages that have minimum idle time of $idleTime milliseconds.
      *
-     * @param  array  $ids
-     * @param  int  $idleTime
-     * @param  bool  $justId
      *
-     * @return array
      */
     public function claim(array $ids, int $idleTime, bool $justId = true): array
     {
         if ($justId) {
-            return $this->redis()->xClaim($this->stream->getName(), $this->group, $this->consumer, $idleTime, $ids,
-                ['JUSTID']);
+            return $this->redis()->xClaim(
+                $this->stream->getName(),
+                $this->group,
+                $this->consumer,
+                $idleTime,
+                $ids,
+                ['JUSTID']
+            );
         }
 
         return $this->redis()->xClaim($this->stream->getName(), $this->group, $this->consumer, $idleTime, $ids);

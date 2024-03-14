@@ -10,21 +10,13 @@ class MatchAllSpecification implements Specification
     /**
      * @var Specification[]
      */
-    private array $specifications;
+    private readonly array $specifications;
 
-    /**
-     * MatchAllSpecification constructor.
-     *
-     * @param  Specification  ...$specifications
-     */
     public function __construct(Specification ...$specifications)
     {
         $this->specifications = $specifications;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function isSatisfiedBy(FailedMessage $message): bool
     {
         foreach ($this->specifications as $specification) {

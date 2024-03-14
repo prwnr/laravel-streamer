@@ -26,20 +26,14 @@ class ArchiveRestoreCommand extends Command
      */
     protected $description = 'Streamer Archive Restore command, to restore archived messages from database storage back to Stream.';
 
-    private Archiver $archiver;
-    private ArchiveStorage $storage;
+    private readonly ArchiveStorage $storage;
 
     /**
      * ArchiveRestoreCommand constructor.
-     *
-     * @param  Archiver  $archiver
-     * @param  StorageManager  $manager
      */
-    public function __construct(Archiver $archiver, StorageManager $manager)
+    public function __construct(private readonly Archiver $archiver, StorageManager $manager)
     {
         parent::__construct();
-
-        $this->archiver = $archiver;
         $this->storage = $manager->driver(config('streamer.archive.storage_driver'));
     }
 
@@ -69,7 +63,7 @@ class ArchiveRestoreCommand extends Command
             }
 
             $message = $this->storage->find($this->option('stream'), $this->option('id'));
-            if (!$message) {
+            if (!$message instanceof Message) {
                 $this->error('The message could not be found in archive storage.');
                 return 1;
             }
@@ -92,8 +86,32 @@ class ArchiveRestoreCommand extends Command
     }
 
     /**
-     * @param  Message  $message
+     * @inheritDoc
      */
+    protected function getOptions(): array
+    {
+        return [
+            [
+                'all',
+                null,
+                InputOption::VALUE_NONE,
+                'Restores all archived messages back to the stream.',
+            ],
+            [
+                'id',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Restores archived message back to the stream by ID. Requires --stream option to be used as well.',
+            ],
+            [
+                'stream',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Restores all archived messages from a selected stream.',
+            ],
+        ];
+    }
+
     private function restore(Message $message): void
     {
         try {
@@ -101,28 +119,9 @@ class ArchiveRestoreCommand extends Command
             $this->info("Successfully restored [{$message->getEventName()}][{$message->getId()}] message. New ID: $id");
         } catch (Exception $e) {
             report($e);
-            $this->info("Failed to restore [{$message->getEventName()}][{$message->getId()}] message. Error: {$e->getMessage()}");
+            $this->info(
+                "Failed to restore [{$message->getEventName()}][{$message->getId()}] message. Error: {$e->getMessage()}"
+            );
         }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function getOptions(): array
-    {
-        return [
-            [
-                'all', null, InputOption::VALUE_NONE,
-                'Restores all archived messages back to the stream.'
-            ],
-            [
-                'id', null, InputOption::VALUE_REQUIRED,
-                'Restores archived message back to the stream by ID. Requires --stream option to be used as well.'
-            ],
-            [
-                'stream', null, InputOption::VALUE_REQUIRED,
-                'Restores all archived messages from a selected stream.'
-            ],
-        ];
     }
 }

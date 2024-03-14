@@ -8,9 +8,6 @@ use RuntimeException;
 
 class ExceptionalListener implements MessageReceiver
 {
-    /**
-     * @param  ReceivedMessage  $message
-     */
     public function handle(ReceivedMessage $message): void
     {
         throw new RuntimeException('Listener failed.');

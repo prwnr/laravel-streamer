@@ -4,7 +4,6 @@ namespace Tests;
 
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
-use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 
 class FailedListCommandTest extends TestCase
 {
@@ -61,10 +60,10 @@ class FailedListCommandTest extends TestCase
 
     protected function createTwoMessages(): void
     {
-        Carbon::withTestNow(Carbon::parse('2021-12-12 12:12:12'), function () {
+        Carbon::withTestNow(Carbon::parse('2021-12-12 12:12:12'), function (): void {
             $this->failFakeMessage('foo.bar', '123', ['payload' => 123]);
         });
-        Carbon::withTestNow(Carbon::parse('2021-12-12 12:15:12'), function () {
+        Carbon::withTestNow(Carbon::parse('2021-12-12 12:15:12'), function (): void {
             $this->failFakeMessage('other.bar', '321', ['payload' => 321]);
         });
     }

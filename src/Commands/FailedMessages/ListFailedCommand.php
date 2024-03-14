@@ -19,12 +19,12 @@ class ListFailedCommand extends Command
      */
     protected $description = 'Lists all failed stream messages with error messages.';
 
-    private Repository $repository;
     private array $compactHeaders = [
         'ID',
         'Stream',
         'Error',
     ];
+
     private array $headers = [
         'ID',
         'Stream',
@@ -33,24 +33,14 @@ class ListFailedCommand extends Command
         'Date',
     ];
 
-    /**
-     * FailedListCommand constructor.
-     *
-     * @param  Repository  $errorsRepository
-     */
-    public function __construct(Repository $errorsRepository)
+    public function __construct(private readonly Repository $repository)
     {
         parent::__construct();
-
-        $this->repository = $errorsRepository;
     }
 
-    /**
-     * @return int
-     */
     public function handle(): int
     {
-        if (!$this->repository->count()) {
+        if ($this->repository->count() === 0) {
             $this->info('No failed messages');
             return 0;
         }
@@ -63,14 +53,11 @@ class ListFailedCommand extends Command
         return 0;
     }
 
-    /**
-     * @return array
-     */
     protected function getMessages(): array
     {
         $isCompact = $this->option('compact');
 
-        return $this->repository->all()->map(static function (FailedMessage $message) use ($isCompact) {
+        return $this->repository->all()->map(static function (FailedMessage $message) use ($isCompact): array {
             $serialized = $message->jsonSerialize();
             if ($isCompact) {
                 unset($serialized['receiver'], $serialized['date']);
@@ -87,9 +74,11 @@ class ListFailedCommand extends Command
     {
         return [
             [
-                'compact', null, InputOption::VALUE_NONE,
-                'Returns only IDs, Stream names and Errors of failed messages.'
-            ]
+                'compact',
+                null,
+                InputOption::VALUE_NONE,
+                'Returns only IDs, Stream names and Errors of failed messages.',
+            ],
         ];
     }
 }

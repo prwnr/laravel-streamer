@@ -2,7 +2,9 @@
 
 namespace Prwnr\Streamer\Exceptions;
 
-class InvalidListeningArgumentsException extends \Exception
+use Exception;
+
+class InvalidListeningArgumentsException extends Exception
 {
     public function __construct()
     {

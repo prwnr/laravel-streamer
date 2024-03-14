@@ -3,33 +3,16 @@
 namespace Prwnr\Streamer;
 
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
-use Prwnr\Streamer\Contracts\StreamableMessage;
+use Prwnr\Streamer\Contracts\Errors\StreamableMessage;
 
-/**
- * Class Streams.
- */
 class Streams
 {
     use ConnectsWithRedis;
 
-    private array $streams;
-
-    /**
-     * Streams constructor.
-     *
-     * @param array $streams
-     */
-    public function __construct(array $streams)
+    public function __construct(private readonly array $streams)
     {
-        $this->streams = $streams;
     }
 
-    /**
-     * @param  StreamableMessage  $message
-     * @param  string  $id
-     *
-     * @return array
-     */
     public function add(StreamableMessage $message, string $id = '*'): array
     {
         $ids = [];
@@ -40,12 +23,6 @@ class Streams
         return $ids;
     }
 
-    /**
-     * @param array    $from
-     * @param int|null $limit
-     *
-     * @return array
-     */
     public function read(array $from = [], ?int $limit = null): array
     {
         $read = [];
