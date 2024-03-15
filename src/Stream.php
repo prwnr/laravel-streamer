@@ -164,7 +164,18 @@ class Stream
             throw new StreamNotFoundException("No results for stream $this->name");
         }
 
-        return $result;
+        return [
+            'length' => null,
+            'radix-tree-keys' => null,
+            'radix-tree-nodes' => null,
+            'last-generated-id' => null,
+            'max-deleted-entry-id' => null,
+            'entries-added' => null,
+            'recorded-first-entry-id' => null,
+            'entries' => null,
+            'groups' => null,
+            ...$result,
+        ];
     }
 
     /**
