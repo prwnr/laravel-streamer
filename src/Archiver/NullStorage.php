@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Prwnr\Streamer\Archiver;
 
 use Illuminate\Support\Collection;
@@ -13,7 +15,6 @@ class NullStorage implements ArchiveStorage
      */
     public function create(Message $message): void
     {
-        //
     }
 
     /**

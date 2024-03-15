@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Prwnr\Streamer\Stream;
 
 use Exception;
@@ -94,7 +96,7 @@ class MultiStream
         return $deleted;
     }
 
-    public function await(string $lastSeenId = '', int $timeout = 0): ?array
+    public function await(string $lastSeenId = '', float $timeout = 0.0): ?array
     {
         if ($lastSeenId === '' || $lastSeenId === '0') {
             $lastSeenId = $this->getNewEntriesKey();
@@ -167,7 +169,7 @@ class MultiStream
         return $list;
     }
 
-    private function awaitSingle(Stream $stream, string $lastSeenId, int $timeout): array
+    private function awaitSingle(Stream $stream, string $lastSeenId, float $timeout): array
     {
         if (!$this->consumer && !$this->group) {
             return $stream->await($lastSeenId, $timeout);
@@ -181,7 +183,7 @@ class MultiStream
         return $consumer->await($lastSeenId, $timeout);
     }
 
-    private function awaitMultiple(string $lastSeenId, int $timeout): array
+    private function awaitMultiple(string $lastSeenId, float $timeout): array
     {
         $streams = $this->streams->map(static fn (Stream $s): string => $lastSeenId)->toArray();
 

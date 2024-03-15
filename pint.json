@@ -32,6 +32,7 @@
       "tokens": ["extra", "throw", "use", "use_trait", "curly_brace_block", "continue"]
     },
     "single_space_after_construct": true,
-    "binary_operator_spaces": true
+    "binary_operator_spaces": true,
+    "declare_strict_types": true
   }
 }
