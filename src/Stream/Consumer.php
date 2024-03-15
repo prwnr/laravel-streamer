@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Prwnr\Streamer\Stream;
 
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
@@ -27,7 +29,7 @@ class Consumer
         return self::NEW_ENTRIES;
     }
 
-    public function await(string $lastSeenId = self::NEW_ENTRIES, int $timeout = 0): array
+    public function await(string $lastSeenId = self::NEW_ENTRIES, float $timeout = 0.0): array
     {
         $result = $this->redis()->xReadGroup(
             $this->group,
@@ -70,8 +72,6 @@ class Consumer
 
     /**
      * Claim all given messages that have minimum idle time of $idleTime milliseconds.
-     *
-     *
      */
     public function claim(array $ids, int $idleTime, bool $justId = true): array
     {

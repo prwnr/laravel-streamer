@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     /*
@@ -96,6 +98,6 @@ return [
     | Driver should implement \Prwnr\Streamer\Contracts\ArchiveStorage contract.
     */
     'archive' => [
-        'storage_driver' => 'null'
-    ]
+        'storage_driver' => 'null',
+    ],
 ];

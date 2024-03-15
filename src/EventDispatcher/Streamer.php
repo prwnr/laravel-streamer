@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Prwnr\Streamer\EventDispatcher;
 
 use Exception;
@@ -20,7 +22,7 @@ class Streamer implements Emitter, Listener
 {
     protected string $startFrom;
 
-    protected float $readTimeout = 0.0;
+    protected float $readTimeout;
 
     protected float $listenTimeout;
 
@@ -39,11 +41,11 @@ class Streamer implements Emitter, Listener
      */
     public function __construct(private readonly History $history)
     {
-        $this->readTimeout = config('streamer.stream_read_timeout', 1);
-        $this->listenTimeout = config('streamer.listen_timeout', 1);
-        $this->readSleep = config('streamer.read_sleep', 1);
-        $this->readTimeout *= 1000;
-        $this->listenTimeout *= 1000;
+        $this->readTimeout = (float) config('streamer.stream_read_timeout', 1.0);
+        $this->listenTimeout = (float) config('streamer.listen_timeout', 1.0);
+        $this->readSleep = (float) config('streamer.read_sleep', 1.0);
+        $this->readTimeout *= 1000.0;
+        $this->listenTimeout *= 1000.0;
     }
 
     public function startFrom(string $startFrom): self
@@ -62,7 +64,6 @@ class Streamer implements Emitter, Listener
     }
 
     /**
-     * @inheritdoc
      * @throws JsonException
      */
     public function emit(Event $event, string $id = '*'): string
@@ -94,7 +95,7 @@ class Streamer implements Emitter, Listener
      *
      * @throws Throwable
      */
-    public function listen($events, $handlers): void
+    public function listen(string|array $events, array|callable $handlers): void
     {
         if ($this->inLoop) {
             return;
@@ -153,7 +154,7 @@ class Streamer implements Emitter, Listener
     private function adjustGroupReadTimeout(): void
     {
         if ($this->readTimeout === 0.0) {
-            $this->readTimeout = 2000;
+            $this->readTimeout = 2000.0;
         }
     }
 
@@ -166,7 +167,7 @@ class Streamer implements Emitter, Listener
             $payload = $streams->await($lastSeenId, $this->readTimeout);
             if (!$payload) {
                 $lastSeenId = $streams->getNewEntriesKey();
-                sleep($this->readSleep);
+                sleep((int) $this->readSleep);
                 if ($this->shouldStop($start)) {
                     break;
                 }

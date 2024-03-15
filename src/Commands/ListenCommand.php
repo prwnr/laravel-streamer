@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Prwnr\Streamer\Commands;
 
 use Exception;
@@ -80,7 +82,11 @@ class ListenCommand extends Command
             $this->setupGroupListening();
         }
 
-        $this->maxAttempts = $this->option('max-attempts');
+        $maxAttempts = $this->option('max-attempts');
+        if ($maxAttempts !== null) {
+            $this->maxAttempts = (int) $maxAttempts;
+        }
+
         $this->listen($events, function (ReceivedMessage $message): void {
             $failed = false;
             foreach (ListenersStack::getListenersFor($message->getEventName()) as $listener) {
@@ -242,7 +248,7 @@ class ListenCommand extends Command
             }
 
             $consumer = new Stream\Consumer($consumerName, $stream, $this->option('group'));
-            $consumer->claim($messages, $this->option('reclaim'));
+            $consumer->claim($messages, (int) $this->option('reclaim'));
         }
     }
 
