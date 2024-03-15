@@ -22,7 +22,7 @@ class Streamer implements Emitter, Listener
 {
     protected string $startFrom;
 
-    protected float $readTimeout = 0.0;
+    protected float $readTimeout;
 
     protected float $listenTimeout;
 
@@ -64,7 +64,6 @@ class Streamer implements Emitter, Listener
     }
 
     /**
-     * @inheritdoc
      * @throws JsonException
      */
     public function emit(Event $event, string $id = '*'): string

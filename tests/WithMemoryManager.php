@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
 use Prwnr\Streamer\Archiver\StorageManager;
@@ -7,9 +9,6 @@ use Tests\Stubs\MemoryArchiveStorage;
 
 trait WithMemoryManager
 {
-    /**
-     * @var null|StorageManager
-     */
     protected ?StorageManager $manager;
 
     public function setUpMemoryManager(): void

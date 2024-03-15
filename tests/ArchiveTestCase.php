@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
 use Prwnr\Streamer\EventDispatcher\Message;
@@ -21,7 +23,6 @@ class ArchiveTestCase extends TestCase
 
         $this->manager = null;
     }
-
 
     protected function addArchiveMessage(string $stream, string $id, array $data): Message
     {
