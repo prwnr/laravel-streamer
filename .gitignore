@@ -3,3 +3,5 @@
 /vendor
 composer.lock
 phpunit.xml
+.DS_Store
+.phpunit.cache

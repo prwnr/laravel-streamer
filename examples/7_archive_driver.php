@@ -11,7 +11,7 @@ use Prwnr\Streamer\EventDispatcher\Message;
 // The driver class should implement ArchiveStorage contract and all its methods like in this example:
 class MemoryStorageExample implements ArchiveStorage
 {
-    private $items = [];
+    private array $items = [];
 
     /**
      * Creation of the message in storage (database or else)

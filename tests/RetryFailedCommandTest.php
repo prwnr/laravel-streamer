@@ -56,27 +56,39 @@ class RetryFailedCommandTest extends TestCase
 
     public function test_retries_all_failed_messages(): void
     {
-        Carbon::withTestNow('2020-10-10', function () {
+        Carbon::withTestNow('2020-10-10', function (): void {
             $this->failFakeMessage('foo.bar', '123', ['payload' => 123]);
         });
-        Carbon::withTestNow('2020-10-11', function () {
+        Carbon::withTestNow('2020-10-11', function (): void {
             $this->failFakeMessage('foo.bar', '345', ['payload' => 123]);
         });
-        Carbon::withTestNow('2020-10-12', function () {
+        Carbon::withTestNow('2020-10-12', function (): void {
             $this->failFakeMessage('foo.bar', '678', ['payload' => 123]);
         });
 
         $this->expectsListenersToBeCalled([
-            LocalListener::class
+            LocalListener::class,
         ]);
 
         $this->artisan('streamer:failed:retry', ['--all' => true])
-            ->expectsOutput(sprintf('Successfully retried [123] on foo.bar stream by [%s] listener',
-                LocalListener::class))
-            ->expectsOutput(sprintf('Successfully retried [345] on foo.bar stream by [%s] listener',
-                LocalListener::class))
-            ->expectsOutput(sprintf('Successfully retried [678] on foo.bar stream by [%s] listener',
-                LocalListener::class))
+            ->expectsOutput(
+                sprintf(
+                    'Successfully retried [123] on foo.bar stream by [%s] listener',
+                    LocalListener::class
+                )
+            )
+            ->expectsOutput(
+                sprintf(
+                    'Successfully retried [345] on foo.bar stream by [%s] listener',
+                    LocalListener::class
+                )
+            )
+            ->expectsOutput(
+                sprintf(
+                    'Successfully retried [678] on foo.bar stream by [%s] listener',
+                    LocalListener::class
+                )
+            )
             ->assertExitCode(0);
 
         $this->assertEquals(0, $this->redis()->sCard(MessagesRepository::ERRORS_SET));
@@ -89,12 +101,16 @@ class RetryFailedCommandTest extends TestCase
         $this->failFakeMessage('foo.bar', '678', ['payload' => 123]);
 
         $this->expectsListenersToBeCalled([
-            LocalListener::class
+            LocalListener::class,
         ]);
 
         $this->artisan('streamer:failed:retry', ['--id' => '123'])
-            ->expectsOutput(sprintf('Successfully retried [123] on foo.bar stream by [%s] listener',
-                LocalListener::class))
+            ->expectsOutput(
+                sprintf(
+                    'Successfully retried [123] on foo.bar stream by [%s] listener',
+                    LocalListener::class
+                )
+            )
             ->assertExitCode(0);
 
         $this->assertEquals(2, $this->redis()->sCard(MessagesRepository::ERRORS_SET));
@@ -107,7 +123,7 @@ class RetryFailedCommandTest extends TestCase
         $this->failFakeMessage('foo.other', '678', ['payload' => 123]);
 
         $this->expectsListenersToBeCalled([
-            LocalListener::class
+            LocalListener::class,
         ]);
 
         $this->artisan('streamer:failed:retry', ['--stream' => 'foo.bar'])
@@ -118,23 +134,31 @@ class RetryFailedCommandTest extends TestCase
 
     public function test_retries_message_by_receiver(): void
     {
-        Carbon::withTestNow('2020-10-11', function () {
+        Carbon::withTestNow('2020-10-11', function (): void {
             $this->failFakeMessage('foo.bar', '123', ['payload' => 123], new AnotherLocalListener());
         });
-        Carbon::withTestNow('2020-10-12', function () {
+        Carbon::withTestNow('2020-10-12', function (): void {
             $this->failFakeMessage('foo.bar', '345', ['payload' => 123], new AnotherLocalListener());
         });
         $this->failFakeMessage('foo.bar', '678', ['payload' => 123]);
 
         $this->expectsListenersToBeCalled([
-            LocalListener::class
+            LocalListener::class,
         ]);
 
         $this->artisan('streamer:failed:retry', ['--receiver' => AnotherLocalListener::class])
-            ->expectsOutput(sprintf('Successfully retried [123] on foo.bar stream by [%s] listener',
-                AnotherLocalListener::class))
-            ->expectsOutput(sprintf('Successfully retried [345] on foo.bar stream by [%s] listener',
-                AnotherLocalListener::class))
+            ->expectsOutput(
+                sprintf(
+                    'Successfully retried [123] on foo.bar stream by [%s] listener',
+                    AnotherLocalListener::class
+                )
+            )
+            ->expectsOutput(
+                sprintf(
+                    'Successfully retried [345] on foo.bar stream by [%s] listener',
+                    AnotherLocalListener::class
+                )
+            )
             ->assertExitCode(0);
 
         $this->assertEquals(1, $this->redis()->sCard(MessagesRepository::ERRORS_SET));
@@ -147,14 +171,18 @@ class RetryFailedCommandTest extends TestCase
         $this->failFakeMessage('foo.other', '123', ['payload' => 123]);
 
         $this->expectsListenersToBeCalled([
-            LocalListener::class
+            LocalListener::class,
         ]);
 
         $this->artisan('streamer:failed:retry', [
             '--id' => '123',
             '--stream' => 'foo.bar',
-        ])->expectsOutput(sprintf('Successfully retried [123] on foo.bar stream by [%s] listener',
-            AnotherLocalListener::class))
+        ])->expectsOutput(
+            sprintf(
+                'Successfully retried [123] on foo.bar stream by [%s] listener',
+                AnotherLocalListener::class
+            )
+        )
             ->assertExitCode(0);
 
         $this->assertEquals(2, $this->redis()->sCard(MessagesRepository::ERRORS_SET));
@@ -171,9 +199,13 @@ class RetryFailedCommandTest extends TestCase
         $this->artisan('streamer:failed:retry', [
             '--id' => '123',
             '--stream' => 'foo.bar',
-            '--receiver' => AnotherLocalListener::class
-        ])->expectsOutput(sprintf('Successfully retried [123] on foo.bar stream by [%s] listener',
-            AnotherLocalListener::class))
+            '--receiver' => AnotherLocalListener::class,
+        ])->expectsOutput(
+            sprintf(
+                'Successfully retried [123] on foo.bar stream by [%s] listener',
+                AnotherLocalListener::class
+            )
+        )
             ->assertExitCode(0);
 
         $this->assertEquals(2, $this->redis()->sCard(MessagesRepository::ERRORS_SET));
@@ -201,7 +233,9 @@ class RetryFailedCommandTest extends TestCase
             ->andThrow(new MessageRetryFailedException($message, 'errored again'));
 
         $this->artisan('streamer:failed:retry', ['--all' => true])
-            ->expectsOutput('Failed to retry [123] on foo.bar stream by [Tests\Stubs\LocalListener] listener. Error: errored again')
+            ->expectsOutput(
+                'Failed to retry [123] on foo.bar stream by [Tests\Stubs\LocalListener] listener. Error: errored again'
+            )
             ->assertExitCode(0);
     }
 
@@ -215,12 +249,16 @@ class RetryFailedCommandTest extends TestCase
         $this->assertCount(2, $stream->read()['foo.bar']);
 
         $this->expectsListenersToBeCalled([
-            LocalListener::class
+            LocalListener::class,
         ]);
 
         $this->artisan('streamer:failed:retry', ['--id' => '123', '--purge' => true])
-            ->expectsOutput(sprintf('Successfully retried [123] on foo.bar stream by [%s] listener',
-                LocalListener::class))
+            ->expectsOutput(
+                sprintf(
+                    'Successfully retried [123] on foo.bar stream by [%s] listener',
+                    LocalListener::class
+                )
+            )
             ->expectsOutput("Message [123] has been purged from the 'foo.bar' stream.")
             ->assertExitCode(0);
 
@@ -238,26 +276,38 @@ class RetryFailedCommandTest extends TestCase
         $this->assertCount(1, $stream->read()['foo.bar']);
 
         $this->expectsListenersToBeCalled([
-            LocalListener::class
+            LocalListener::class,
         ]);
 
-        $this->artisan('streamer:failed:retry',
-            ['--id' => '123', '--receiver' => LocalListener::class, '--purge' => true])
-            ->expectsOutput(sprintf('Successfully retried [123] on foo.bar stream by [%s] listener',
-                LocalListener::class))
+        $this->artisan(
+            'streamer:failed:retry',
+            ['--id' => '123', '--receiver' => LocalListener::class, '--purge' => true]
+        )
+            ->expectsOutput(
+                sprintf(
+                    'Successfully retried [123] on foo.bar stream by [%s] listener',
+                    LocalListener::class
+                )
+            )
             ->assertExitCode(0);
 
         $this->assertEquals(1, $this->redis()->sCard(MessagesRepository::ERRORS_SET));
         $this->assertCount(1, $stream->read()['foo.bar']);
 
         $this->expectsListenersToBeCalled([
-            AnotherLocalListener::class
+            AnotherLocalListener::class,
         ]);
 
-        $this->artisan('streamer:failed:retry',
-            ['--id' => '123', '--receiver' => AnotherLocalListener::class, '--purge' => true])
-            ->expectsOutput(sprintf('Successfully retried [123] on foo.bar stream by [%s] listener',
-                AnotherLocalListener::class))
+        $this->artisan(
+            'streamer:failed:retry',
+            ['--id' => '123', '--receiver' => AnotherLocalListener::class, '--purge' => true]
+        )
+            ->expectsOutput(
+                sprintf(
+                    'Successfully retried [123] on foo.bar stream by [%s] listener',
+                    AnotherLocalListener::class
+                )
+            )
             ->expectsOutput("Message [123] has been purged from the 'foo.bar' stream.")
             ->assertExitCode(0);
 
@@ -276,12 +326,16 @@ class RetryFailedCommandTest extends TestCase
         $this->assertCount(2, $stream->read()['foo.bar']);
 
         $this->expectsListenersToBeCalled([
-            LocalListener::class
+            LocalListener::class,
         ]);
 
         $this->artisan('streamer:failed:retry', ['--id' => '123', '--archive' => true])
-            ->expectsOutput(sprintf('Successfully retried [123] on foo.bar stream by [%s] listener',
-                LocalListener::class))
+            ->expectsOutput(
+                sprintf(
+                    'Successfully retried [123] on foo.bar stream by [%s] listener',
+                    LocalListener::class
+                )
+            )
             ->expectsOutput("Message [123] has been archived from the 'foo.bar' stream.")
             ->assertExitCode(0);
 
@@ -301,13 +355,19 @@ class RetryFailedCommandTest extends TestCase
         $this->assertCount(1, $stream->read()['foo.bar']);
 
         $this->expectsListenersToBeCalled([
-            LocalListener::class
+            LocalListener::class,
         ]);
 
-        $this->artisan('streamer:failed:retry',
-            ['--id' => '123', '--receiver' => LocalListener::class, '--archive' => true])
-            ->expectsOutput(sprintf('Successfully retried [123] on foo.bar stream by [%s] listener',
-                LocalListener::class))
+        $this->artisan(
+            'streamer:failed:retry',
+            ['--id' => '123', '--receiver' => LocalListener::class, '--archive' => true]
+        )
+            ->expectsOutput(
+                sprintf(
+                    'Successfully retried [123] on foo.bar stream by [%s] listener',
+                    LocalListener::class
+                )
+            )
             ->assertExitCode(0);
 
         $this->assertEquals(1, $this->redis()->sCard(MessagesRepository::ERRORS_SET));
@@ -315,13 +375,19 @@ class RetryFailedCommandTest extends TestCase
         $this->assertNull($this->manager->driver('memory')->find('foo.bar', '123'));
 
         $this->expectsListenersToBeCalled([
-            AnotherLocalListener::class
+            AnotherLocalListener::class,
         ]);
 
-        $this->artisan('streamer:failed:retry',
-            ['--id' => '123', '--receiver' => AnotherLocalListener::class, '--archive' => true])
-            ->expectsOutput(sprintf('Successfully retried [123] on foo.bar stream by [%s] listener',
-                AnotherLocalListener::class))
+        $this->artisan(
+            'streamer:failed:retry',
+            ['--id' => '123', '--receiver' => AnotherLocalListener::class, '--archive' => true]
+        )
+            ->expectsOutput(
+                sprintf(
+                    'Successfully retried [123] on foo.bar stream by [%s] listener',
+                    AnotherLocalListener::class
+                )
+            )
             ->expectsOutput("Message [123] has been archived from the 'foo.bar' stream.")
             ->assertExitCode(0);
 
@@ -339,7 +405,7 @@ class RetryFailedCommandTest extends TestCase
         $this->assertCount(1, $stream->read()['foo.bar']);
 
         $this->expectsListenersToBeCalled([
-            LocalListener::class
+            LocalListener::class,
         ]);
 
         $mock = $this->mock(Archiver::class);
@@ -348,9 +414,15 @@ class RetryFailedCommandTest extends TestCase
             ->andThrow(Exception::class, 'Something went wrong');
 
         $this->artisan('streamer:failed:retry', ['--id' => '123', '--archive' => true])
-            ->expectsOutput(sprintf('Successfully retried [123] on foo.bar stream by [%s] listener',
-                LocalListener::class))
-            ->expectsOutput("Message [123] from the 'foo.bar' stream could not be archived. Error: Something went wrong")
+            ->expectsOutput(
+                sprintf(
+                    'Successfully retried [123] on foo.bar stream by [%s] listener',
+                    LocalListener::class
+                )
+            )
+            ->expectsOutput(
+                "Message [123] from the 'foo.bar' stream could not be archived. Error: Something went wrong"
+            )
             ->assertExitCode(0);
 
         $this->assertEquals(0, $this->redis()->sCard(MessagesRepository::ERRORS_SET));

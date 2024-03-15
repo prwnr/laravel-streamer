@@ -4,7 +4,6 @@ namespace Tests;
 
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
-use Illuminate\Support\Arr;
 use Prwnr\Streamer\Concerns\ConnectsWithRedis;
 use Prwnr\Streamer\Errors\FailedMessage;
 use Prwnr\Streamer\Errors\MessagesRepository;
@@ -35,15 +34,15 @@ class ErrorsMessagesRepositoryTest extends TestCase
 
         $this->assertCount(0, $repository->all());
 
-        Carbon::withTestNow(Carbon::parse('2021-12-12 12:12:12'), function () {
+        Carbon::withTestNow(Carbon::parse('2021-12-12 12:12:12'), function (): void {
             $this->failFakeMessage('foo.bar', '123', ['payload' => 123]);
         });
 
-        Carbon::withTestNow(Carbon::parse('2021-12-12 12:15:12'), function () {
+        Carbon::withTestNow(Carbon::parse('2021-12-12 12:15:12'), function (): void {
             $this->failFakeMessage('other.bar', '321', ['payload' => 321]);
         });
 
-        Carbon::withTestNow(Carbon::parse('2021-12-12 12:20:12'), function () {
+        Carbon::withTestNow(Carbon::parse('2021-12-12 12:20:12'), function (): void {
             $this->failFakeMessage('some.bar', '456', ['payload' => 456]);
         });
 
@@ -71,10 +70,8 @@ class ErrorsMessagesRepositoryTest extends TestCase
                 'receiver' => LocalListener::class,
                 'error' => 'error',
                 'date' => '2021-12-12 12:20:12',
-            ]
-        ], $actual->map(static function (FailedMessage $message) {
-            return $message->jsonSerialize();
-        })->values()->toArray());
+            ],
+        ], $actual->map(static fn (FailedMessage $message): array => $message->jsonSerialize())->values()->toArray());
     }
 
     public function test_adds_new_failed_message(): void

@@ -34,24 +34,16 @@ class ListenCommand extends Command
      */
     protected $description = 'RedisStream listen command that awaits for new messages on given Stream and fires local events based on streamer configuration';
 
-    private Streamer $streamer;
-    private MessagesFailer $failer;
-    private ?int $maxAttempts;
-    private Archiver $archiver;
+    private ?int $maxAttempts = null;
 
     /**
      * ListenCommand constructor.
-     *
-     * @param  Streamer  $streamer
-     * @param  MessagesFailer  $failer
-     * @param  Archiver  $archiver
      */
-    public function __construct(Streamer $streamer, MessagesFailer $failer, Archiver $archiver)
-    {
-        $this->streamer = $streamer;
-        $this->failer = $failer;
-        $this->archiver = $archiver;
-
+    public function __construct(
+        private readonly Streamer $streamer,
+        private readonly MessagesFailer $failer,
+        private readonly Archiver $archiver
+    ) {
         parent::__construct();
     }
 
@@ -89,7 +81,7 @@ class ListenCommand extends Command
         }
 
         $this->maxAttempts = $this->option('max-attempts');
-        $this->listen($events, function (ReceivedMessage $message) {
+        $this->listen($events, function (ReceivedMessage $message): void {
             $failed = false;
             foreach (ListenersStack::getListenersFor($message->getEventName()) as $listener) {
                 $receiver = app()->make($listener);
@@ -130,9 +122,131 @@ class ListenCommand extends Command
     }
 
     /**
-     * @param  array  $events
-     * @param  callable  $handler
-     * @return void
+     * @inheritDoc
+     */
+    protected function getArguments(): array
+    {
+        return [
+            [
+                'events',
+                InputArgument::OPTIONAL,
+                'Name (or names separated by comma) of an event(s) that should be listened to',
+            ],
+        ];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getOptions(): array
+    {
+        return [
+            [
+                'all',
+                null,
+                InputOption::VALUE_NONE,
+                'Will start listening to all events that are registered in Listeners Stack. Will override usage of "events" argument',
+            ],
+            [
+                'group',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Name of your streaming group. Only when group is provided listener will listen on group as consumer',
+            ],
+            [
+                'consumer',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Name of your group consumer. If not provided a name will be created as groupname-timestamp',
+            ],
+            [
+                'reclaim',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Milliseconds of pending messages idle time, that should be reclaimed for current consumer in this group. Can be only used with group listening',
+            ],
+            [
+                'last_id',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'ID from which listener should start reading messages',
+            ],
+            [
+                'keep-alive',
+                null,
+                InputOption::VALUE_NONE,
+                'Will keep listener alive when any unexpected non-listener related error will occur by simply restarting listening.',
+            ],
+            [
+                'max-attempts',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Number of maximum attempts to restart a listener on an unexpected non-listener related error',
+            ],
+            [
+                'purge',
+                null,
+                InputOption::VALUE_NONE,
+                'Will remove message from the stream if it will be processed successfully by all listeners in the current stack.',
+            ],
+            [
+                'archive',
+                null,
+                InputOption::VALUE_NONE,
+                'Will remove message from the stream and store it in database if it will be processed successfully by all listeners in the current stack.',
+            ],
+        ];
+    }
+
+    private function getEventsToListen(): array
+    {
+        if ($this->option('all')) {
+            return array_keys(ListenersStack::all());
+        }
+
+        $events = $this->argument('events');
+        if (!$events) {
+            $this->error(
+                'Either "events" argument with list of events or "--all" option is required to start listening.'
+            );
+        }
+
+        return explode(',', $events);
+    }
+
+    private function setupGroupListening(): void
+    {
+        $multiStream = new Stream\MultiStream($this->getEventsToListen(), $this->option('group'));
+        $consumer = $this->option('consumer');
+        if (!$consumer) {
+            $consumer = $this->option('group') . '-' . time();
+        }
+
+        if ($this->option('reclaim')) {
+            if ($multiStream->streams()->count() > 1) {
+                $this->info('Reclaiming will reclaim pending messages on all listened events.');
+            }
+            $this->reclaimMessages($multiStream, $consumer);
+        }
+
+        $this->streamer->asConsumer($consumer, $this->option('group'));
+    }
+
+    private function reclaimMessages(Stream\MultiStream $multiStream, string $consumerName): void
+    {
+        foreach ($multiStream->streams() as $stream) {
+            $pendingMessages = $stream->pending($this->option('group'));
+            $messages = array_map(static fn ($message) => $message[0], $pendingMessages);
+            if ($messages === []) {
+                continue;
+            }
+
+            $consumer = new Stream\Consumer($consumerName, $stream, $this->option('group'));
+            $consumer->claim($messages, $this->option('reclaim'));
+        }
+    }
+
+    /**
      * @throws Throwable
      */
     private function listen(array $events, callable $handler): void
@@ -161,180 +275,60 @@ class ListenCommand extends Command
         }
     }
 
-    /**
-     * @return void
-     */
-    private function setupGroupListening(): void
+    private function printError(ReceivedMessage $message, string $listener, Throwable $e): void
     {
-        $multiStream = new Stream\MultiStream($this->getEventsToListen(), $this->option('group'));
-        $consumer = $this->option('consumer');
-        if (!$consumer) {
-            $consumer = $this->option('group').'-'.time();
-        }
-
-        if ($this->option('reclaim')) {
-            if ($multiStream->streams()->count() > 1) {
-                $this->info('Reclaiming will reclaim pending messages on all listened events.');
-            }
-            $this->reclaimMessages($multiStream, $consumer);
-        }
-
-        $this->streamer->asConsumer($consumer, $this->option('group'));
+        $this->error(
+            sprintf(
+                "Listener error. Failed processing message with ID %s on '%s' stream by %s. Error: %s",
+                $message->getId(),
+                $message->getEventName(),
+                $listener,
+                $e->getMessage()
+            )
+        );
     }
 
-    /**
-     * @param  Stream\MultiStream  $multiStream
-     * @param  string  $consumerName
-     * @return void
-     */
-    private function reclaimMessages(Stream\MultiStream $multiStream, string $consumerName): void
+    private function printInfo(ReceivedMessage $message, string $listener): void
     {
-        foreach ($multiStream->streams() as $stream) {
-            $pendingMessages = $stream->pending($this->option('group'));
-            $messages = array_map(static fn($message) => $message[0], $pendingMessages);
-            if (!$messages) {
-                continue;
-            }
-
-            $consumer = new Stream\Consumer($consumerName, $stream, $this->option('group'));
-            $consumer->claim($messages, $this->option('reclaim'));
-        }
+        $this->info(
+            sprintf(
+                "Processed message [%s] on '%s' stream by [%s] listener.",
+                $message->getId(),
+                $message->getEventName(),
+                $listener
+            )
+        );
     }
 
     /**
      * Removes message from the stream and stores message in DB.
      * No verification for other consumers is made in this archiving option.
-     *
-     * @param  ReceivedMessage  $message
      */
     private function archive(ReceivedMessage $message): void
     {
         try {
             $this->archiver->archive($message);
-            $this->info("Message [{$message->getId()}] has been archived from the '{$message->getEventName()}' stream.");
+            $this->info(
+                "Message [{$message->getId()}] has been archived from the '{$message->getEventName()}' stream."
+            );
         } catch (Exception $e) {
-            $this->warn("Message [{$message->getId()}] from the '{$message->getEventName()}' stream could not be archived. Error: ".$e->getMessage());
+            $this->warn(
+                "Message [{$message->getId()}] from the '{$message->getEventName()}' stream could not be archived. Error: " . $e->getMessage(
+                )
+            );
         }
     }
 
     /**
      * Removes message from the stream.
      * No verification for other consumers is made in this purging option.
-     *
-     * @param  ReceivedMessage  $message
      */
     private function purge(ReceivedMessage $message): void
     {
         $stream = new Stream($message->getEventName());
         $result = $stream->delete($message->getId());
-        if ($result) {
+        if ($result !== 0) {
             $this->info("Message [{$message->getId()}] has been purged from the '{$message->getEventName()}' stream.");
         }
-    }
-
-    /**
-     * @return array
-     */
-    private function getEventsToListen(): array
-    {
-        if ($this->option('all')) {
-            return array_keys(ListenersStack::all());
-        }
-
-        $events = $this->argument('events');
-        if (!$events) {
-            $this->error('Either "events" argument with list of events or "--all" option is required to start listening.');
-        }
-
-        return explode(',', $events);
-    }
-
-    /**
-     * @param  ReceivedMessage  $message
-     * @param  string  $listener
-     */
-    private function printInfo(ReceivedMessage $message, string $listener): void
-    {
-        $this->info(sprintf(
-            "Processed message [%s] on '%s' stream by [%s] listener.",
-            $message->getId(),
-            $message->getEventName(),
-            $listener
-        ));
-    }
-
-    /**
-     * @param  ReceivedMessage  $message
-     * @param  string  $listener
-     * @param  Throwable  $e
-     */
-    private function printError(ReceivedMessage $message, string $listener, Throwable $e): void
-    {
-        $this->error(sprintf(
-            "Listener error. Failed processing message with ID %s on '%s' stream by %s. Error: %s",
-            $message->getId(),
-            $message->getEventName(),
-            $listener,
-            $e->getMessage()
-        ));
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function getArguments(): array
-    {
-        return [
-            [
-                'events',
-                InputArgument::OPTIONAL,
-                'Name (or names separated by comma) of an event(s) that should be listened to'
-            ],
-        ];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function getOptions(): array
-    {
-        return [
-            [
-                'all', null, InputOption::VALUE_NONE,
-                'Will start listening to all events that are registered in Listeners Stack. Will override usage of "events" argument'
-            ],
-            [
-                'group', null, InputOption::VALUE_REQUIRED,
-                'Name of your streaming group. Only when group is provided listener will listen on group as consumer'
-            ],
-            [
-                'consumer', null, InputOption::VALUE_REQUIRED,
-                'Name of your group consumer. If not provided a name will be created as groupname-timestamp'
-            ],
-            [
-                'reclaim', null, InputOption::VALUE_REQUIRED,
-                'Milliseconds of pending messages idle time, that should be reclaimed for current consumer in this group. Can be only used with group listening'
-            ],
-            [
-                'last_id', null, InputOption::VALUE_REQUIRED,
-                'ID from which listener should start reading messages'
-            ],
-            [
-                'keep-alive', null, InputOption::VALUE_NONE,
-                'Will keep listener alive when any unexpected non-listener related error will occur by simply restarting listening.'
-            ],
-            [
-                'max-attempts', null, InputOption::VALUE_REQUIRED,
-                'Number of maximum attempts to restart a listener on an unexpected non-listener related error'
-            ],
-            [
-                'purge', null, InputOption::VALUE_NONE,
-                'Will remove message from the stream if it will be processed successfully by all listeners in the current stack.'
-            ],
-            [
-                'archive', null, InputOption::VALUE_NONE,
-                'Will remove message from the stream and store it in database if it will be processed successfully by all listeners in the current stack.'
-            ],
-        ];
     }
 }

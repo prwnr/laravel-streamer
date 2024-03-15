@@ -4,8 +4,8 @@ namespace Tests;
 
 use Illuminate\Support\Arr;
 use Prwnr\Streamer\Concerns\HashableMessage;
+use Prwnr\Streamer\Contracts\Errors\StreamableMessage;
 use Prwnr\Streamer\Contracts\Event;
-use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\EventDispatcher\Message;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
 
@@ -14,9 +14,9 @@ class MessageTest extends TestCase
     public function test_message_is_created_with_content(): void
     {
         $meta = [
-            'type'    => Event::TYPE_EVENT,
-            'domain'  => config('streamer.domain'),
-            'name'    => 'foo.bar',
+            'type' => Event::TYPE_EVENT,
+            'domain' => config('streamer.domain'),
+            'name' => 'foo.bar',
             'created' => time(),
         ];
         $data = ['foo' => 'bar'];
@@ -37,7 +37,7 @@ class MessageTest extends TestCase
     {
         $data = [
             'foo' => 'bar',
-            'bar' => 'foo bar foo'
+            'bar' => 'foo bar foo',
         ];
         $expectedId = '1-0';
         $expected = [
@@ -66,13 +66,13 @@ class MessageTest extends TestCase
     public function test_message_is_created_with_matching_hash(): void
     {
         $meta = [
-            'type'    => Event::TYPE_EVENT,
-            'domain'  => config('streamer.domain'),
-            'name'    => 'foo.bar',
+            'type' => Event::TYPE_EVENT,
+            'domain' => config('streamer.domain'),
+            'name' => 'foo.bar',
             'created' => time(),
         ];
         $data = ['foo' => 'bar'];
-        $key = $meta['type'].$meta['name'].$meta['domain'].json_encode($data, JSON_THROW_ON_ERROR);
+        $key = $meta['type'] . $meta['name'] . $meta['domain'] . json_encode($data, JSON_THROW_ON_ERROR);
         $hash = hash('SHA256', $key);
 
         $message = new Message($meta, $data);
@@ -85,7 +85,7 @@ class MessageTest extends TestCase
 
     public function test_message_without_content_is_not_hashed(): void
     {
-        $message = new class() implements StreamableMessage {
+        $message = new class () implements StreamableMessage {
             use HashableMessage;
 
             protected array $content = [];

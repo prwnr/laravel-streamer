@@ -10,9 +10,6 @@ use Symfony\Component\Console\Input\InputOption;
 
 abstract class ProcessMessagesCommand extends Command
 {
-    /**
-     * @return int
-     */
     public function handle(): int
     {
         if (!$this->option('streams')) {
@@ -20,7 +17,7 @@ abstract class ProcessMessagesCommand extends Command
             return 1;
         }
 
-        $olderThan = new Carbon('-'.$this->option('older_than'));
+        $olderThan = new Carbon('-' . $this->option('older_than'));
         $streams = explode(',', $this->option('streams'));
 
         $messageCount = 0;
@@ -37,20 +34,17 @@ abstract class ProcessMessagesCommand extends Command
             }
         }
 
-        $this->info(sprintf(
-            "Total of %d %s processed.",
-            $messageCount,
-            Str::plural('message', $messageCount)
-        ));
+        $this->info(
+            sprintf(
+                "Total of %d %s processed.",
+                $messageCount,
+                Str::plural('message', $messageCount)
+            )
+        );
 
         return 0;
     }
 
-    /**
-     * @param  string  $stream
-     * @param  string  $id
-     * @param  array  $message
-     */
     abstract protected function process(string $stream, string $id, array $message): void;
 
     /**
@@ -60,12 +54,16 @@ abstract class ProcessMessagesCommand extends Command
     {
         return [
             [
-                'streams', null, InputOption::VALUE_REQUIRED,
-                'List of streams to process separated by comma.'
+                'streams',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'List of streams to process separated by comma.',
             ],
             [
-                'older_than', null, InputOption::VALUE_REQUIRED,
-                'How old messages should be to get process. The format to use this option looks like: 1 day, 1 week, 5 days, 4 weeks etc. It will take the current time and subtract the option value.'
+                'older_than',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'How old messages should be to get process. The format to use this option looks like: 1 day, 1 week, 5 days, 4 weeks etc. It will take the current time and subtract the option value.',
             ],
         ];
     }

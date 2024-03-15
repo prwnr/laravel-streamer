@@ -4,9 +4,9 @@ namespace Tests;
 
 use Exception;
 use Mockery;
+use Prwnr\Streamer\Contracts\Errors\StreamableMessage;
 use Prwnr\Streamer\Contracts\Event;
 use Prwnr\Streamer\Contracts\MessageReceiver;
-use Prwnr\Streamer\Contracts\StreamableMessage;
 use Prwnr\Streamer\Errors\FailedMessagesHandler;
 use Prwnr\Streamer\EventDispatcher\Message;
 use Prwnr\Streamer\EventDispatcher\ReceivedMessage;
@@ -74,15 +74,14 @@ class TestCase extends \Orchestra\Testbench\TestCase
         string $id,
         array $data,
         ?MessageReceiver $listener = null
-    ): ReceivedMessage
-    {
+    ): ReceivedMessage {
         /** @var FailedMessagesHandler $handler */
         $handler = $this->app->make(FailedMessagesHandler::class);
         $message = new ReceivedMessage($id, [
             'name' => $stream,
-            'data' => json_encode($data, JSON_THROW_ON_ERROR)
+            'data' => json_encode($data, JSON_THROW_ON_ERROR),
         ]);
-        $listener = $listener ?? new LocalListener();
+        $listener ??= new LocalListener();
         $e = new Exception('error');
         $handler->store($message, $listener, $e);
 

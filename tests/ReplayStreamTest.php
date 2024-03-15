@@ -52,7 +52,7 @@ class ReplayStreamTest extends TestCase
         $this->assertEquals([
             'foo' => 'changed again',
             'bar' => 'different value',
-            'new bar' => true
+            'new bar' => true,
         ], $payload);
     }
 
@@ -84,7 +84,7 @@ class ReplayStreamTest extends TestCase
         $this->assertEquals([
             'foo' => 'changed',
             'bar' => 'bar initial',
-            'new bar' => true
+            'new bar' => true,
         ], $payload);
     }
 
@@ -132,7 +132,7 @@ class ReplayStreamTest extends TestCase
         $streamer->emit(new ReplayableFooBarEvent('123', [
             'foo' => 'foo',
             'bar' => 'bar',
-            'foobar' => 'foobar'
+            'foobar' => 'foobar',
         ]));
 
         $modChange = 0;
@@ -152,7 +152,7 @@ class ReplayStreamTest extends TestCase
         $this->assertEquals([
             'foo' => 'foo-1000',
             'bar' => 'bar',
-            'foobar' => 'foobar-10'
+            'foobar' => 'foobar-10',
         ], $recorder->replay('foo.bar', '123'));
     }
 
@@ -192,14 +192,8 @@ class ReplayStreamTest extends TestCase
 
 abstract class StreamerReplayableEvent implements Event, Replayable
 {
-    protected $payload;
-
-    protected $id;
-
-    public function __construct(string $id, array $payload)
+    public function __construct(protected string $id, protected array $payload)
     {
-        $this->id = $id;
-        $this->payload = $payload;
     }
 
     public function name(): string

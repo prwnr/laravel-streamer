@@ -2,7 +2,8 @@
 
 namespace Prwnr\Streamer\Exceptions;
 
-class AcknowledgingFailedException extends \Exception
-{
+use Exception;
 
+class AcknowledgingFailedException extends Exception
+{
 }

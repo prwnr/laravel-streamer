@@ -7,7 +7,7 @@ services:
       - ./:/var/www/html
 
   redis:
-    image: redis:6.0.7-alpine
+    image: redis:latest
     ports:
       - 6379:6379
     command: redis-server --appendonly yes

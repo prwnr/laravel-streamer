@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Exception;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithRedis;
 use Prwnr\Streamer\Stream;
 use Prwnr\Streamer\Stream\MultiStream;
@@ -94,12 +95,12 @@ class MultiStreamTest extends TestCase
             [
                 'stream' => 'foo',
                 'id' => '1-0',
-                'message' => ['foo' => 'bar']
+                'message' => ['foo' => 'bar'],
             ],
             [
                 'stream' => 'foo',
                 'id' => '2-0',
-                'message' => ['foo' => 'bar']
+                'message' => ['foo' => 'bar'],
             ],
         ], $result);
 
@@ -122,22 +123,22 @@ class MultiStreamTest extends TestCase
             [
                 'stream' => 'foo',
                 'id' => '1-0',
-                'message' => ['foo' => 'bar']
+                'message' => ['foo' => 'bar'],
             ],
             [
                 'stream' => 'bar',
                 'id' => '1-0',
-                'message' => ['foo' => 'bar']
+                'message' => ['foo' => 'bar'],
             ],
             [
                 'stream' => 'foo',
                 'id' => '2-0',
-                'message' => ['foo' => 'bar']
+                'message' => ['foo' => 'bar'],
             ],
             [
                 'stream' => 'bar',
                 'id' => '2-0',
-                'message' => ['foo' => 'bar']
+                'message' => ['foo' => 'bar'],
             ],
         ], $result);
     }
@@ -157,12 +158,12 @@ class MultiStreamTest extends TestCase
             [
                 'stream' => 'foo',
                 'id' => '1-0',
-                'message' => ['foo' => 'bar']
+                'message' => ['foo' => 'bar'],
             ],
             [
                 'stream' => 'foo',
                 'id' => '2-0',
-                'message' => ['foo' => 'bar']
+                'message' => ['foo' => 'bar'],
             ],
         ], $result);
     }
@@ -182,22 +183,22 @@ class MultiStreamTest extends TestCase
             [
                 'stream' => 'foo',
                 'id' => '1-0',
-                'message' => ['foo' => 'bar']
+                'message' => ['foo' => 'bar'],
             ],
             [
                 'stream' => 'bar',
                 'id' => '1-0',
-                'message' => ['foo' => 'bar']
+                'message' => ['foo' => 'bar'],
             ],
             [
                 'stream' => 'foo',
                 'id' => '2-0',
-                'message' => ['foo' => 'bar']
+                'message' => ['foo' => 'bar'],
             ],
             [
                 'stream' => 'bar',
                 'id' => '2-0',
-                'message' => ['foo' => 'bar']
+                'message' => ['foo' => 'bar'],
             ],
         ], $result);
     }
@@ -232,7 +233,7 @@ class MultiStreamTest extends TestCase
         $this->assertNotEmpty($result);
         $this->assertCount(2, $result);
 
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
         $this->expectExceptionMessage('Not all messages were acknowledged. Streams affected: bar');
 
         $multi->acknowledge(['foo' => ['1-0'], 'bar' => ['1-0', '2-0']]);

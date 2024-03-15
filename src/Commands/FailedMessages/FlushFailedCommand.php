@@ -18,27 +18,15 @@ class FlushFailedCommand extends Command
      */
     protected $description = 'Deletes all failed stream messages.';
 
-    private Repository $repository;
-
-    /**
-     * FailedListCommand constructor.
-     *
-     * @param  Repository  $errorsRepository
-     */
-    public function __construct(Repository $errorsRepository)
+    public function __construct(private readonly Repository $repository)
     {
         parent::__construct();
-
-        $this->repository = $errorsRepository;
     }
 
-    /**
-     * @return int
-     */
     public function handle(): int
     {
         $count = $this->repository->count();
-        if (!$count) {
+        if ($count === 0) {
             $this->info('No messages to remove.');
             return 0;
         }

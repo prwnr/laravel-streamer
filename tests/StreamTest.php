@@ -295,15 +295,18 @@ class StreamTest extends TestCase
         $actual = $stream->info();
 
         $this->assertNotEmpty($actual);
-        $this->assertCount(7, $actual);
-        foreach (
-            [
-                'length', 'radix-tree-keys', 'radix-tree-nodes', 'groups', 'last-generated-id', 'first-entry',
-                'last-entry'
-            ] as $key
-        ) {
-            $this->assertArrayHasKey($key, $actual);
-        }
+        $this->assertEquals([
+            'length',
+            'radix-tree-keys',
+            'radix-tree-nodes',
+            'last-generated-id',
+            'max-deleted-entry-id',
+            'entries-added',
+            'recorded-first-entry-id',
+            'groups',
+            'first-entry',
+            'last-entry',
+        ], array_keys($actual));
         $this->assertEquals(10, $actual['length']);
         $this->assertEquals(1, $actual['groups']);
         $this->assertEquals($messages[9], $actual['last-generated-id']);
@@ -335,15 +338,17 @@ class StreamTest extends TestCase
         $actual = $stream->fullInfo();
 
         $this->assertNotEmpty($actual);
-        $this->assertCount(6, $actual);
-        foreach (
-            [
-                'length', 'radix-tree-keys', 'radix-tree-nodes', 'last-generated-id', 'last-generated-id', 'entries',
-                'groups'
-            ] as $key
-        ) {
-            $this->assertArrayHasKey($key, $actual);
-        }
+        $this->assertEquals([
+            'length',
+            'radix-tree-keys',
+            'radix-tree-nodes',
+            'last-generated-id',
+            'max-deleted-entry-id',
+            'entries-added',
+            'recorded-first-entry-id',
+            'entries',
+            'groups',
+        ], array_keys($actual));
         $this->assertEquals(10, $actual['length']);
         $this->assertCount(1, $actual['groups']);
         $this->assertCount(10, $actual['entries']);

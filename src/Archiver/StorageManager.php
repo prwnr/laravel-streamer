@@ -10,7 +10,7 @@ use Prwnr\Streamer\EventDispatcher\Message;
 use RuntimeException;
 
 /**
- * Class StorageManager
+ * Class StorageManager.
  *
  * @mixin ArchiveStorage
  * @method void create(Message $message)
@@ -22,9 +22,8 @@ use RuntimeException;
 class StorageManager extends Manager
 {
     /**
-     * Create null driver
+     * Create null driver.
      *
-     * @return ArchiveStorage
      * @throws BindingResolutionException
      */
     public function createNullDriver(): ArchiveStorage

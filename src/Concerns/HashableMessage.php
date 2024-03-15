@@ -24,7 +24,7 @@ trait HashableMessage
             $data = json_encode($this->content['data'], JSON_THROW_ON_ERROR);
         }
 
-        $key = $this->content['type'].$this->content['name'].$this->content['domain'].$data;
+        $key = $this->content['type'] . $this->content['name'] . $this->content['domain'] . $data;
         $hash = hash('SHA256', $key);
         $this->content['hash'] = $hash;
     }

@@ -84,7 +84,7 @@ class StreamerTest extends TestCase
         $ids = [];
         $ids[] = $streamer->emit($event);
         $ids[] = $streamer->emit($event);
-        $callback = function ($message, $streamer) use (&$ids) {
+        $callback = function ($message, $streamer) use (&$ids): void {
             $content = $message->getContent();
             $this->assertInstanceOf(ReceivedMessage::class, $message);
             $this->assertInstanceOf(Streamer::class, $streamer);
@@ -92,7 +92,7 @@ class StreamerTest extends TestCase
             $this->assertEquals(array_shift($ids), $message->getId());
             $this->assertEquals(['foo' => 'bar'], $content['data']);
 
-            if (empty($ids)) {
+            if ($ids === []) {
                 $streamer->cancel(); // break out of the listener loop
             }
         };
@@ -109,7 +109,7 @@ class StreamerTest extends TestCase
         $event = $this->makeEvent();
 
         $id = $streamer->emit($event);
-        $callback = function ($message, $streamer) use ($id) {
+        $callback = function ($message, $streamer) use ($id): void {
             $content = $message->getContent();
             $this->assertInstanceOf(ReceivedMessage::class, $message);
             $this->assertInstanceOf(Streamer::class, $streamer);
@@ -131,7 +131,7 @@ class StreamerTest extends TestCase
         $ids = [];
         $ids[] = $streamer->emit($event);
         $ids[] = $streamer->emit($event);
-        $callback = function ($message, $streamer) use (&$ids) {
+        $callback = function ($message, $streamer) use (&$ids): void {
             $content = $message->getContent();
             $this->assertInstanceOf(ReceivedMessage::class, $message);
             $this->assertInstanceOf(Streamer::class, $streamer);
@@ -139,7 +139,7 @@ class StreamerTest extends TestCase
             $this->assertEquals(array_shift($ids), $message->getId());
             $this->assertEquals(['foo' => 'bar'], $content['data']);
 
-            if (empty($ids)) {
+            if ($ids === []) {
                 $streamer->cancel(); // break out of the listener loop
             }
         };
@@ -161,7 +161,7 @@ class StreamerTest extends TestCase
             ->once()
             ->with("Listener error. Failed processing message with ID $id on '{$event->name()}' stream. Error: error");
 
-        $callback = function () {
+        $callback = function (): never {
             throw new Exception('error');
         };
 
@@ -176,8 +176,8 @@ class StreamerTest extends TestCase
         $streamer = new Streamer(new EventHistory());
         $event = $this->makeEvent();
         $id = $streamer->emit($event);
-        $callback = function ($message, $streamer) use ($id) {
-            $streamer->listen('bar.foo', static function ($message, $streamer) {
+        $callback = function ($message, $streamer) use ($id): void {
+            $streamer->listen('bar.foo', static function ($message, $streamer): void {
             });
             $content = $message->getContent();
             $this->assertInstanceOf(ReceivedMessage::class, $message);
@@ -202,7 +202,7 @@ class StreamerTest extends TestCase
         $ids[] = $streamer->emit(new OtherBarStreamerEventStub());
         $ids[] = $streamer->emit(new OtherBarStreamerEventStub());
 
-        $fooBarHandler = function ($message, $streamer) use (&$ids) {
+        $fooBarHandler = function ($message, $streamer) use (&$ids): void {
             $content = $message->getContent();
             $this->assertInstanceOf(ReceivedMessage::class, $message);
             $this->assertInstanceOf(Streamer::class, $streamer);
@@ -210,12 +210,12 @@ class StreamerTest extends TestCase
             $this->assertEquals(array_shift($ids), $message->getId());
             $this->assertEquals(['foo' => 'bar'], $content['data']);
 
-            if (empty($ids)) {
+            if ($ids === []) {
                 $streamer->cancel(); // break out of the listener loop
             }
         };
 
-        $otherBarHandler = function ($message, $streamer) use (&$ids) {
+        $otherBarHandler = function ($message, $streamer) use (&$ids): void {
             $content = $message->getContent();
             $this->assertInstanceOf(ReceivedMessage::class, $message);
             $this->assertInstanceOf(Streamer::class, $streamer);
@@ -223,7 +223,7 @@ class StreamerTest extends TestCase
             $this->assertEquals(array_shift($ids), $message->getId());
             $this->assertEquals(['other' => 'bar'], $content['data']);
 
-            if (empty($ids)) {
+            if ($ids === []) {
                 $streamer->cancel(); // break out of the listener loop
             }
         };
@@ -246,7 +246,7 @@ class StreamerTest extends TestCase
         $ids[] = $streamer->emit(new OtherBarStreamerEventStub());
         $ids[] = $streamer->emit(new OtherBarStreamerEventStub());
 
-        $handler = function ($message, $streamer) use (&$ids) {
+        $handler = function ($message, $streamer) use (&$ids): void {
             $content = $message->getContent();
             $this->assertInstanceOf(ReceivedMessage::class, $message);
             $this->assertInstanceOf(Streamer::class, $streamer);
@@ -254,11 +254,10 @@ class StreamerTest extends TestCase
             $this->assertEquals(array_shift($ids), $message->getId());
             $this->assertContains($message->getEventName(), ['foo.bar', 'other.bar']);
 
-            if (empty($ids)) {
+            if ($ids === []) {
                 $streamer->cancel(); // break out of the listener loop
             }
         };
-
 
         $streamer->startFrom('0-0');
         $streamer->listen(['foo.bar', 'other.bar'], $handler);

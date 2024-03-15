@@ -8,7 +8,6 @@ use Tests\Stubs\LocalListener;
 
 class ListenersStackTest extends TestCase
 {
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -20,8 +19,8 @@ class ListenersStackTest extends TestCase
         $expected = [
             'foo.bar' => [
                 LocalListener::class,
-                AnotherLocalListener::class
-            ]
+                AnotherLocalListener::class,
+            ],
         ];
         ListenersStack::boot($expected);
 
@@ -33,11 +32,11 @@ class ListenersStackTest extends TestCase
         $expected = [
             'foo.bar' => [
                 LocalListener::class,
-                AnotherLocalListener::class
+                AnotherLocalListener::class,
             ],
             'bar.foo' => [
-                LocalListener::class
-            ]
+                LocalListener::class,
+            ],
         ];
 
         ListenersStack::add('foo.bar', LocalListener::class);
@@ -52,9 +51,9 @@ class ListenersStackTest extends TestCase
         $expected = [
             'foo.bar' => [
                 LocalListener::class,
-                AnotherLocalListener::class
+                AnotherLocalListener::class,
             ],
-            'bar.foo' => LocalListener::class
+            'bar.foo' => LocalListener::class,
         ];
 
         ListenersStack::addMany($expected);
@@ -62,11 +61,11 @@ class ListenersStackTest extends TestCase
         $expected = [
             'foo.bar' => [
                 LocalListener::class,
-                AnotherLocalListener::class
+                AnotherLocalListener::class,
             ],
             'bar.foo' => [
-                LocalListener::class
-            ]
+                LocalListener::class,
+            ],
         ];
         $this->assertEquals($expected, ListenersStack::all());
     }
@@ -76,7 +75,7 @@ class ListenersStackTest extends TestCase
         $expected = [
             'foo.bar' => [
                 LocalListener::class,
-                AnotherLocalListener::class
+                AnotherLocalListener::class,
             ],
         ];
 
@@ -92,9 +91,9 @@ class ListenersStackTest extends TestCase
         $expected = [
             'foo.bar' => [
                 LocalListener::class,
-                AnotherLocalListener::class
+                AnotherLocalListener::class,
             ],
-            'bar.foo' => LocalListener::class
+            'bar.foo' => LocalListener::class,
         ];
 
         ListenersStack::addMany($expected);
@@ -108,16 +107,16 @@ class ListenersStackTest extends TestCase
         $expected = [
             'foo.bar' => [
                 LocalListener::class,
-                AnotherLocalListener::class
+                AnotherLocalListener::class,
             ],
-            'bar.foo' => LocalListener::class
+            'bar.foo' => LocalListener::class,
         ];
 
         ListenersStack::addMany($expected);
 
         $this->assertEquals([
             LocalListener::class,
-            AnotherLocalListener::class
+            AnotherLocalListener::class,
         ], ListenersStack::getListenersFor('foo.bar'));
         $this->assertEquals([LocalListener::class], ListenersStack::getListenersFor('bar.foo'));
     }
