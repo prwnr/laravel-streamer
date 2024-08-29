@@ -6,6 +6,7 @@ namespace Prwnr\Streamer\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 use Prwnr\Streamer\Contracts\Archiver;
 use Prwnr\Streamer\Contracts\Errors\MessagesFailer;
 use Prwnr\Streamer\Contracts\MessageReceiver;
@@ -225,7 +226,7 @@ class ListenCommand extends Command
         $multiStream = new Stream\MultiStream($this->getEventsToListen(), $this->option('group'));
         $consumer = $this->option('consumer');
         if (!$consumer) {
-            $consumer = $this->option('group') . '-' . time();
+            $consumer = $this->option('group') . '-' . Str::random();
         }
 
         if ($this->option('reclaim')) {
