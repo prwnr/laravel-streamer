@@ -104,7 +104,7 @@ class ListenCommand extends Command
                     report($e);
 
                     $this->printError($message, $listener, $e);
-                    $this->failer->store($message, $receiver, $e);
+                    $this->failer->store($message, $receiver, new \Exception($e->getMessage(), $e->getCode(), $e));
 
                     continue;
                 }
