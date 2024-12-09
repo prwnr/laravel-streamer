@@ -188,7 +188,7 @@ class MultiStream
         $streams = $this->streams->map(static fn (Stream $s): string => $lastSeenId)->toArray();
 
         if (!$this->consumer || !$this->group) {
-            $result = $this->redis()->xRead($streams, null, $timeout);
+            $result = $this->redis()->xRead($streams, -1, $timeout);
             if (!is_array($result)) {
                 return [];
             }
@@ -196,7 +196,7 @@ class MultiStream
             return $result;
         }
 
-        $result = $this->redis()->xReadGroup($this->group, $this->consumer, $streams, null, $timeout);
+        $result = $this->redis()->xReadGroup($this->group, $this->consumer, $streams, -1, $timeout);
         if (!is_array($result)) {
             return [];
         }
