@@ -20,7 +20,7 @@
     },
     "require-dev": {
         "orchestra/testbench": "^8.0|^9.0|^10.0",
-        "phpunit/phpunit": "^10.0",
+        "phpunit/phpunit": "^10.0|^11.0",
         "predis/predis": "^1.1",
         "rector/rector": "^1.0",
         "laravel/pint": "^1.2"
