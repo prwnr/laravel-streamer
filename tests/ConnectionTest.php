@@ -13,71 +13,33 @@ class ConnectionTest extends TestCase
 {
     use InteractsWithRedis;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->setUpRedis();
-    }
+    private Connection $connection;
 
     protected function tearDown(): void
     {
         parent::tearDown();
-        $this->redis['phpredis']->connection()->flushall();
+        $this->connection->flushall();
         $this->tearDownRedis();
     }
 
-    public function test_redis_connection_trait_uses_default_connection(): void
+    public function test_redis_connection_trait_uses_default_connection()
     {
-        $foo = new class () {
-            use ConnectsWithRedis;
+        $this->createRedisConnection();
 
-            public function bar(): Connection
-            {
-                return $this->redis();
-            }
-        };
-
-        $this->assertInstanceOf(Connection::class, $foo->bar());
-        $this->assertInstanceOf(Redis::class, $foo->bar()->client());
-        $this->assertEquals('default', $foo->bar()->getName());
+        static::assertInstanceOf(Redis::class, $this->connection->client());
+        static::assertSame('default', $this->connection->getName());
     }
 
-    public function test_redis_connection_trait_uses_custom_connection(): void
+    public function test_redis_commands_works_with_custom_redis_connection()
     {
         $this->configureCustomRedisConnection();
+        $this->createRedisConnection();
 
-        $foo = new class () {
-            use ConnectsWithRedis;
-
-            public function bar(): Connection
-            {
-                return $this->redis();
-            }
-        };
-
-        $this->assertInstanceOf(Connection::class, $foo->bar());
-        $this->assertInstanceOf(Redis::class, $foo->bar()->client());
-        $this->assertEquals('custom', $foo->bar()->getName());
-    }
-
-    public function test_redis_commands_works_with_custom_redis_connection(): void
-    {
-        $this->configureCustomRedisConnection();
-
-        $foo = new class () {
-            use ConnectsWithRedis;
-
-            public function bar(): Connection
-            {
-                return $this->redis();
-            }
-        };
-
-        $this->assertInstanceOf(Connection::class, $foo->bar());
-        $this->assertInstanceOf(Redis::class, $foo->bar()->client());
-        $this->assertIsString($foo->bar()->XADD('foobar', '*', ['key' => 'value']));
-        $this->assertEquals(1, $foo->bar()->XLEN('foobar'));
-        $this->assertNotEmpty($foo->bar()->XREAD(['foobar' => '0']));
+        static::assertSame('custom', $this->connection->getName());
+        static::assertInstanceOf(Redis::class, $this->connection->client());
+        static::assertIsString($this->connection->XADD('foobar', '*', ['key' => 'value']));
+        static::assertEquals(1, $this->connection->XLEN('foobar'));
+        static::assertNotEmpty($this->connection->XREAD(['foobar' => '0']));
     }
 
     private function configureCustomRedisConnection(): void
@@ -90,5 +52,19 @@ class ConnectionTest extends TestCase
         ]);
 
         $this->app['config']->set('streamer.redis_connection', 'custom');
+    }
+
+    private function createRedisConnection(): void
+    {
+        $foo = new class () {
+            use ConnectsWithRedis;
+
+            public function bar(): Connection
+            {
+                return $this->redis();
+            }
+        };
+
+        $this->connection = $foo->bar();
     }
 }
