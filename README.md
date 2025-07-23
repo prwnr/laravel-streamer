@@ -386,3 +386,27 @@ has been taken.
 
 Check example's directory in this package to see how can you exactly use each command with package Stream and Consumer
 instances.
+
+
+### Acknowledge on Any Listener Failure
+
+A new configuration option is available in `config/streamer.php`:
+
+```php
+'ack_on_any_listener_failure' => env('STREAMER_ACK_ON_LISTENER_FAILURE', false),
+```
+
+**Description:**
+
+- If set to `true`, messages will only be acknowledged if all listeners succeed.
+- If any listener fails, the message will remain pending for the group/consumer and can be retried later.
+- If set to `false` (the default), messages are acknowledged after the handler, even if some listeners fail (backwards compatible behavior).
+- You can also control this via the `STREAMER_ACK_ON_LISTENER_FAILURE` environment variable.
+
+**Use case:**
+
+This option is useful when you want to ensure that all listeners have successfully processed a message before it is acknowledged and removed from the pending list. If any listener fails, the message will not be acknowledged, allowing for retries and improved reliability in distributed event processing.
+
+**Note on Retries and Redis Streams Best Practices:**
+
+While this library provides a retry function for failed messages, relying on retries as a primary recovery mechanism is considered an anti-pattern when using Redis Streams. Redis Streams are designed for at-least-once delivery, and the most robust approach is to acknowledge messages only after all listeners have successfully processed them. This ensures that no message is lost or processed incompletely, and avoids the pitfalls of repeated failures and message buildup in the pending list. The `ack_on_any_listener_failure` option enforces this best practice by keeping messages pending until all listeners succeed, making retries a fallback rather than the main strategy.
