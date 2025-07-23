@@ -44,6 +44,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Acknowledge on Any Listener Failure
+    |--------------------------------------------------------------------------
+    |
+    | If true, messages will only be acknowledged if all listeners succeed.
+    | If any listener fails, the message will remain pending for the group/consumer
+    | and can be retried later. If false, messages are acknowledged after the handler
+    | even if some listeners fail (backwards compatible).
+    |
+    */
+    'ack_on_any_listener_failure' => env('STREAMER_ACK_ON_LISTENER_FAILURE', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Streamer Redis connection
     |--------------------------------------------------------------------------
     |

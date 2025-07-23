@@ -113,6 +113,9 @@ class ListenCommand extends Command
             }
 
             if ($failed) {
+                if (config('streamer.ack_on_any_listener_failure', false)) {
+                    throw new \Prwnr\Streamer\Exceptions\ListenerFailedException('At least one listener failed');
+                }
                 return;
             }
 
@@ -260,6 +263,9 @@ class ListenCommand extends Command
     {
         try {
             $this->streamer->listen($events, $handler);
+        } catch (\Prwnr\Streamer\Exceptions\ListenerFailedException $e) {
+            // Always rethrow so Streamer can avoid acknowledging the message
+            throw $e;
         } catch (Throwable $e) {
             if (!$this->option('keep-alive')) {
                 throw $e;
