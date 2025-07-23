@@ -223,15 +223,13 @@ class ListenCommandTest extends TestCase
         $stream = new Stream('foo.bar');
         $stream->createGroup('bar');
         Streamer::emit($this->makeEvent());
-        $args = [
+        $this->expectsListenersToBeCalled($listeners);
+        $this->artisan('streamer:listen', [
             'events' => 'foo.bar',
             '--last_id' => '0-0',
             '--group' => 'bar',
             '--consumer' => 'foobar',
-        ];
-
-        $this->expectsListenersToBeCalled($listeners);
-        $this->artisan('streamer:listen', $args)
+        ])
             ->assertExitCode(0);
     }
 
@@ -245,14 +243,12 @@ class ListenCommandTest extends TestCase
         $stream = new Stream('foo.bar');
         $stream->createGroup('bar');
         Streamer::emit($this->makeEvent());
-        $args = [
+        $this->expectsListenersToBeCalled($listeners);
+        $this->artisan('streamer:listen', [
             'events' => 'foo.bar',
             '--last_id' => '0-0',
             '--group' => 'bar',
-        ];
-
-        $this->expectsListenersToBeCalled($listeners);
-        $this->artisan('streamer:listen', $args)
+        ])
             ->assertExitCode(0);
     }
 
@@ -264,15 +260,13 @@ class ListenCommandTest extends TestCase
         ];
         $this->withLocalListenersConfigured($listeners);
         Streamer::emit($this->makeEvent());
-        $args = [
+        $this->expectsListenersToBeCalled($listeners);
+        $this->artisan('streamer:listen', [
             'events' => 'foo.bar',
             '--last_id' => '0-0',
             '--group' => 'bar',
             '--consumer' => 'foobar',
-        ];
-
-        $this->expectsListenersToBeCalled($listeners);
-        $this->artisan('streamer:listen', $args)
+        ])
             ->assertExitCode(0);
 
         $stream = new Stream('foo.bar');
@@ -292,16 +286,14 @@ class ListenCommandTest extends TestCase
         Streamer::emit($this->makeEvent());
         //Consume messages without acknowledging them, so that they will stays as pending
         $consumer->await($consumer->getNewEntriesKey());
-        $args = [
+        $this->expectsListenersToBeCalled($listeners);
+        $this->artisan('streamer:listen', [
             'events' => 'foo.bar',
             '--last_id' => '0-0',
             '--group' => 'bar',
             '--consumer' => 'foobarB',
             '--reclaim' => '1',
-        ];
-
-        $this->expectsListenersToBeCalled($listeners);
-        $this->artisan('streamer:listen', $args)
+        ])
             ->assertExitCode(0);
     }
 
@@ -318,16 +310,14 @@ class ListenCommandTest extends TestCase
         Streamer::emit($this->makeEvent());
         //Consume messages without acknowledging them, so that they will stays as pending
         $consumer->await($consumer->getNewEntriesKey());
-        $args = [
+        $this->doesntExpectListenersToBeCalled($listeners);
+        $this->artisan('streamer:listen', [
             'events' => 'foo.bar',
             '--last_id' => '0-0',
             '--group' => 'bar',
             '--consumer' => 'foobarB',
             '--reclaim' => '10000',
-        ];
-
-        $this->doesntExpectListenersToBeCalled($listeners);
-        $this->artisan('streamer:listen', $args)
+        ])
             ->assertExitCode(0);
     }
 
@@ -338,16 +328,14 @@ class ListenCommandTest extends TestCase
             AnotherLocalListener::class,
         ];
         $this->withLocalListenersConfigured($listeners);
-        $args = [
+        $this->doesntExpectListenersToBeCalled($listeners);
+        $this->artisan('streamer:listen', [
             'events' => 'foo.bar',
             '--last_id' => '0-0',
             '--group' => 'bar',
             '--consumer' => 'foobarB',
             '--reclaim' => '10000',
-        ];
-
-        $this->doesntExpectListenersToBeCalled($listeners);
-        $this->artisan('streamer:listen', $args)
+        ])
             ->assertExitCode(0);
     }
 
@@ -545,7 +533,7 @@ class ListenCommandTest extends TestCase
 
     public function test_message_is_not_acknowledged_if_any_listener_fails_and_config_flag_is_on(): void
     {
-        $this->app['config']->set('streamer.ack_on_any_listener_failure', true);
+        $this->app['config']->set('streamer.always_acknowledge', false);
         $listeners = [
             ExceptionalListener::class,
             LocalListener::class,
@@ -560,23 +548,22 @@ class ListenCommandTest extends TestCase
         $event = $this->makeEvent();
         $id = Streamer::emit($event);
         // 3. Run the listen command with --last_id => '>'
-        $args = [
+        $this->artisan('streamer:listen', [
             'events' => 'foo.bar',
             '--last_id' => '>',
             '--group' => $group,
             '--consumer' => $consumer,
-        ];
-        $this->artisan('streamer:listen', $args)
+        ])
             ->assertExitCode(0);
         // 4. Assert the message is pending for the consumer
         $pending = $stream->pending($group, $consumer);
-        $pendingIds = array_map(fn($item) => $item[0], $pending);
+        $pendingIds = array_map(static fn($item) => $item[0], $pending);
         $this->assertContains($id, $pendingIds);
     }
 
     public function test_message_is_acknowledged_if_all_listeners_succeed_and_config_flag_is_on(): void
     {
-        $this->app['config']->set('streamer.ack_on_any_listener_failure', true);
+        $this->app['config']->set('streamer.always_acknowledge', true);
         $listeners = [
             LocalListener::class,
             AnotherLocalListener::class,
@@ -590,25 +577,23 @@ class ListenCommandTest extends TestCase
         // Create the group with last-delivered-id '0' so all messages are delivered
         $stream->createGroup($group, '0');
 
-        $args = [
+        $this->artisan('streamer:listen', [
             'events' => 'foo.bar',
             '--last_id' => '0-0',
             '--group' => $group,
             '--consumer' => $consumer,
-        ];
-
-        $this->artisan('streamer:listen', $args)
+        ])
             ->assertExitCode(0);
 
         // Message should NOT be pending for the group/consumer
         $pending = $stream->pending($group, $consumer);
-        $pendingIds = array_map(fn($item) => $item[0], $pending);
+        $pendingIds = array_map(static fn($item) => $item[0], $pending);
         $this->assertNotContains($id, $pendingIds);
     }
 
     public function test_message_is_acknowledged_on_failure_if_config_flag_is_off(): void
     {
-        $this->app['config']->set('streamer.ack_on_any_listener_failure', false);
+        $this->app['config']->set('streamer.always_acknowledge', false);
         $listeners = [
             ExceptionalListener::class,
             LocalListener::class,
@@ -622,19 +607,17 @@ class ListenCommandTest extends TestCase
         // Create the group with last-delivered-id '0' so all messages are delivered
         $stream->createGroup($group, '0');
 
-        $args = [
+        $this->artisan('streamer:listen', [
             'events' => 'foo.bar',
             '--last_id' => '0-0',
             '--group' => $group,
             '--consumer' => $consumer,
-        ];
-
-        $this->artisan('streamer:listen', $args)
+        ])
             ->assertExitCode(0);
 
         // Message should NOT be pending for the group/consumer (default behavior)
         $pending = $stream->pending($group, $consumer);
-        $pendingIds = array_map(fn($item) => $item[0], $pending);
+        $pendingIds = array_map(static fn($item) => $item[0], $pending);
         $this->assertNotContains($id, $pendingIds);
     }
 
@@ -653,23 +636,22 @@ class ListenCommandTest extends TestCase
         // 2. Create the group at '0' (after the event)
         $stream->createGroup($group, '0');
         // 3. Run the listen command with --last_id => '>'
-        $args = [
+        $this->artisan('streamer:listen', [
             'events' => 'foo.bar',
             '--last_id' => '>',
             '--group' => $group,
             '--consumer' => $consumer,
-        ];
-        $this->artisan('streamer:listen', $args)
+        ])
             ->assertExitCode(0);
         // 4. Assert the message is NOT pending for the consumer (was acknowledged)
         $pending = $stream->pending($group, $consumer);
-        $pendingIds = array_map(fn($item) => $item[0], $pending);
+        $pendingIds = array_map(static fn($item) => $item[0], $pending);
         $this->assertNotContains($id, $pendingIds);
     }
 
     public function test_group_created_after_event_leaves_pending_on_failure(): void
     {
-        $this->app['config']->set('streamer.ack_on_any_listener_failure', true);
+        $this->app['config']->set('streamer.always_acknowledge', false);
         $listeners = [
             ExceptionalListener::class,
         ];
@@ -683,17 +665,16 @@ class ListenCommandTest extends TestCase
         // 2. Create the group at '0' (after the event)
         $stream->createGroup($group, '0');
         // 3. Run the listen command with --last_id => '>'
-        $args = [
+        $this->artisan('streamer:listen', [
             'events' => 'foo.bar',
             '--last_id' => '>',
             '--group' => $group,
             '--consumer' => $consumer,
-        ];
-        $this->artisan('streamer:listen', $args)
+        ])
             ->assertExitCode(0);
         // 4. Assert the message IS pending for the consumer (was not acknowledged)
         $pending = $stream->pending($group, $consumer);
-        $pendingIds = array_map(fn($item) => $item[0], $pending);
+        $pendingIds = array_map(static fn($item) => $item[0], $pending);
         $this->assertContains($id, $pendingIds);
     }
 
@@ -713,17 +694,16 @@ class ListenCommandTest extends TestCase
         $id2 = \Prwnr\Streamer\Facades\Streamer::emit($event2);
         // Create the group with last-delivered-id '0' so all messages are delivered
         $stream->createGroup($group, '0');
-        $args = [
+        $this->artisan('streamer:listen', [
             'events' => 'foo.bar',
             '--last_id' => '>',
             '--group' => $group,
             '--consumer' => $consumer,
-        ];
-        $this->artisan('streamer:listen', $args)
+        ])
             ->assertExitCode(0);
         // Assert both messages are NOT pending for the consumer (were acknowledged)
         $pending = $stream->pending($group, $consumer);
-        $pendingIds = array_map(fn($item) => $item[0], $pending);
+        $pendingIds = array_map(static fn($item) => $item[0], $pending);
         $this->assertNotContains($id1, $pendingIds);
         $this->assertNotContains($id2, $pendingIds);
     }

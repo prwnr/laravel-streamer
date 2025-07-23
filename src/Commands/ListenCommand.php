@@ -17,6 +17,7 @@ use Prwnr\Streamer\Stream;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Throwable;
+use Prwnr\Streamer\Exceptions\ListenerFailedException;
 
 /**
  * Class ListenCommand.
@@ -113,10 +114,10 @@ class ListenCommand extends Command
             }
 
             if ($failed) {
-                if (config('streamer.ack_on_any_listener_failure', false)) {
-                    throw new \Prwnr\Streamer\Exceptions\ListenerFailedException('At least one listener failed');
+                if (config('streamer.always_acknowledge', true)) {
+                    return;
                 }
-                return;
+                throw new ListenerFailedException('At least one listener failed');
             }
 
             if ($this->option('archive')) {
@@ -263,7 +264,7 @@ class ListenCommand extends Command
     {
         try {
             $this->streamer->listen($events, $handler);
-        } catch (\Prwnr\Streamer\Exceptions\ListenerFailedException $e) {
+        } catch (ListenerFailedException $e) {
             // Always rethrow so Streamer can avoid acknowledging the message
             throw $e;
         } catch (Throwable $e) {
