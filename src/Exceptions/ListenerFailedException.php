@@ -6,7 +6,9 @@ namespace Prwnr\Streamer\Exceptions;
 
 use Exception;
 
+/**
+ * Used to signal that at least one listener failed
+ */
 class ListenerFailedException extends Exception
 {
-    // Used to signal that at least one listener failed and message should not be acknowledged
 } 
