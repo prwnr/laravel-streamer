@@ -44,6 +44,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Always Acknowledge
+    |--------------------------------------------------------------------------
+    |
+    | If true (default), messages will be acknowledged after the handler, even if some listeners fail (backwards compatible).
+    | If false, messages will only be acknowledged if all listeners succeed. If any listener fails, the message will remain pending for the group/consumer and can be retried later.
+    |
+    */
+    'always_acknowledge' => env('STREAMER_ALWAYS_ACKNOWLEDGE', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Streamer Redis connection
     |--------------------------------------------------------------------------
     |
