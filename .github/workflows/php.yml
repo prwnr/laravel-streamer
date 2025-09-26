@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ['8.1', '8.2']
+        php-version: ['8.1', '8.2', '8.3', '8.4']
         redis-version: [6, 7]
     name: PHP ${{ matrix.php-version }}, Redis ${{ matrix.redis-version }}
     steps:

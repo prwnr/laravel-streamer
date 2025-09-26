@@ -77,7 +77,7 @@ class ArchiveStorageManagerTest extends TestCase
                     ]);
                 }
 
-                public function delete(string $event, string $id = null): int
+                public function delete(string $event, ?string $id = null): int
                 {
                     if ($event === 'foo.bar' && $id === '123') {
                         return 1;
