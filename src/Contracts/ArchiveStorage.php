@@ -40,5 +40,5 @@ interface ArchiveStorage
      * @param string|null $id without ID being passed, all messages of a given event should be deleted
      * @return int count of deleted messages
      */
-    public function delete(string $event, string $id = null): int;
+    public function delete(string $event, ?string $id = null): int;
 }

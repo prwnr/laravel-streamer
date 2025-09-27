@@ -18,5 +18,5 @@ interface History
      * Replays event history by its specific identifier.
      *
      */
-    public function replay(string $event, string $identifier, Carbon $until = null): array;
+    public function replay(string $event, string $identifier, ?Carbon $until = null): array;
 }

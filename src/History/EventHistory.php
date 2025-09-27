@@ -27,7 +27,7 @@ class EventHistory implements History
      * @inheritDoc
      * @throws JsonException
      */
-    public function replay(string $event, string $identifier, Carbon $until = null): array
+    public function replay(string $event, string $identifier, ?Carbon $until = null): array
     {
         $key = $event . Snapshot::KEY_SEPARATOR . $identifier;
         $snapshots = $this->redis()->lRange($key, 0, $this->redis()->lLen($key));
