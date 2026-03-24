@@ -30,7 +30,7 @@ class ArchiveStorageManagerTest extends TestCase
         $manager = new StorageManager($this->app);
         $manager->extend(
             'custom',
-            static fn (): ArchiveStorage => new class () implements ArchiveStorage {
+            fn (): ArchiveStorage => new class () implements ArchiveStorage {
                 public function create(Message $message): void
                 {
                 }
@@ -112,8 +112,7 @@ class ArchiveStorageManagerTest extends TestCase
     public function testCustomDriverNeedsToImplementStorageContract(): void
     {
         $manager = new StorageManager($this->app);
-        $manager->extend('custom', static fn (): object => new class () {
-        });
+        $manager->extend('custom', fn (): object => new class () {});
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage(
