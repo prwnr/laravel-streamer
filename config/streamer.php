@@ -111,4 +111,31 @@ return [
     'archive' => [
         'storage_driver' => 'null',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Local development (php artisan dev)
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, each entry of "listeners" is registered as a process
+    | of the "php artisan dev" command (Laravel 13.16+), named after its key.
+    | Disabled by default, as listeners consume and acknowledge messages.
+    |
+    | "events" accepts "*" (listen to all events, same as --all) or
+    | a comma separated list of event names.
+    | "args" is appended as-is to the streamer:listen command.
+    |
+    */
+    'dev' => [
+        'enabled' => env('STREAMER_DEV', false),
+
+        'listeners' => [
+            'laravel-streamer' => [
+                'events' => '*',
+                'group' => 'dev',
+                'consumer' => 'local',
+                'args' => '',
+            ],
+        ],
+    ],
 ];

@@ -410,3 +410,21 @@ This option is useful when you want to ensure that all listeners have successful
 **Note on Retries and Redis Streams Best Practices:**
 
 While this library provides a retry function for failed messages, relying on retries as a primary recovery mechanism is considered an anti-pattern when using Redis Streams. Redis Streams are designed for at-least-once delivery, and the most robust approach is to acknowledge messages only after all listeners have successfully processed them. This ensures that no message is lost or processed incompletely, and avoids the pitfalls of repeated failures and message buildup in the pending list. Setting `always_acknowledge` to false enforces this best practice by keeping messages pending until all listeners succeed, making retries a fallback rather than the main strategy.
+
+### Running listeners with `php artisan dev`
+
+On Laravel 13.16+, listeners can be started as processes of `php artisan dev`. It's opt-in, as listeners consume and
+acknowledge messages. Enable it with `STREAMER_DEV=true` and configure the processes in `config/streamer.php`:
+
+```php
+'dev' => [
+    'enabled' => env('STREAMER_DEV', false),
+    'listeners' => [
+        // process name => streamer:listen options
+        'laravel-streamer' => ['events' => '*', 'group' => 'dev', 'consumer' => 'local', 'args' => ''],
+    ],
+],
+```
+
+`events` accepts `*` (same as `--all`) or a comma separated list, and `args` is appended to the command. Events
+without local listeners are left out of the command, and entries with none left are skipped. Processes can be removed with `DevCommands::except('laravel-streamer')`.
