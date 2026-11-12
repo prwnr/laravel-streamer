@@ -428,4 +428,4 @@ acknowledge messages. Enable it with `STREAMER_DEV=true` and configure the proce
 ```
 
 `events` accepts `*` (same as `--all`) or a comma separated list, and `args` is appended to the command. Events
-without local listeners are left out of the command, and entries with none left are skipped. Processes can be removed with `DevCommands::except('laravel-streamer')`.
+without local listeners are left out of the command, and entries with none left are skipped. Registered processes are listed by `php artisan dev:list`, and can be removed with `DevCommands::except('laravel-streamer')`.

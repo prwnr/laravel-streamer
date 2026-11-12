@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests;
 
 use Illuminate\Console\Events\CommandStarting;
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\DevCommands;
 use Orchestra\Testbench\Attributes\DefineEnvironment;
@@ -56,6 +57,22 @@ class DevCommandsTest extends TestCase
         $this->startCommand('migrate');
 
         $this->assertSame([], $this->registered());
+    }
+
+    public function test_listeners_are_registered_for_dev_list(): void
+    {
+        $this->startCommand('dev:list');
+
+        $this->assertSame(['laravel-streamer'], array_keys($this->registered()));
+    }
+
+    public function test_dev_list_shows_listener_processes(): void
+    {
+        $this->app[Kernel::class]->rerouteSymfonyCommandEvents();
+
+        $this->artisan('dev:list', ['--json' => true])
+            ->expectsOutputToContain('streamer:listen --all --group=dev --consumer=local')
+            ->assertSuccessful();
     }
 
     public function test_default_listener_listens_to_all_events(): void
