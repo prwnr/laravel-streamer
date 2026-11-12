@@ -20,7 +20,7 @@ class DevCommandsProvider extends ServiceProvider
         }
 
         $this->app['events']->listen(CommandStarting::class, function (CommandStarting $event): void {
-            if ($event->command !== 'dev') {
+            if (! in_array($event->command, ['dev', 'dev:list'], true)) {
                 return;
             }
 
